@@ -1,6 +1,8 @@
 YACC = yacc
 CC     = gcc
-CFLAGS = -DDEBUG
+CFLAGS = -Wall
+#CFLAGS += -DDEBUG
+#CFLAGS += -DYYDEBUG=1
 
 .PHONY: all
 all: binop

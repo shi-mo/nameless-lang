@@ -1,53 +1,99 @@
 %{
 #include <stdio.h>
+#include <ctype.h>
 
+/**********
+ * MACROS *
+ **********/
 #ifdef DEBUG
 # define BINOP_DEBUG_PRINT(fmt, ...) \
-	printf("Debug:%d:" fmt, __LINE__,  __VA_ARGS__)
+	fprintf(stderr, "Debug:%s:%d:" fmt "\n", \
+	__FILE__, __LINE__,  __VA_ARGS__)
 #else
 # define BINOP_DEBUG_PRINT(fmt, ...) \
 	do {} while(0)
 #endif
 
+#define BINOP_CONSOLE(fmt, ...) \
+	fprintf(binop_out, "> " fmt "\n", __VA_ARGS__)
+
+/********************
+ * GLOBAL VARIABLES *
+ ********************/
+static FILE *binop_out;
+
+/**************
+ * PROTOTYPES *
+ **************/
 int main(int argc, char *argv[]);
 static int yylex(void);
 static int yyerror(char *msg);
 %}
-%token NUMBER
-%token OP_ADD OP_SUB OP_MUL OP_DIV OP_MOD
+
+%token TKN_NUMBER
 
 %%
-expr	: NUMBER
+code	: op_separators exprs op_separators
+
+exprs	: expr
 	{
-		BINOP_DEBUG_PRINT("val:%5d\n", $1);
+		BINOP_CONSOLE("%d", $1);
+	}
+	| exprs separators expr
+	{
+		BINOP_CONSOLE("%d", $3);
+	}
+
+expr	: TKN_NUMBER
+	{
+		BINOP_DEBUG_PRINT("TKN_NUMBER: %d", $1);
 	}
 	| '(' op ' ' expr ' ' expr ')'
 	{
-		BINOP_DEBUG_PRINT("op:%d val1:%5d val2:%5d\n", $2, $4, $6);
+		BINOP_CONSOLE("(%c %d %d)", $2, $4, $6);
 		switch ($2) {
-		case OP_ADD:
+		case '+':
 			$$ = $4 + $6;
-		case OP_SUB:
+			break;
+		case '-':
 			$$ = $4 - $6;
-		case OP_MUL:
+			break;
+		case '*':
 			$$ = $4 * $6;
-		case OP_DIV:
+			break;
+		case '/':
 			$$ = $4 / $6;
-		case OP_MOD:
+			break;
+		case '%':
 			$$ = $4 % $6;
+			break;
+		default:
+			YYERROR;
 		}
 	}
 
-op	: '+' { $$ = OP_ADD; }
-	| '-' { $$ = OP_SUB; }
-	| '*' { $$ = OP_MUL; }
-	| '/' { $$ = OP_DIV; }
-	| '%' { $$ = OP_MOD; }
+op	: '+' { $$ = '+'; }
+	| '-' { $$ = '-'; }
+	| '*' { $$ = '*'; }
+	| '/' { $$ = '/'; }
+	| '%' { $$ = '%'; }
+
+separators	: separator op_separators
+
+op_separators	: /* empty */
+		| separator op_separators
+
+separator	: '\n'
+		| '\r'
+		| '\t'
+		| ' '
 %%
 
 int
 main(int argc, char *argv[])
 {
+	binop_out = stdout;
+
 	return yyparse();
 }
 
@@ -59,9 +105,6 @@ yylex(void)
 	int c = getc(in);
 
 	/* discard \n */
-	while ('\n' == c) {
-		c = getc(in);
-	}
 	if (!isdigit(c)) {
 		return c;
 	}
@@ -79,7 +122,7 @@ yylex(void)
 		ungetc(c, in);
 		*bufp = '\0';
 		yylval = atoi(buf);
-		return NUMBER;
+		return TKN_NUMBER;
 	}
 }
 
