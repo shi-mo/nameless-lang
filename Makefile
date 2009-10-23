@@ -3,16 +3,21 @@ CC     = gcc
 CFLAGS = -Wall
 #CFLAGS += -DDEBUG
 #CFLAGS += -DYYDEBUG=1
+EXEC = binop
 
 .PHONY: all
-all: binop
+all: $(EXEC)
 
 .PHONY: clean
 clean:
-	rm -f binop y.tab.c
+	rm -f $(EXEC) y.tab.c
 
 y.tab.c: binop.y
 	$(YACC) $<
 
-binop:	y.tab.c
+$(EXEC):	y.tab.c
 	$(CC) $(CFLAGS) -o $@ $^
+
+.PHONY: test
+test: $(EXEC)
+	@for T in test/*; do echo "=== `basename $$T`"; ./$(EXEC) < $$T; done
