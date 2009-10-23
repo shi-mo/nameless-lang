@@ -1,0 +1,34 @@
+%{
+#include "y.tab.h"
+#include "binop.h"
+
+typedef int YYSTYPE;
+extern YYSTYPE yylval;
+
+static int yywrap(void);
+%}
+%%
+
+"+"	{ return tOP_ADD; }
+"-"	{ return tOP_SUB; }
+"*"	{ return tOP_MUL; }
+"/"	{ return tOP_DIV; }
+"%"	{ return tOP_MOD; }
+"("	{ return tLPAREN; }
+")"	{ return tRPAREN; }
+[ \t]+	{ return tSPACE; }
+\r|\n|\n\r	{ return tNEWLINE; }
+[1-9][0-9]*	{
+	int temp;
+
+	sscanf(yytext, "%d", &temp);
+	yylval = temp;
+	return tNUMBER;
+}
+%%
+
+static int
+yywrap(void)
+{
+	return 1;
+}

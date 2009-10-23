@@ -1,56 +1,43 @@
 %{
-#include <stdio.h>
-#include <ctype.h>
+#include "binop.h"
 
-/**********
- * MACROS *
- **********/
-#ifdef DEBUG
-# define BINOP_DEBUG_PRINT(fmt, ...) \
-	fprintf(stderr, "Debug:%s:%d:" fmt "\n", \
-	__FILE__, __LINE__,  __VA_ARGS__)
-#else
-# define BINOP_DEBUG_PRINT(fmt, ...) \
-	do {} while(0)
-#endif
-
-#define BINOP_CONSOLE(fmt, ...) \
-	fprintf(binop_out, "> " fmt "\n", __VA_ARGS__)
-
-/********************
- * GLOBAL VARIABLES *
- ********************/
-static FILE *binop_out;
-
-/**************
- * PROTOTYPES *
- **************/
-int main(int argc, char *argv[]);
-static int yylex(void);
-static int yyerror(char *msg);
+FILE *binop_out;
 %}
 
-%token TKN_NUMBER
+%token tOP_ADD tOP_SUB
+%token tOP_MUL tOP_DIV
+%token tOP_MOD
+%token tLPAREN tRPAREN
+%token tSPACE  tNEWLINE
+%token tNUMBER
 
 %%
-code	: op_separators exprs op_separators
+code	: /* empty */
+	| tNEWLINE
+	| exprs tNEWLINE
+	{
+		$$ = $1;
+	}
 
 exprs	: expr
 	{
 		BINOP_CONSOLE("%d", $1);
+		$$ = $1;
 	}
-	| exprs separators expr
+	| exprs tNEWLINE expr
 	{
 		BINOP_CONSOLE("%d", $3);
+		$$ = $3;
 	}
 
-expr	: TKN_NUMBER
+expr	: tNUMBER
 	{
-		BINOP_DEBUG_PRINT("TKN_NUMBER: %d", $1);
+		BINOP_DEBUG_PRINT("tNUMBER: %d", $1);
 	}
-	| '(' op ' ' expr ' ' expr ')'
+	| tLPAREN operator spaces expr spaces expr tRPAREN
 	{
 		BINOP_CONSOLE("(%c %d %d)", $2, $4, $6);
+
 		switch ($2) {
 		case '+':
 			$$ = $4 + $6;
@@ -68,65 +55,22 @@ expr	: TKN_NUMBER
 			$$ = $4 % $6;
 			break;
 		default:
-			YYERROR;
+			YYABORT;
 		}
 	}
 
-op	: '+' { $$ = '+'; }
-	| '-' { $$ = '-'; }
-	| '*' { $$ = '*'; }
-	| '/' { $$ = '/'; }
-	| '%' { $$ = '%'; }
+operator: tOP_ADD { $$ = '+'; }
+	| tOP_SUB { $$ = '-'; }
+	| tOP_MUL { $$ = '*'; }
+	| tOP_DIV { $$ = '/'; }
+	| tOP_MOD { $$ = '%'; }
 
-separators	: separator op_separators
+spaces	: tSPACE
+	| spaces tSPACE
 
-op_separators	: /* empty */
-		| separator op_separators
-
-separator	: '\n'
-		| '\r'
-		| '\t'
-		| ' '
 %%
 
 int
-main(int argc, char *argv[])
-{
-	binop_out = stdout;
-
-	return yyparse();
-}
-
-#define BINOP_LEX_BUF_SIZE 128
-static int
-yylex(void)
-{
-	FILE *in = stdin;
-	int c = getc(in);
-
-	/* discard \n */
-	if (!isdigit(c)) {
-		return c;
-	}
-	{
-		char buf[BINOP_LEX_BUF_SIZE];
-		char *bufp = buf;
-
-		*(bufp++) = c;
-		while (isdigit(c = getc(in))) {
-			*(bufp++) = c;
-			if (bufp >= (buf + BINOP_LEX_BUF_SIZE - 1)) {
-				yyerror("number token too long.");
-			}
-		}
-		ungetc(c, in);
-		*bufp = '\0';
-		yylval = atoi(buf);
-		return TKN_NUMBER;
-	}
-}
-
-static int
 yyerror(char *msg)
 {
 	fprintf(stderr, "ERROR: %s\n", msg);
