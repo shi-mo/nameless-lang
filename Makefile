@@ -1,7 +1,8 @@
 YACC = yacc -d
 CC     = gcc
-CFLAGS = -Wall
-#CFLAGS += -DDEBUG
+CFLAGS = -Wall -g
+#CFLAGS += -E
+#CFLAGS += -DBINOP_DEBUG
 #CFLAGS += -DYYDEBUG=1
 EXEC = binop
 
@@ -12,17 +13,31 @@ all: $(EXEC)
 clean:
 	rm -f $(EXEC) y.tab.c y.tab.h lex.yy.c
 
-$(EXEC): main.c y.tab.c lex.yy.c
+$(EXEC): binop.c y.tab.c lex.yy.c
 	$(CC) $(CFLAGS) -o $@ $^
 
-y.tab.c: binop.y
+y.tab.c: parse.y binop.h
 	$(YACC) $<
+	@cp y.tab.h .y.tab.h
+	@echo '#include "binop.h"' > y.tab.h
+	@cat .y.tab.h >> y.tab.h
+	@rm .y.tab.h
 
 y.tab.h: y.tab.c
 
-lex.yy.c: binop.l y.tab.h
+lex.yy.c: lex.l y.tab.h binop.h
 	$(LEX) $<
 
 .PHONY: test
 test: $(EXEC)
-	@for T in test/*; do echo "=== `basename $$T`"; ./$(EXEC) < $$T; done
+	@YYDEBUG=1
+	@for T in test/*.bop; do \
+		echo "==== `basename $$T`"; \
+		./$(EXEC) < $$T; \
+		if [ 0 -ne $$? ]; then \
+			echo "--------"; \
+			cat $$T; \
+			echo "--------"; \
+			break; \
+		fi; \
+	done

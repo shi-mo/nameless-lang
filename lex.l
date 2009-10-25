@@ -2,9 +2,6 @@
 #include "y.tab.h"
 #include "binop.h"
 
-typedef int YYSTYPE;
-extern YYSTYPE yylval;
-
 static int yywrap(void);
 %}
 %%
@@ -22,7 +19,7 @@ static int yywrap(void);
 	int temp;
 
 	sscanf(yytext, "%d", &temp);
-	yylval = temp;
+	yylval.yst_int = temp;
 	return tNUMBER;
 }
 %%
