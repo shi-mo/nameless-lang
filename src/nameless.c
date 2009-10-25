@@ -4,7 +4,7 @@
 nls_node *nls_parse_result;
 
 static int nls_eval(nls_node *tree);
-static int nls_apply(nls_operator, int, int);
+static int nls_apply(nls_function, int, int);
 
 static void nls_list_free(nls_node *list_node);
 static void nls_tree_free(nls_node *tree);
@@ -76,7 +76,7 @@ nls_eval(nls_node *tree)
  * 	   negative	: error code
  */
 static int
-nls_apply(nls_operator op, int a, int b)
+nls_apply(nls_function op, int a, int b)
 {
 	return (op)(a, b);
 }

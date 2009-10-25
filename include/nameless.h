@@ -52,7 +52,7 @@ typedef enum _nls_node_type {
 	NLS_TYPE_LIST,
 } nls_node_type;
 
-typedef int (*nls_operator)(int, int);
+typedef int (*nls_function)(int, int);
 
 struct _nls_node;
 typedef struct _nls_application {
@@ -72,7 +72,7 @@ typedef struct _nls_node {
 	union {
 		int nnu_int;
 		nls_list nnu_list;
-		nls_operator nnu_op;
+		nls_function nnu_op;
 		nls_application nnu_app;
 	} nn_union;
 } nls_node;

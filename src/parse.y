@@ -5,7 +5,7 @@ FILE *nls_out;
 FILE *nls_err;
 
 static nls_node *nls_int_new(int val);
-static nls_node *nls_operator_new(nls_operator op);
+static nls_node *nls_function_new(nls_function op);
 static nls_node *nls_list_new(nls_node *node);
 static int nls_list_add(nls_node *list, nls_node *node);
 static int nls_list_isfull(nls_node *list);
@@ -63,11 +63,11 @@ expr	: tNUMBER
 		$$ = nls_application_new($2, $4, $6);
 	}
 
-operator: tOP_ADD { $$ = nls_operator_new(nls_op_add); }
-	| tOP_SUB { $$ = nls_operator_new(nls_op_sub); }
-	| tOP_MUL { $$ = nls_operator_new(nls_op_mul); }
-	| tOP_DIV { $$ = nls_operator_new(nls_op_div); }
-	| tOP_MOD { $$ = nls_operator_new(nls_op_mod); }
+operator: tOP_ADD { $$ = nls_function_new(nls_op_add); }
+	| tOP_SUB { $$ = nls_function_new(nls_op_sub); }
+	| tOP_MUL { $$ = nls_function_new(nls_op_mul); }
+	| tOP_DIV { $$ = nls_function_new(nls_op_div); }
+	| tOP_MOD { $$ = nls_function_new(nls_op_mod); }
 
 op_spaces: /* empty */
 	| op_spaces spaces
@@ -104,7 +104,7 @@ nls_int_new(int val)
 }
 
 static nls_node*
-nls_operator_new(nls_operator op)
+nls_function_new(nls_function op)
 {
 	nls_node *node = nls_new(nls_node);
 
