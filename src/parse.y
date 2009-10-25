@@ -109,7 +109,7 @@ nls_function_new(nls_function func)
 	nls_node *node = nls_new(nls_node);
 
 	if (node) {
-		node->nn_type = NLS_TYPE_OPERATOR;
+		node->nn_type = NLS_TYPE_FUNCTION;
 		node->nn_func = func;
 	}
 	return node;

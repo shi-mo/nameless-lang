@@ -39,7 +39,7 @@ nls_eval(nls_node *tree)
 	switch (tree->nn_type) {
 	case NLS_TYPE_INT:
 		return 0;
-	case NLS_TYPE_OPERATOR:
+	case NLS_TYPE_FUNCTION:
 		return 0;
 	case NLS_TYPE_APPLICATION:
 		return nls_application_eval(tree);

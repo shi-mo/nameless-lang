@@ -3,7 +3,7 @@
 
 typedef enum _nls_node_type {
 	NLS_TYPE_INT,
-	NLS_TYPE_OPERATOR,
+	NLS_TYPE_FUNCTION,
 	NLS_TYPE_APPLICATION,
 	NLS_TYPE_LIST,
 } nls_node_type;
