@@ -4,10 +4,7 @@
 nls_node *nls_parse_result;
 
 static int nls_eval(nls_node *tree);
-static int nls_apply(nls_function, int, int);
-
-static void nls_list_free(nls_node *list_node);
-static void nls_tree_free(nls_node *tree);
+static int nls_apply(nls_node **node);
 
 int
 main(int argc, char *argv[])
@@ -31,24 +28,23 @@ main(int argc, char *argv[])
 }
 
 /*
- * @return positive or 0: evaluation result
- * 	   negative	: error code
+ * @return  0: success
+ * 	   !0: error code
  */
 static int
 nls_eval(nls_node *tree)
 {
 	switch (tree->nn_type) {
 	case NLS_TYPE_INT:
-		return tree->nn_u.nnu_int;
+		return 0;
 	case NLS_TYPE_OPERATOR:
 		return 0;
 	case NLS_TYPE_APPLICATION:
 		{
 			nls_application *app = &(tree->nn_u.nnu_app);
+			nls_eval(app->na_arg);
 
-			return nls_apply(app->na_func->nn_u.nnu_func,
-				nls_eval(app->na_left),
-				nls_eval(app->na_right));
+			return nls_apply(&tree);
 		}
 	case NLS_TYPE_LIST:
 		{
@@ -57,31 +53,40 @@ nls_eval(nls_node *tree)
 
 			nls_list_foreach(tmp, tree) {
 				ret = nls_eval(*tmp);
-				NLS_CONSOLE("%d", ret);
-				if (ret < 0) {
-					return -ret;
+				if (ret) {
+					return ret;
 				}
 			}
 			return 0;
 		}
 	default:
 		NLS_ERRMSG("Illegal node type.");
-		return -1; /* must not happen */
+		return 1; /* must not happen */
 	}
 }
 
 /*
- * TODO: Reconsider value returning (negative expr).
  * @return positive or 0: evaluation result
  * 	   negative	: error code
  */
 static int
-nls_apply(nls_function func, int a, int b)
+nls_apply(nls_node **node)
 {
-	return (func)(a, b);
+	int ret;
+	nls_node *tmp;
+
+	nls_application *app = &((*node)->nn_u.nnu_app);
+	nls_function func = app->na_func->nn_u.nnu_func;
+	nls_node *arg = app->na_arg;
+
+	if ((ret = (func)(arg, &tmp))) {
+		nls_tree_free(*node);
+		*node = tmp;
+	}
+	return ret;
 }
 
-static void
+void
 nls_list_free(nls_node *list_node)
 {
 	nls_node **tmp;
@@ -93,7 +98,7 @@ nls_list_free(nls_node *list_node)
 	nls_free(list_node);
 }
 
-static void
+void
 nls_tree_free(nls_node *tree)
 {
 	if (NLS_TYPE_LIST == tree->nn_type) {
@@ -103,8 +108,7 @@ nls_tree_free(nls_node *tree)
 	if (NLS_TYPE_APPLICATION == tree->nn_type) {
 		nls_application *app = &tree->nn_u.nnu_app;
 
-		nls_tree_free(app->na_left);
-		nls_tree_free(app->na_right);
+		nls_tree_free(app->na_arg);
 	}
 	nls_free(tree);
 }

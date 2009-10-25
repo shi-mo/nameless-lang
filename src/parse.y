@@ -4,9 +4,9 @@
 FILE *nls_out;
 FILE *nls_err;
 
-static nls_node *nls_int_new(int val);
-static nls_node *nls_function_new(nls_function func);
-static nls_node *nls_list_new(nls_node *node);
+static nls_node* nls_int_new(int val);
+static nls_node* nls_function_new(nls_function func);
+static nls_node* nls_list_new(nls_node *node);
 static int nls_list_add(nls_node *list, nls_node *node);
 static int nls_list_isfull(nls_node *list);
 %}
@@ -58,9 +58,9 @@ expr	: tNUMBER
 	{
 		$$ = $2;
 	}
-	| tLPAREN function spaces expr spaces expr tRPAREN
+	| tLPAREN function spaces exprs tRPAREN
 	{
-		$$ = nls_application_new($2, $4, $6);
+		$$ = nls_application_new($2, $4);
 	}
 
 function: tOP_ADD { $$ = nls_function_new(nls_func_add); }
@@ -116,7 +116,7 @@ nls_function_new(nls_function func)
 }
 
 static nls_node*
-nls_application_new(nls_node *func, nls_node *left, nls_node *right)
+nls_application_new(nls_node *func, nls_node *arg)
 {
 	nls_node *node = nls_new(nls_node);
 
@@ -125,9 +125,8 @@ nls_application_new(nls_node *func, nls_node *left, nls_node *right)
 
 		node->nn_type = NLS_TYPE_APPLICATION;
 		app = &(node->nn_u.nnu_app);
-		app->na_func  = func;
-		app->na_left  = left;
-		app->na_right = right;
+		app->na_func = func;
+		app->na_arg  = arg;
 	}
 	return node;
 }

@@ -1,9 +1,10 @@
-#ifndef _NLS_H_
-#define _NLS_H_
+#ifndef _NAMELESS_H_
+#define _NAMELESS_H_
 
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "nameless/types.h"
 #include "nameless/function.h"
 
 /**********
@@ -37,45 +38,10 @@
 
 /* List Management */
 #define nls_list_foreach(tmp, list_node) \
-	for(tmp = ((list_node)->nn_u.nnu_list.nl_array); \
+	for (tmp = ((list_node)->nn_u.nnu_list.nl_array); \
 		(tmp != (((list_node)->nn_u.nnu_list.nl_array) \
 		 + ((list_node)->nn_u.nnu_list.nl_num))); \
 		tmp++) \
-
-/*********
- * TYPES *
- *********/
-typedef enum _nls_node_type {
-	NLS_TYPE_INT,
-	NLS_TYPE_OPERATOR,
-	NLS_TYPE_APPLICATION,
-	NLS_TYPE_LIST,
-} nls_node_type;
-
-typedef int (*nls_function)(int, int);
-
-struct _nls_node;
-typedef struct _nls_application {
-	struct _nls_node *na_func;
-	struct _nls_node *na_left;
-	struct _nls_node *na_right;
-} nls_application;
-
-typedef struct _nls_list {
-	int nl_num;
-	int nl_ary_size;
-	struct _nls_node **nl_array;
-} nls_list;
-
-typedef struct _nls_node {
-	nls_node_type nn_type;
-	union {
-		int nnu_int;
-		nls_list nnu_list;
-		nls_function nnu_func;
-		nls_application nnu_app;
-	} nn_u;
-} nls_node;
 
 /********************
  * GLOBAL VARIABLES *
@@ -92,4 +58,8 @@ int yylex(void);
 int yyparse(void);
 int yyerror(char *msg);
 
-#endif /* _NLS_H_ */
+/* Memory Management */
+void nls_list_free(nls_node *list_node);
+void nls_tree_free(nls_node *tree);
+
+#endif /* _NAMELESS_H_ */
