@@ -1,22 +1,44 @@
+SRCDIR  = src
+INCDIR  = include
+TESTDIR = test
+OBJDIR  = obj
+
+SRCS    = $(wildcard $(SRCDIR)/*.c)
+HEADERS = $(wildcard $(INCDIR)/*.h)
+OBJS  = $(OBJDIR)/y.tab.o $(OBJDIR)/lex.yy.o
+OBJS += $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCS))
+EXEC  = nameless
+
 YACC = yacc -d
 CC     = gcc
-CFLAGS = -Wall -g
+CFLAGS = -Wall -g -I$(INCDIR) -I.
 #CFLAGS += -E
 #CFLAGS += -DBINOP_DEBUG
 #CFLAGS += -DYYDEBUG=1
-EXEC = nameless
 
 .PHONY: all
 all: $(EXEC)
 
 .PHONY: clean
 clean:
-	rm -f $(EXEC) y.tab.c y.tab.h lex.yy.c
+	rm -rf $(EXEC) $(OBJDIR) lex.yy.c y.tab.c y.tab.h
 
-$(EXEC): nameless.c y.tab.c lex.yy.c
+$(EXEC): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
 
-y.tab.c: parse.y nameless.h
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
+
+$(OBJDIR)/y.tab.o: y.tab.c $(OBJDIR)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(OBJDIR)/lex.yy.o: lex.yy.c $(OBJDIR)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(OBJDIR)/%.o: $(SRCDIR)/%.c $(OBJDIR)
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+y.tab.c: $(SRCDIR)/parse.y $(HEADERS)
 	$(YACC) $<
 	@cp y.tab.h .y.tab.h
 	@echo '#include "nameless.h"' > y.tab.h
@@ -25,13 +47,13 @@ y.tab.c: parse.y nameless.h
 
 y.tab.h: y.tab.c
 
-lex.yy.c: lex.l y.tab.h nameless.h
+lex.yy.c: $(SRCDIR)/lex.l y.tab.h $(HEADERS)
 	$(LEX) $<
 
 .PHONY: test
 test: $(EXEC)
 	@YYDEBUG=1
-	@for T in test/*.nls; do \
+	@for T in $(TESTDIR)/*.nls; do \
 		echo "==== `basename $$T`"; \
 		./$(EXEC) < $$T; \
 		if [ 0 -ne $$? ]; then \
