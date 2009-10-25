@@ -1,6 +1,6 @@
 %{
 #include "y.tab.h"
-#include "binop.h"
+#include "nameless.h"
 
 static int yywrap(void);
 %}
