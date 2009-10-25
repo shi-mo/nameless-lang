@@ -5,7 +5,7 @@ FILE *nls_out;
 FILE *nls_err;
 
 static nls_node *nls_int_new(int val);
-static nls_node *nls_function_new(nls_function op);
+static nls_node *nls_function_new(nls_function func);
 static nls_node *nls_list_new(nls_node *node);
 static int nls_list_add(nls_node *list, nls_node *node);
 static int nls_list_isfull(nls_node *list);
@@ -26,7 +26,7 @@ static int nls_list_isfull(nls_node *list);
 %token<yst_int> tNUMBER
 
 %type<yst_node> code exprs
-%type<yst_node> expr operator
+%type<yst_node> expr function
 
 %start code
 
@@ -58,16 +58,16 @@ expr	: tNUMBER
 	{
 		$$ = $2;
 	}
-	| tLPAREN operator spaces expr spaces expr tRPAREN
+	| tLPAREN function spaces expr spaces expr tRPAREN
 	{
 		$$ = nls_application_new($2, $4, $6);
 	}
 
-operator: tOP_ADD { $$ = nls_function_new(nls_op_add); }
-	| tOP_SUB { $$ = nls_function_new(nls_op_sub); }
-	| tOP_MUL { $$ = nls_function_new(nls_op_mul); }
-	| tOP_DIV { $$ = nls_function_new(nls_op_div); }
-	| tOP_MOD { $$ = nls_function_new(nls_op_mod); }
+function: tOP_ADD { $$ = nls_function_new(nls_func_add); }
+	| tOP_SUB { $$ = nls_function_new(nls_func_sub); }
+	| tOP_MUL { $$ = nls_function_new(nls_func_mul); }
+	| tOP_DIV { $$ = nls_function_new(nls_func_div); }
+	| tOP_MOD { $$ = nls_function_new(nls_func_mod); }
 
 op_spaces: /* empty */
 	| op_spaces spaces
@@ -104,19 +104,19 @@ nls_int_new(int val)
 }
 
 static nls_node*
-nls_function_new(nls_function op)
+nls_function_new(nls_function func)
 {
 	nls_node *node = nls_new(nls_node);
 
 	if (node) {
 		node->nn_type = NLS_TYPE_OPERATOR;
-		node->nn_u.nnu_op = op;
+		node->nn_u.nnu_func = func;
 	}
 	return node;
 }
 
 static nls_node*
-nls_application_new(nls_node *op, nls_node *left, nls_node *right)
+nls_application_new(nls_node *func, nls_node *left, nls_node *right)
 {
 	nls_node *node = nls_new(nls_node);
 
@@ -125,7 +125,7 @@ nls_application_new(nls_node *op, nls_node *left, nls_node *right)
 
 		node->nn_type = NLS_TYPE_APPLICATION;
 		app = &(node->nn_u.nnu_app);
-		app->na_op    = op;
+		app->na_func  = func;
 		app->na_left  = left;
 		app->na_right = right;
 	}

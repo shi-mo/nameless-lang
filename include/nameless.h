@@ -56,7 +56,7 @@ typedef int (*nls_function)(int, int);
 
 struct _nls_node;
 typedef struct _nls_application {
-	struct _nls_node *na_op;
+	struct _nls_node *na_func;
 	struct _nls_node *na_left;
 	struct _nls_node *na_right;
 } nls_application;
@@ -72,7 +72,7 @@ typedef struct _nls_node {
 	union {
 		int nnu_int;
 		nls_list nnu_list;
-		nls_function nnu_op;
+		nls_function nnu_func;
 		nls_application nnu_app;
 	} nn_u;
 } nls_node;

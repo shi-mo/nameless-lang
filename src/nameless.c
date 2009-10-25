@@ -46,7 +46,7 @@ nls_eval(nls_node *tree)
 		{
 			nls_application *app = &(tree->nn_u.nnu_app);
 
-			return nls_apply(app->na_op->nn_u.nnu_op,
+			return nls_apply(app->na_func->nn_u.nnu_func,
 				nls_eval(app->na_left),
 				nls_eval(app->na_right));
 		}
@@ -76,9 +76,9 @@ nls_eval(nls_node *tree)
  * 	   negative	: error code
  */
 static int
-nls_apply(nls_function op, int a, int b)
+nls_apply(nls_function func, int a, int b)
 {
-	return (op)(a, b);
+	return (func)(a, b);
 }
 
 static void
