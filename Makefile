@@ -4,7 +4,7 @@ TESTDIR = test
 OBJDIR  = obj
 
 SRCS    = $(wildcard $(SRCDIR)/*.c)
-HEADERS = $(wildcard $(INCDIR)/*.h)
+HEADERS = $(wildcard $(INCDIR)/*.h) $(wildcard $(INCDIR)/**/*.h)
 OBJS  = $(OBJDIR)/y.tab.o $(OBJDIR)/lex.yy.o
 OBJS += $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCS))
 EXEC  = nameless
