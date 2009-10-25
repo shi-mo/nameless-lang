@@ -98,7 +98,7 @@ nls_int_new(int val)
 
 	if (node) {
 		node->nn_type = NLS_TYPE_INT;
-		node->nn_union.nnu_int = val;
+		node->nn_u.nnu_int = val;
 	}
 	return node;
 }
@@ -110,7 +110,7 @@ nls_function_new(nls_function op)
 
 	if (node) {
 		node->nn_type = NLS_TYPE_OPERATOR;
-		node->nn_union.nnu_op = op;
+		node->nn_u.nnu_op = op;
 	}
 	return node;
 }
@@ -124,7 +124,7 @@ nls_application_new(nls_node *op, nls_node *left, nls_node *right)
 		nls_application *app;
 
 		node->nn_type = NLS_TYPE_APPLICATION;
-		app = &(node->nn_union.nnu_app);
+		app = &(node->nn_u.nnu_app);
 		app->na_op    = op;
 		app->na_left  = left;
 		app->na_right = right;
@@ -140,7 +140,7 @@ nls_list_new(nls_node *node)
 {
 	int sz = (1 << NLS_LIST_ARRAY_EXP);
 	nls_node *ls_nd = nls_new(nls_node);
-	nls_list *list  = &(ls_nd->nn_union.nnu_list);
+	nls_list *list  = &(ls_nd->nn_u.nnu_list);
 	nls_node **ary  = nls_array_new(nls_node*, sz);
 
 	if (ls_nd && ary) {
@@ -165,7 +165,7 @@ nls_list_add(nls_node *ls_nd, nls_node *node)
 {
 	int new_size;
 	nls_node **ary;
-	nls_list *list = &(ls_nd->nn_union.nnu_list);
+	nls_list *list = &(ls_nd->nn_u.nnu_list);
 
 	if (!nls_list_isfull(ls_nd)) {
 		list->nl_array[list->nl_num++] = node;
@@ -189,7 +189,7 @@ nls_list_add(nls_node *ls_nd, nls_node *node)
 static int
 nls_list_isfull(nls_node *ls_nd)
 {
-	nls_list *list = &(ls_nd->nn_union.nnu_list);
+	nls_list *list = &(ls_nd->nn_u.nnu_list);
 
 	return (list->nl_ary_size == list->nl_num);
 }

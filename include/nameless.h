@@ -37,9 +37,9 @@
 
 /* List Management */
 #define nls_list_foreach(tmp, list_node) \
-	for(tmp = ((list_node)->nn_union.nnu_list.nl_array); \
-		(tmp != (((list_node)->nn_union.nnu_list.nl_array) \
-		 + ((list_node)->nn_union.nnu_list.nl_num))); \
+	for(tmp = ((list_node)->nn_u.nnu_list.nl_array); \
+		(tmp != (((list_node)->nn_u.nnu_list.nl_array) \
+		 + ((list_node)->nn_u.nnu_list.nl_num))); \
 		tmp++) \
 
 /*********
@@ -74,7 +74,7 @@ typedef struct _nls_node {
 		nls_list nnu_list;
 		nls_function nnu_op;
 		nls_application nnu_app;
-	} nn_union;
+	} nn_u;
 } nls_node;
 
 /********************
