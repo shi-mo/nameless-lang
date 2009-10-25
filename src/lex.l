@@ -13,8 +13,11 @@ static int yywrap(void);
 "%"	{ return tOP_MOD; }
 "("	{ return tLPAREN; }
 ")"	{ return tRPAREN; }
+"["	{ return tLBRACE; }
+"]"	{ return tRBRACE; }
 [ \t]+	{ return tSPACE; }
 \r|\n|\n\r	{ return tNEWLINE; }
+
 [1-9][0-9]*	{
 	int temp;
 

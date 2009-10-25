@@ -56,7 +56,9 @@ test: $(EXEC)
 	@for T in $(TESTDIR)/*.nls; do \
 		echo "==== `basename $$T`"; \
 		./$(EXEC) < $$T; \
-		if [ 0 -ne $$? ]; then \
+		STATUS=$$?; \
+		if [ 0 -ne $$STATUS ]; then \
+			echo "exit status:$$STATUS"; \
 			echo "--------"; \
 			cat $$T; \
 			echo "--------"; \

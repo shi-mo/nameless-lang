@@ -1,49 +1,33 @@
 #include "y.tab.h"
 #include "nameless.h"
 
-nls_node_list *nls_parse_result;
+nls_node *nls_parse_result;
 
-static int nls_list_eval(nls_node_list *list);
 static int nls_eval(nls_node *tree);
 static int nls_apply(nls_operator, int, int);
 
-static void nls_list_free(nls_node_list *list);
+static void nls_list_free(nls_node *list_node);
 static void nls_tree_free(nls_node *tree);
 
 int
 main(int argc, char *argv[])
 {
 	int ret;
-	nls_node_list *list = NULL;
+	nls_node *tree = NULL;
 
 	nls_out = stdout;
+	nls_err = stderr;
 
 	ret = yyparse();
 	if (!ret && nls_parse_result) {
-		list = nls_parse_result;
-		ret = nls_list_eval(list);
+		tree = nls_parse_result;
+		ret = nls_eval(tree);
 	}
-	if (list) {
-		nls_list_free(list);
+	if (tree) {
+		nls_list_free(tree);
 	}
 
 	return ret;
-}
-
-static int
-nls_list_eval(nls_node_list *list)
-{
-	int ret;
-	nls_node_list *tmp;
-
-	nls_list_foreach(tmp, list) {
-		ret = nls_eval(tmp->nnl_node);
-		NLS_CONSOLE("%d", ret);
-		if (ret < 0) {
-			return -ret;
-		}
-	}
-	return 0;
 }
 
 /*
@@ -66,7 +50,22 @@ nls_eval(nls_node *tree)
 				nls_eval(app->na_left),
 				nls_eval(app->na_right));
 		}
+	case NLS_TYPE_LIST:
+		{
+			int ret;
+			nls_node **tmp;
+
+			nls_list_foreach(tmp, tree) {
+				ret = nls_eval(*tmp);
+				NLS_CONSOLE("%d", ret);
+				if (ret < 0) {
+					return -ret;
+				}
+			}
+			return 0;
+		}
 	default:
+		NLS_ERRMSG("Illegal node type.");
 		return -1; /* must not happen */
 	}
 }
@@ -83,19 +82,24 @@ nls_apply(nls_operator op, int a, int b)
 }
 
 static void
-nls_list_free(nls_node_list *list)
+nls_list_free(nls_node *list_node)
 {
-	nls_node_list *tmp;
+	nls_node **tmp;
 
-	nls_list_foreach(tmp, list) {
-		nls_tree_free(tmp->nnl_node);
-		nls_free(tmp);
+	nls_list_foreach(tmp, list_node) {
+		nls_tree_free(*tmp);
 	}
+	nls_free(list_node->nn_union.nnu_list.nl_array);
+	nls_free(list_node);
 }
 
 static void
 nls_tree_free(nls_node *tree)
 {
+	if (NLS_TYPE_LIST == tree->nn_type) {
+		nls_list_free(tree);
+		return;
+	}
 	if (NLS_TYPE_APPLICATION == tree->nn_type) {
 		nls_application *app = &tree->nn_union.nnu_app;
 
