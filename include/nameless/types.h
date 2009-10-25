@@ -32,4 +32,9 @@ typedef struct _nls_node {
 	} nn_u;
 } nls_node;
 
+#define nn_int  nn_u.nnu_int
+#define nn_list nn_u.nnu_list
+#define nn_func nn_u.nnu_func
+#define nn_app  nn_u.nnu_app
+
 #endif /* _NAMELESS_TYPES_H_ */

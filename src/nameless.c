@@ -41,7 +41,7 @@ nls_eval(nls_node *tree)
 		return 0;
 	case NLS_TYPE_APPLICATION:
 		{
-			nls_application *app = &(tree->nn_u.nnu_app);
+			nls_application *app = &(tree->nn_app);
 			nls_eval(app->na_arg);
 
 			return nls_apply(&tree);
@@ -75,8 +75,8 @@ nls_apply(nls_node **node)
 	int ret;
 	nls_node *tmp;
 
-	nls_application *app = &((*node)->nn_u.nnu_app);
-	nls_function func = app->na_func->nn_u.nnu_func;
+	nls_application *app = &((*node)->nn_app);
+	nls_function func = app->na_func->nn_func;
 	nls_node *arg = app->na_arg;
 
 	if ((ret = (func)(arg, &tmp))) {
@@ -94,7 +94,7 @@ nls_list_free(nls_node *list_node)
 	nls_list_foreach(tmp, list_node) {
 		nls_tree_free(*tmp);
 	}
-	nls_free(list_node->nn_u.nnu_list.nl_array);
+	nls_free(list_node->nn_list.nl_array);
 	nls_free(list_node);
 }
 
@@ -106,7 +106,7 @@ nls_tree_free(nls_node *tree)
 		return;
 	}
 	if (NLS_TYPE_APPLICATION == tree->nn_type) {
-		nls_application *app = &tree->nn_u.nnu_app;
+		nls_application *app = &tree->nn_app;
 
 		nls_tree_free(app->na_arg);
 	}

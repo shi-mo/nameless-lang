@@ -10,9 +10,9 @@ nls_func_add(nls_node *arg, nls_node **out)
 		return 1;
 	}
 	node->nn_type = NLS_TYPE_INT;
-	node->nn_u.nnu_int = 0;
+	node->nn_int = 0;
 	nls_list_foreach(tmp, arg) {
-		node->nn_u.nnu_int += (*tmp)->nn_u.nnu_int;
+		node->nn_int += (*tmp)->nn_int;
 	}
 	*out = node;
 	return 0;
@@ -28,12 +28,12 @@ nls_func_sub(nls_node *arg, nls_node **out)
 		return 1;
 	}
 	node->nn_type = NLS_TYPE_INT;
-	node->nn_u.nnu_int = 0;
+	node->nn_int = 0;
 	nls_list_foreach(tmp, arg) {
-		if (!node->nn_u.nnu_int) {
-			node->nn_u.nnu_int = (*tmp)->nn_u.nnu_int;
+		if (!node->nn_int) {
+			node->nn_int = (*tmp)->nn_int;
 		} else {
-			node->nn_u.nnu_int -= (*tmp)->nn_u.nnu_int;
+			node->nn_int -= (*tmp)->nn_int;
 		}
 	}
 	*out = node;
@@ -50,12 +50,12 @@ nls_func_mul(nls_node *arg, nls_node **out)
 		return 1;
 	}
 	node->nn_type = NLS_TYPE_INT;
-	node->nn_u.nnu_int = 0;
+	node->nn_int = 0;
 	nls_list_foreach(tmp, arg) {
-		if (!node->nn_u.nnu_int) {
-			node->nn_u.nnu_int = (*tmp)->nn_u.nnu_int;
+		if (!node->nn_int) {
+			node->nn_int = (*tmp)->nn_int;
 		} else {
-			node->nn_u.nnu_int *= (*tmp)->nn_u.nnu_int;
+			node->nn_int *= (*tmp)->nn_int;
 		}
 	}
 	*out = node;
@@ -72,12 +72,12 @@ nls_func_div(nls_node *arg, nls_node **out)
 		return 1;
 	}
 	node->nn_type = NLS_TYPE_INT;
-	node->nn_u.nnu_int = 0;
+	node->nn_int = 0;
 	nls_list_foreach(tmp, arg) {
-		if (!node->nn_u.nnu_int) {
-			node->nn_u.nnu_int = (*tmp)->nn_u.nnu_int;
+		if (!node->nn_int) {
+			node->nn_int = (*tmp)->nn_int;
 		} else {
-			node->nn_u.nnu_int /= (*tmp)->nn_u.nnu_int;
+			node->nn_int /= (*tmp)->nn_int;
 		}
 	}
 	*out = node;
@@ -94,12 +94,12 @@ nls_func_mod(nls_node *arg, nls_node **out)
 		return 1;
 	}
 	node->nn_type = NLS_TYPE_INT;
-	node->nn_u.nnu_int = 0;
+	node->nn_int = 0;
 	nls_list_foreach(tmp, arg) {
-		if (!node->nn_u.nnu_int) {
-			node->nn_u.nnu_int = (*tmp)->nn_u.nnu_int;
+		if (!node->nn_int) {
+			node->nn_int = (*tmp)->nn_int;
 		} else {
-			node->nn_u.nnu_int %= (*tmp)->nn_u.nnu_int;
+			node->nn_int %= (*tmp)->nn_int;
 		}
 	}
 	*out = node;

@@ -38,9 +38,9 @@
 
 /* List Management */
 #define nls_list_foreach(tmp, list_node) \
-	for (tmp = ((list_node)->nn_u.nnu_list.nl_array); \
-		(tmp != (((list_node)->nn_u.nnu_list.nl_array) \
-		 + ((list_node)->nn_u.nnu_list.nl_num))); \
+	for (tmp = ((list_node)->nn_list.nl_array); \
+		(tmp != (((list_node)->nn_list.nl_array) \
+		 + ((list_node)->nn_list.nl_num))); \
 		tmp++) \
 
 /********************
