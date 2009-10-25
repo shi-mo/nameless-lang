@@ -28,42 +28,31 @@ static nls_node_list* nls_node_list_new(nls_node *node);
 %start code
 
 %%
-code	: /* empty */
+code	: op_spaces
 	{
-		NLS_DEBUG_PRINT("code=>(empty)");
 		nls_parse_result = $$ = NULL;
 	}
-	| tNEWLINE
+	| op_spaces exprs op_spaces
 	{
-		NLS_DEBUG_PRINT("code=>tNEWLINE");
-		nls_parse_result = $$ = NULL;
-	}
-	| exprs tNEWLINE
-	{
-		NLS_DEBUG_PRINT("code=>exprs tNEWLINE: %p", $1);
-		nls_parse_result = $$ = $1;
+		nls_parse_result = $$ = $2;
 	}
 
 exprs	: expr
 	{
-		NLS_DEBUG_PRINT("exprs=>expr");
 		$$ = nls_node_list_new($1);
 	}
-	| exprs tNEWLINE expr
+	| exprs op_spaces expr
 	{
-		NLS_DEBUG_PRINT("exprs=>exprs tNEWLINE expr");
 		nls_node_list_add($1, $3); /* TODO: malloc failure */
 		$$ = $1;
 	}
 
 expr	: tNUMBER
 	{
-		NLS_DEBUG_PRINT("expr=>tNUMBER: %d", $1);
 		$$ = nls_int_new($1);
 	}
-	| tLPAREN operator tSPACE expr tSPACE expr tRPAREN
+	| tLPAREN operator spaces expr spaces expr tRPAREN
 	{
-		NLS_DEBUG_PRINT("expr=>(operator expr expr)");
 		$$ = nls_application_new($2, $4, $6);
 	}
 
@@ -72,6 +61,15 @@ operator: tOP_ADD { $$ = nls_operator_new(nls_op_add); }
 	| tOP_MUL { $$ = nls_operator_new(nls_op_mul); }
 	| tOP_DIV { $$ = nls_operator_new(nls_op_div); }
 	| tOP_MOD { $$ = nls_operator_new(nls_op_mod); }
+
+op_spaces: /* empty */
+	| op_spaces spaces
+
+spaces	: space
+	| spaces space
+
+space	: tSPACE
+	| tNEWLINE
 
 %%
 
