@@ -4,6 +4,8 @@
 nls_node *nls_parse_result;
 
 static int nls_eval(nls_node *tree);
+static int nls_application_eval(nls_node *tree);
+static int nls_list_eval(nls_node *tree);
 static int nls_apply(nls_node **node);
 
 int
@@ -40,29 +42,35 @@ nls_eval(nls_node *tree)
 	case NLS_TYPE_OPERATOR:
 		return 0;
 	case NLS_TYPE_APPLICATION:
-		{
-			nls_application *app = &(tree->nn_app);
-			nls_eval(app->na_arg);
-
-			return nls_apply(&tree);
-		}
+		return nls_application_eval(tree);
 	case NLS_TYPE_LIST:
-		{
-			int ret;
-			nls_node **tmp;
-
-			nls_list_foreach(tmp, tree) {
-				ret = nls_eval(*tmp);
-				if (ret) {
-					return ret;
-				}
-			}
-			return 0;
-		}
+		return nls_list_eval(tree);
 	default:
 		NLS_ERRMSG("Illegal node type.");
 		return 1; /* must not happen */
 	}
+}
+
+static int
+nls_application_eval(nls_node *tree)
+{
+	nls_eval(tree->nn_app.na_arg);
+	return nls_apply(&tree);
+}
+
+static int
+nls_list_eval(nls_node *tree)
+{
+	int ret;
+	nls_node **tmp;
+
+	nls_list_foreach(tmp, tree) {
+		ret = nls_eval(*tmp);
+		if (ret) {
+			return ret;
+		}
+	}
+	return 0;
 }
 
 /*
