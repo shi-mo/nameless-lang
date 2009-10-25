@@ -6,12 +6,6 @@ FILE *nls_out;
 static nls_node *nls_int_new(int val);
 static nls_node *nls_operator_new(nls_operator op);
 static nls_node_list* nls_node_list_new(nls_node *node);
-
-static int nls_op_add(int, int);
-static int nls_op_sub(int, int);
-static int nls_op_mul(int, int);
-static int nls_op_div(int, int);
-static int nls_op_mod(int, int);
 %}
 
 %union {
@@ -161,37 +155,4 @@ nls_node_list_add(nls_node_list *list, nls_node *node)
 		return 0;
 	}
 	return 1;
-}
-
-/*************
- * OPERATORS *
- *************/
-static int
-nls_op_add(int a, int b)
-{
-	return a + b;
-}
-
-static int
-nls_op_sub(int a, int b)
-{
-	return a - b;
-}
-
-static int
-nls_op_mul(int a, int b)
-{
-	return a * b;
-}
-
-static int
-nls_op_div(int a, int b)
-{
-	return a / b;
-}
-
-static int
-nls_op_mod(int a, int b)
-{
-	return a % b;
 }
