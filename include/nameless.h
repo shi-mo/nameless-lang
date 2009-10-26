@@ -1,7 +1,6 @@
 #ifndef _NAMELESS_H_
 #define _NAMELESS_H_
 
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "nameless/types.h"

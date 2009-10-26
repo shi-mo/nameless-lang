@@ -1,4 +1,7 @@
 %{
+#include <ctype.h>
+#include <string.h>
+#include <stdio.h>
 #include "nameless.h"
 
 FILE *nls_out;
@@ -6,6 +9,7 @@ FILE *nls_err;
 
 static nls_node* nls_int_new(int val);
 static nls_node* nls_function_new(nls_function func);
+static nls_node* nls_application_new(nls_node *func, nls_node *arg);
 static nls_node* nls_list_new(nls_node *node);
 static int nls_list_add(nls_node *list, nls_node *node);
 static int nls_list_isfull(nls_node *list);
