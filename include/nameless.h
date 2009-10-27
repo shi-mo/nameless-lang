@@ -11,6 +11,7 @@
  **********/
 /* Constant */
 #define NLS_LIST_ARRAY_EXP 8
+#define NLS_ERRMSG_INVALID_NODE_TYPE "Invalid node type."
 
 /* Debug */
 #ifdef NLS_DEBUG
@@ -23,10 +24,7 @@
 #endif /* NLS_DEBUG */
 
 /* Output */
-#define NLS_CONSOLE(fmt, ...) \
-	fprintf(nls_out, "> " fmt "\n", ## __VA_ARGS__)
-
-#define NLS_ERRMSG(fmt, ...) \
+#define nls_error(fmt, ...) \
 	fprintf(nls_err, "ERROR:%s:%d:" fmt "\n", \
 	__FILE__, __LINE__, ## __VA_ARGS__)
 
