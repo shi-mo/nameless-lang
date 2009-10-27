@@ -4,6 +4,7 @@
 
 nls_node *nls_parse_result;
 
+static int nls_main(FILE *in, FILE *out, FILE *err);
 static int nls_eval(nls_node *tree);
 static int nls_application_eval(nls_node *tree);
 static int nls_list_eval(nls_node *tree);
@@ -12,11 +13,19 @@ static int nls_apply(nls_node **node);
 int
 main(int argc, char *argv[])
 {
+	return nls_main(stdin, stdout, stderr);
+}
+
+static int
+nls_main(FILE *in, FILE *out, FILE *err)
+{
 	int ret;
 	nls_node *tree = NULL;
 
-	nls_out = stdout;
-	nls_err = stderr;
+	yyin    = in;
+	yyout   = out;
+	nls_out = out;
+	nls_err = err;
 
 	ret = yyparse();
 	if (!ret && nls_parse_result) {

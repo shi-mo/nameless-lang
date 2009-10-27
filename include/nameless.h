@@ -45,6 +45,8 @@
 /********************
  * GLOBAL VARIABLES *
  ********************/
+extern FILE *yyin;
+extern FILE *yyout;
 extern FILE *nls_out;
 extern FILE *nls_err;
 extern nls_node *nls_parse_result;
