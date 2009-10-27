@@ -9,6 +9,7 @@ static int nls_eval(nls_node *tree);
 static int nls_application_eval(nls_node *tree);
 static int nls_list_eval(nls_node *tree);
 static int nls_apply(nls_node **node);
+static int nls_tree_print(FILE *out, nls_node *tree);
 
 int
 main(int argc, char *argv[])
@@ -31,11 +32,12 @@ nls_main(FILE *in, FILE *out, FILE *err)
 	if (!ret && nls_parse_result) {
 		tree = nls_parse_result;
 		ret = nls_eval(tree);
+		nls_tree_print(nls_out, tree);
+		fprintf(out, "\n");
 	}
 	if (tree) {
 		nls_list_free(tree);
 	}
-
 	return ret;
 }
 
@@ -56,7 +58,7 @@ nls_eval(nls_node *tree)
 	case NLS_TYPE_LIST:
 		return nls_list_eval(tree);
 	default:
-		NLS_ERRMSG("Illegal node type.");
+		NLS_ERRMSG("Invalid node type.");
 		return 1; /* must not happen */
 	}
 }
@@ -129,4 +131,53 @@ nls_tree_free(nls_node *tree)
 		nls_tree_free(app->na_arg);
 	}
 	nls_free(tree);
+}
+
+static int
+nls_tree_print(FILE *out, nls_node *tree)
+{
+	int ret;
+
+	switch (tree->nn_type) {
+	case NLS_TYPE_INT:
+		fprintf(out, "%d", tree->nn_int);
+		return 0;
+	case NLS_TYPE_FUNCTION:
+		fprintf(out, "func:%p", tree->nn_func);
+		return 0;
+	case NLS_TYPE_APPLICATION:
+		fprintf(out, "(");
+		if ((ret = nls_tree_print(out, tree->nn_app.na_func))) {
+			return ret;
+		}
+		fprintf(out, " ");
+		if ((ret = nls_tree_print(out, tree->nn_app.na_arg))) {
+			return ret;
+		}
+		fprintf(out, ")");
+		return 0;
+	case NLS_TYPE_LIST:
+		{
+			int first = 1;
+			nls_node **tmp;
+
+			fprintf(out, "[");
+			nls_list_foreach(tmp, tree) {
+				if (!first) {
+					fprintf(out, " ");
+				}
+				if (first) {
+					first = 0;
+				}
+				if ((ret = nls_tree_print(out, *tmp))) {
+					return ret;
+				}
+			}
+			fprintf(out, "]");
+		}
+		return 0;
+	default:
+		NLS_ERRMSG("Invalid node type.");
+		return 1;
+	}
 }
