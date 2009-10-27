@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <errno.h>
 #include "y.tab.h"
 #include "nameless.h"
 
@@ -59,7 +60,7 @@ nls_eval(nls_node *tree)
 		return nls_list_eval(tree);
 	default:
 		nls_error(NLS_ERRMSG_INVALID_NODE_TYPE);
-		return 1; /* must not happen */
+		return EINVAL; /* must not happen */
 	}
 }
 
@@ -178,6 +179,6 @@ nls_tree_print(FILE *out, nls_node *tree)
 		return 0;
 	default:
 		nls_error(NLS_ERRMSG_INVALID_NODE_TYPE);
-		return 1;
+		return EINVAL;
 	}
 }
