@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 #include "nameless/types.h"
 #include "nameless/function.h"
 
@@ -10,8 +11,15 @@
  * MACROS *
  **********/
 /* Constant */
-#define NLS_LIST_ARRAY_EXP 8
-#define NLS_ERRMSG_INVALID_NODE_TYPE "Invalid node type."
+#define NLS_LIST_ARRAY_EXP  8
+#define NLS_REDUCTION_LIMIT 10000
+
+/* Error Code */
+#define NLS_EINFREDUCE EMLINK
+
+/* Error Message */
+#define NLS_ERRMSG_INVALID_NODE_TYPE  "Invalid node type."
+#define NLS_ERRMSG_REDUCTION_TOO_DEEP "Reduction too deep."
 
 /* Debug */
 #ifdef NLS_DEBUG
