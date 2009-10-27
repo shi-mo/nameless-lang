@@ -22,7 +22,7 @@ all: $(EXEC)
 .PHONY: clean
 clean:
 	rm -rf $(EXEC) $(OBJDIR) lex.yy.c y.tab.c y.tab.h
-	find -name '*~' -delete
+	find -name '*~' -exec rm {} \;
 
 $(EXEC): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
