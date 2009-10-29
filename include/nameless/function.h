@@ -1,7 +1,7 @@
 #ifndef _NAMELESS_FUNCTION_H_
 #define _NAMELESS_FUNCTION_H_
 
-#include "nameless/types.h"
+#include "nameless/node.h"
 
 int nls_func_add(nls_node*, nls_node**);
 int nls_func_sub(nls_node*, nls_node**);

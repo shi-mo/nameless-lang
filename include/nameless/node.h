@@ -1,5 +1,5 @@
-#ifndef _NLS_TYPES_H_
-#define _NLS_TYPES_H_
+#ifndef _NAMELESS_NODE_H_
+#define _NAMELESS_NODE_H_
 
 typedef enum _nls_node_type {
 	NLS_TYPE_INT,
@@ -37,4 +37,4 @@ typedef struct _nls_node {
 #define nn_func nn_u.nnu_func
 #define nn_app  nn_u.nnu_app
 
-#endif /* _NAMELESS_TYPES_H_ */
+#endif /* _NAMELESS_NODE_H_ */
