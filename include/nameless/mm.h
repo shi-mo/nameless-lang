@@ -17,6 +17,18 @@
 /*********
  * TYPES *
  *********/
+/*
+ * Structure leading dynamic data area.
+ *
+ *  +----------------+ <-- malloc() result
+ *  |     nls_mem    |
+ *  +----------------+ <- nls_new() result
+ *  |                |
+ *  | (dynamic data) |
+ *  |                |
+ *  |      ...       |
+ *  +----------------+
+ */
 typedef struct _nls_mem {
 	struct _nls_mem *nm_next;
 	struct _nls_mem *nm_prev;
