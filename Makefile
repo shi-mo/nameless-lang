@@ -2,7 +2,7 @@ INCDIR  = include
 TESTDIR = test
 OBJDIR  = obj
 
-SRCS    = $(wildcard *.c)
+SRCS    = main.c nameless.c mm.c function.c
 HEADERS = $(wildcard $(INCDIR)/*.h) $(wildcard $(INCDIR)/**/*.h)
 GENERATED = lex.yy.c y.tab.c y.tab.h
 OBJS  = $(OBJDIR)/y.tab.o $(OBJDIR)/lex.yy.o
@@ -33,7 +33,6 @@ clobber: clean
 
 .PHONY: test
 test: $(EXEC)
-	@YYDEBUG=1
 	@for T in $(TESTDIR)/*.nls; do \
 		echo "==== `basename $$T`"; \
 		./$(EXEC) < $$T; \
