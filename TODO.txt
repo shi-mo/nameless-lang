@@ -9,6 +9,7 @@
 
 [Language Specification]
   variable
+  change list structure (simple linked-list)
   nil terminated list
   procedure/parallel
 
