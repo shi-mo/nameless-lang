@@ -1,12 +1,11 @@
-SRCDIR  = src
 INCDIR  = include
 TESTDIR = test
 OBJDIR  = obj
 
-SRCS    = $(wildcard $(SRCDIR)/*.c)
+SRCS    = $(wildcard *.c)
 HEADERS = $(wildcard $(INCDIR)/*.h) $(wildcard $(INCDIR)/**/*.h)
 OBJS  = $(OBJDIR)/y.tab.o $(OBJDIR)/lex.yy.o
-OBJS += $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCS))
+OBJS += $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
 EXEC  = nameless
 
 YACC = yacc -d
@@ -36,10 +35,10 @@ $(OBJDIR)/y.tab.o: y.tab.c $(OBJDIR)
 $(OBJDIR)/lex.yy.o: lex.yy.c $(OBJDIR)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.c $(OBJDIR)
+$(OBJDIR)/%.o: %.c $(OBJDIR)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-y.tab.c: $(SRCDIR)/parse.y $(HEADERS)
+y.tab.c: parse.y $(HEADERS)
 	$(YACC) $<
 	@cp y.tab.h .y.tab.h
 	@echo '#include "nameless.h"' > y.tab.h
@@ -48,7 +47,7 @@ y.tab.c: $(SRCDIR)/parse.y $(HEADERS)
 
 y.tab.h: y.tab.c
 
-lex.yy.c: $(SRCDIR)/lex.l y.tab.h $(HEADERS)
+lex.yy.c: lex.l y.tab.h $(HEADERS)
 	$(LEX) $<
 
 .PHONY: test
