@@ -2,9 +2,17 @@
 #include "nameless.h"
 #include "nameless/mm.h"
 
-int nls_mem_alloc_cnt;
-int nls_mem_free_cnt;
-nls_mem nls_mem_chain;
+#define nls_mem_chain_foreach(tmp) \
+	for (*(tmp) = nls_mem_chain.nm_next; \
+		*(tmp) != &nls_mem_chain; \
+		*(tmp) = (*(tmp))->nm_next)
+
+static int nls_mem_alloc_cnt;
+static int nls_mem_free_cnt;
+static nls_mem nls_mem_chain;
+
+static void nls_mem_chain_add(nls_mem *mem);
+static void nls_mem_chain_remove(nls_mem *mem);
 
 int
 nls_mem_chain_init(void)
@@ -41,34 +49,6 @@ nls_mem_chain_term(void)
 		}
 		free(tmp);
 	}
-}
-
-void
-nls_mem_chain_add(nls_mem *mem)
-{
-	nls_mem *tail = nls_mem_chain.nm_prev;
-
-	if (&nls_mem_chain == mem) {
-		nls_bug(NLS_BUGMSG_ILLEGAL_MEMCHAIN_OPERATION);
-		return;
-	}
-	mem->nm_next  = &nls_mem_chain;
-	mem->nm_prev  = tail;
-	tail->nm_next = mem;
-	nls_mem_chain.nm_prev = mem;
-}
-
-void
-nls_mem_chain_remove(nls_mem *mem)
-{
-	if (&nls_mem_chain == mem) {
-		nls_bug(NLS_BUGMSG_ILLEGAL_MEMCHAIN_OPERATION);
-		return;
-	}
-	mem->nm_next->nm_prev = mem->nm_prev;
-	mem->nm_prev->nm_next = mem->nm_next;
-	mem->nm_next = (nls_mem*)NLS_MAGIC_MEMCHAIN_REMOVED;
-	mem->nm_prev = (nls_mem*)NLS_MAGIC_MEMCHAIN_REMOVED;
 }
 
 /*
@@ -120,4 +100,32 @@ nls_free(void *ptr)
 		nls_mem_chain_remove(mem);
 		free(mem);
 	}
+}
+
+static void
+nls_mem_chain_add(nls_mem *mem)
+{
+	nls_mem *tail = nls_mem_chain.nm_prev;
+
+	if (&nls_mem_chain == mem) {
+		nls_bug(NLS_BUGMSG_ILLEGAL_MEMCHAIN_OPERATION);
+		return;
+	}
+	mem->nm_next  = &nls_mem_chain;
+	mem->nm_prev  = tail;
+	tail->nm_next = mem;
+	nls_mem_chain.nm_prev = mem;
+}
+
+static void
+nls_mem_chain_remove(nls_mem *mem)
+{
+	if (&nls_mem_chain == mem) {
+		nls_bug(NLS_BUGMSG_ILLEGAL_MEMCHAIN_OPERATION);
+		return;
+	}
+	mem->nm_next->nm_prev = mem->nm_prev;
+	mem->nm_prev->nm_next = mem->nm_next;
+	mem->nm_next = (nls_mem*)NLS_MAGIC_MEMCHAIN_REMOVED;
+	mem->nm_prev = (nls_mem*)NLS_MAGIC_MEMCHAIN_REMOVED;
 }
