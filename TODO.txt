@@ -1,0 +1,23 @@
+[Functionality]
+  nls_grab(reference count)
+  GC
+  (done)leak check
+
+[Refactoring]
+  macro:NLS_GLOBAL
+  add prefix:nls_sys for global symbols
+
+[Language Specification]
+  variable
+  nil terminated list
+  procedure/parallel
+
+[Testing]
+  #ifdef NLS_UNITTEST
+
+[Documentation]
+  comment(function spec)
+  comment(structure chart)
+  CODINGSTD
+  COPYING
+  README
