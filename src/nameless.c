@@ -29,14 +29,13 @@ nls_main(FILE *in, FILE *out, FILE *err)
 	nls_err = err;
 
 	ret = yyparse();
-	if (!ret && nls_parse_result) {
-		tree = nls_parse_result;
-		if ((ret = nls_reduce(&tree, NLS_REDUCTION_LIMIT))) {
-			goto free_exit;
-		}
-		nls_tree_print(nls_out, tree);
-		fprintf(out, "\n");
+	if (ret || !nls_parse_result) {
+		goto free_exit;
 	}
+	tree = nls_parse_result;
+	ret = nls_reduce(&tree, NLS_REDUCTION_LIMIT);
+	nls_tree_print(nls_out, tree);
+	fprintf(out, "\n");
 free_exit:
 	if (tree) {
 		nls_tree_free(tree);
