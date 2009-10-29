@@ -18,6 +18,7 @@
 [Documentation]
   comment(function spec)
   comment(structure chart)
+  commit message rule
   CODINGSTD
   COPYING
   README
