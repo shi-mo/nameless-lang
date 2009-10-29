@@ -2,11 +2,7 @@
 #define _NAMELESS_H_
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
 #include "nameless/node.h"
-#include "nameless/mm.h"
-#include "nameless/function.h"
 
 /**********
  * MACROS *
@@ -36,7 +32,7 @@
 #ifdef NLS_DEBUG
 # define NLS_DEBUG_PRINT(fmt, ...) \
 	fprintf(stderr, "DEBUG:%s:%d:" fmt "\n", \
-	__FILE__, __LINE__, ## __VA_ARGS__)
+		__FILE__, __LINE__, ## __VA_ARGS__)
 #else  /* NLS_DEBUG */
 # define NLS_DEBUG_PRINT(fmt, ...) \
 	do {} while(0)
@@ -45,12 +41,12 @@
 /* Output */
 #define nls_error(fmt, ...) \
 	fprintf(nls_err, "ERROR:%s:%d:" fmt "\n", \
-	__FILE__, __LINE__, ## __VA_ARGS__)
+		__FILE__, __LINE__, ## __VA_ARGS__)
 
 #define nls_bug(fmt, ...) \
 	do { \
 		fprintf(nls_err, "BUG:%s:%d:" fmt "\n", \
-		__FILE__, __LINE__, ## __VA_ARGS__); \
+			__FILE__, __LINE__, ## __VA_ARGS__); \
 		exit(1); \
 	} while(0)
 
@@ -64,19 +60,12 @@
 /********************
  * GLOBAL VARIABLES *
  ********************/
-extern FILE *yyin;
-extern FILE *yyout;
 extern FILE *nls_out;
 extern FILE *nls_err;
-extern nls_node *nls_parse_result;
 
 /**************
  * PROTOTYPES *
  **************/
-/* Parser & Lexer */
-int yylex(void);
-int yyparse(void);
-int yyerror(char *msg);
 int nls_main(FILE *in, FILE *out, FILE *err);
 
 #endif /* _NAMELESS_H_ */

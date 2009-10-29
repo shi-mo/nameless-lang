@@ -2,11 +2,16 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
-#include "nameless.h"
+#include "nameless/parser.h"
+#include "nameless/node.h"
+#include "nameless/mm.h"
+#include "nameless/function.h"
 
 FILE *nls_out;
 FILE *nls_err;
+nls_node *nls_parse_result;
 
+static int yyerror(char *msg);
 static nls_node* nls_int_new(int val);
 static nls_node* nls_function_new(nls_function func);
 static nls_node* nls_application_new(nls_node *func, nls_node *arg);
@@ -84,7 +89,7 @@ space	: tSPACE
 
 %%
 
-int
+static int
 yyerror(char *msg)
 {
 	fprintf(stderr, "ERROR: %s\n", msg);

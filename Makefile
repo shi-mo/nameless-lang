@@ -65,7 +65,7 @@ $(OBJDIR)/%.o: %.c $(HEADERS) $(OBJDIR)
 y.tab.c: parse.y $(HEADERS)
 	$(YACC) $<
 	@cp y.tab.h .y.tab.h
-	@echo '#include "nameless.h"' > y.tab.h
+	@echo '#include "nameless/node.h"' > y.tab.h
 	@cat .y.tab.h >> y.tab.h
 	@rm .y.tab.h
 

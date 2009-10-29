@@ -2,8 +2,8 @@
 #include <errno.h>
 #include "y.tab.h"
 #include "nameless.h"
-
-nls_node *nls_parse_result;
+#include "nameless/parser.h"
+#include "nameless/mm.h"
 
 static int nls_reduce(nls_node **tree, int limit);
 static int nls_list_reduce(nls_node **tree, int limit);
