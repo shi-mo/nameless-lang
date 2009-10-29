@@ -78,8 +78,4 @@ int yylex(void);
 int yyparse(void);
 int yyerror(char *msg);
 
-/* Memory Management */
-void nls_list_free(nls_node *list_node);
-void nls_tree_free(nls_node *tree);
-
 #endif /* _NAMELESS_H_ */

@@ -9,6 +9,8 @@ static int nls_main(FILE *in, FILE *out, FILE *err);
 static int nls_reduce(nls_node **tree, int limit);
 static int nls_list_reduce(nls_node **tree, int limit);
 static int nls_apply(nls_node **node, int limit);
+static void nls_list_free(nls_node *list_node);
+static void nls_tree_free(nls_node *tree);
 static int nls_tree_print(FILE *out, nls_node *tree);
 
 int
@@ -114,7 +116,7 @@ nls_apply(nls_node **node, int limit)
 	return 0;
 }
 
-void
+static void
 nls_list_free(nls_node *list_node)
 {
 	nls_node **tmp;
@@ -126,7 +128,7 @@ nls_list_free(nls_node *list_node)
 	nls_free(list_node);
 }
 
-void
+static void
 nls_tree_free(nls_node *tree)
 {
 	if (NLS_TYPE_LIST == tree->nn_type) {
