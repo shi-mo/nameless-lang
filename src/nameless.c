@@ -28,6 +28,7 @@ nls_main(FILE *in, FILE *out, FILE *err)
 	nls_out = out;
 	nls_err = err;
 
+	nls_mem_chain_init();
 	ret = yyparse();
 	if (ret || !nls_parse_result) {
 		goto free_exit;
@@ -40,6 +41,7 @@ free_exit:
 	if (tree) {
 		nls_tree_free(tree);
 	}
+	nls_mem_chain_term();
 	return ret;
 }
 
@@ -135,6 +137,7 @@ nls_tree_free(nls_node *tree)
 		nls_application *app = &tree->nn_app;
 
 		nls_tree_free(app->na_arg);
+		nls_free(app->na_func);
 	}
 	nls_free(tree);
 }

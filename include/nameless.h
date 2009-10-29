@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include "nameless/types.h"
+#include "nameless/mm.h"
 #include "nameless/function.h"
 
 /**********
@@ -20,6 +21,16 @@
 /* Error Message */
 #define NLS_ERRMSG_INVALID_NODE_TYPE  "Invalid node type."
 #define NLS_ERRMSG_REDUCTION_TOO_DEEP "Reduction too deep."
+#define NLS_ERRFMT_MEMLEAK_DETECTED \
+	"Memory leak detected: mem=%p ptr=%p ref=%d size=%d"
+
+/* BUG Message */
+#define NLS_BUGMSG_BROKEN_MEMCHAIN "Broken memchain."
+#define NLS_BUGMSG_ILLEGAL_MEMCHAIN_OPERATION "Illegal memchain operation."
+#define NLS_BUGFMT_ILLEGAL_ALLOCNT \
+	"Illegal alloc count: alloc=%d free=%d"
+#define NLS_BUGFMT_INVALID_REFCOUNT \
+	"Invalid reference count: mem=%p ptr=%p ref=%d size=%d"
 
 /* Debug */
 #ifdef NLS_DEBUG
@@ -36,17 +47,18 @@
 	fprintf(nls_err, "ERROR:%s:%d:" fmt "\n", \
 	__FILE__, __LINE__, ## __VA_ARGS__)
 
-/* Memory Management */
-#define nls_free(ptr) free(ptr)
-#define nls_new(type) ((type*)malloc(sizeof(type)))
-#define nls_array_new(type, n) ((type*)malloc(sizeof(type) * n))
+#define nls_bug(fmt, ...) \
+	do { \
+		fprintf(nls_err, "BUG:" fmt, ## __VA_ARGS__); \
+		exit(1); \
+	} while(0)
 
 /* List Management */
 #define nls_list_foreach(tmp, list_node) \
-	for (tmp = ((list_node)->nn_list.nl_array); \
-		(tmp != (((list_node)->nn_list.nl_array) \
+	for ((tmp) = ((list_node)->nn_list.nl_array); \
+		((tmp) != (((list_node)->nn_list.nl_array) \
 		 + ((list_node)->nn_list.nl_num))); \
-		tmp++) \
+		(tmp)++) \
 
 /********************
  * GLOBAL VARIABLES *
