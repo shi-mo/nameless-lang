@@ -5,6 +5,9 @@
 #include "nameless/parser.h"
 #include "nameless/mm.h"
 
+NLS_GLOBAL FILE *nls_sys_out;
+NLS_GLOBAL FILE *nls_sys_err;
+
 static int nls_reduce(nls_node **tree, int limit);
 static int nls_list_reduce(nls_node **tree, int limit);
 static int nls_apply(nls_node **node, int limit);
@@ -18,19 +21,19 @@ nls_main(FILE *in, FILE *out, FILE *err)
 	int ret;
 	nls_node *tree = NULL;
 
-	yyin    = in;
-	yyout   = out;
-	nls_out = out;
-	nls_err = err;
+	yyin  = in;
+	yyout = out;
+	nls_sys_out = out;
+	nls_sys_err = err;
 
 	nls_mem_chain_init();
 	ret = yyparse();
-	if (ret || !nls_parse_result) {
+	if (ret || !nls_sys_parse_result) {
 		goto free_exit;
 	}
-	tree = nls_parse_result;
+	tree = nls_sys_parse_result;
 	ret = nls_reduce(&tree, NLS_REDUCTION_LIMIT);
-	nls_tree_print(nls_out, tree);
+	nls_tree_print(nls_sys_out, tree);
 	fprintf(out, "\n");
 free_exit:
 	if (tree) {

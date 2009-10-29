@@ -1,11 +1,11 @@
 [Functionality]
   nls_grab(reference count)
   GC
-  (done)leak check
+  *done* leak check
 
 [Refactoring]
-  macro:NLS_GLOBAL
-  add prefix:nls_sys for global symbols
+  *done* macro:NLS_GLOBAL
+  *done* add prefix:nls_sys for global symbols
 
 [Language Specification]
   variable

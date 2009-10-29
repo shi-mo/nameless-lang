@@ -6,7 +6,7 @@
 
 extern FILE *yyin;
 extern FILE *yyout;
-extern nls_node *nls_parse_result;
+extern nls_node *nls_sys_parse_result;
 
 int yylex(void);
 int yyparse(void);

@@ -2,14 +2,13 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
+#include "nameless.h"
 #include "nameless/parser.h"
 #include "nameless/node.h"
 #include "nameless/mm.h"
 #include "nameless/function.h"
 
-FILE *nls_out;
-FILE *nls_err;
-nls_node *nls_parse_result;
+NLS_GLOBAL nls_node *nls_sys_parse_result;
 
 static int yyerror(char *msg);
 static nls_node* nls_int_new(int val);
@@ -42,11 +41,11 @@ static int nls_list_isfull(nls_node *list);
 %%
 code	: op_spaces
 	{
-		nls_parse_result = $$ = NULL;
+		nls_sys_parse_result = $$ = NULL;
 	}
 	| op_spaces exprs op_spaces
 	{
-		nls_parse_result = $$ = $2;
+		nls_sys_parse_result = $$ = $2;
 	}
 
 exprs	: expr

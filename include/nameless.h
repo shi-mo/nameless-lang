@@ -7,6 +7,8 @@
 /**********
  * MACROS *
  **********/
+#define NLS_GLOBAL /* empty */
+
 /* Constant */
 #define NLS_LIST_ARRAY_EXP  8
 #define NLS_REDUCTION_LIMIT 10000
@@ -40,12 +42,12 @@
 
 /* Output */
 #define nls_error(fmt, ...) \
-	fprintf(nls_err, "ERROR:%s:%d:" fmt "\n", \
+	fprintf(nls_sys_err, "ERROR:%s:%d:" fmt "\n", \
 		__FILE__, __LINE__, ## __VA_ARGS__)
 
 #define nls_bug(fmt, ...) \
 	do { \
-		fprintf(nls_err, "BUG:%s:%d:" fmt "\n", \
+		fprintf(nls_sys_err, "BUG:%s:%d:" fmt "\n", \
 			__FILE__, __LINE__, ## __VA_ARGS__); \
 		exit(1); \
 	} while(0)
@@ -60,8 +62,8 @@
 /********************
  * GLOBAL VARIABLES *
  ********************/
-extern FILE *nls_out;
-extern FILE *nls_err;
+extern FILE *nls_sys_out;
+extern FILE *nls_sys_err;
 
 /**************
  * PROTOTYPES *
