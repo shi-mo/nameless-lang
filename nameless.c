@@ -5,7 +5,6 @@
 
 nls_node *nls_parse_result;
 
-static int nls_main(FILE *in, FILE *out, FILE *err);
 static int nls_reduce(nls_node **tree, int limit);
 static int nls_list_reduce(nls_node **tree, int limit);
 static int nls_apply(nls_node **node, int limit);
@@ -14,12 +13,6 @@ static void nls_tree_free(nls_node *tree);
 static int nls_tree_print(FILE *out, nls_node *tree);
 
 int
-main(int argc, char *argv[])
-{
-	return nls_main(stdin, stdout, stderr);
-}
-
-static int
 nls_main(FILE *in, FILE *out, FILE *err)
 {
 	int ret;

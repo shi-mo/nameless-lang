@@ -77,5 +77,6 @@ extern nls_node *nls_parse_result;
 int yylex(void);
 int yyparse(void);
 int yyerror(char *msg);
+int nls_main(FILE *in, FILE *out, FILE *err);
 
 #endif /* _NAMELESS_H_ */
