@@ -89,7 +89,6 @@ nls_free(void *ptr)
 		return;
 	}
 
-	nls_mem_free_cnt++;
 	ref = --(mem->nm_ref);
 	if (ref < 0) {
 		NLS_BUG(NLS_BUGFMT_INVALID_REFCOUNT,
@@ -97,6 +96,7 @@ nls_free(void *ptr)
 		return;
 	}
 	if (!ref) {
+		nls_mem_free_cnt++;
 		nls_mem_chain_remove(mem);
 		free(mem);
 	}
