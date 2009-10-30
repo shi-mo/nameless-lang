@@ -11,7 +11,7 @@ NLS_GLOBAL FILE *nls_sys_err;
 static int nls_reduce(nls_node **tree, int limit);
 static int nls_list_reduce(nls_node **tree, int limit);
 static int nls_apply(nls_node **node, int limit);
-static void nls_list_free(nls_node *list_node);
+static void nls_list_item_free(nls_node *list_node);
 static void nls_tree_free(nls_node *tree);
 static int nls_tree_print(FILE *out, nls_node *tree);
 
@@ -113,7 +113,7 @@ nls_apply(nls_node **node, int limit)
 }
 
 static void
-nls_list_free(nls_node *list_node)
+nls_list_item_free(nls_node *list_node)
 {
 	nls_node **tmp;
 
@@ -121,21 +121,27 @@ nls_list_free(nls_node *list_node)
 		nls_tree_free(*tmp);
 	}
 	nls_free(list_node->nn_list.nl_array);
-	nls_free(list_node);
 }
 
 static void
 nls_tree_free(nls_node *tree)
 {
-	if (NLS_TYPE_LIST == tree->nn_type) {
-		nls_list_free(tree);
-		return;
-	}
-	if (NLS_TYPE_APPLICATION == tree->nn_type) {
-		nls_application *app = &tree->nn_app;
+	switch (tree->nn_type) {
+	case NLS_TYPE_INT:
+		break;
+	case NLS_TYPE_FUNCTION:
+		break;
+	case NLS_TYPE_LIST:
+		nls_list_item_free(tree);
+		break;
+	case NLS_TYPE_APPLICATION:
+		{
+			nls_application *app = &tree->nn_app;
 
-		nls_tree_free(app->na_arg);
-		nls_free(app->na_func);
+			nls_tree_free(app->na_arg);
+			nls_free(app->na_func);
+		}
+		break;
 	}
 	nls_free(tree);
 }
