@@ -45,7 +45,7 @@
 	fprintf(nls_sys_err, "ERROR:%s:%d:" fmt "\n", \
 		__FILE__, __LINE__, ## __VA_ARGS__)
 
-#define nls_bug(fmt, ...) \
+#define NLS_BUG(fmt, ...) \
 	do { \
 		fprintf(nls_sys_err, "BUG:%s:%d:" fmt "\n", \
 			__FILE__, __LINE__, ## __VA_ARGS__); \

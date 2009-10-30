@@ -34,13 +34,13 @@ nls_mem_chain_term(void)
 	nls_mem *tmp;
 
 	if (nls_mem_alloc_cnt != nls_mem_free_cnt) {
-		nls_bug(NLS_BUGFMT_ILLEGAL_ALLOCNT,
+		NLS_BUG(NLS_BUGFMT_ILLEGAL_ALLOCNT,
 			nls_mem_alloc_cnt, nls_mem_free_cnt);
 		return;
 	}
 	nls_mem_chain_foreach(&tmp) {
 		if (NLS_MAGIC_MEMCHUNK != tmp->nm_magic) {
-			nls_bug(NLS_BUGMSG_BROKEN_MEMCHAIN);
+			NLS_BUG(NLS_BUGMSG_BROKEN_MEMCHAIN);
 			return;
 		}
 		if (tmp->nm_ref) {
@@ -81,7 +81,7 @@ nls_free(void *ptr)
 	nls_mem *mem = (nls_mem*)(ptr - sizeof(nls_mem));
 
 	if (&nls_mem_chain == mem) {
-		nls_bug(NLS_BUGMSG_ILLEGAL_MEMCHAIN_OPERATION);
+		NLS_BUG(NLS_BUGMSG_ILLEGAL_MEMCHAIN_OPERATION);
 		return;
 	}
 	if (NLS_MAGIC_MEMCHUNK != mem->nm_magic) {
@@ -92,7 +92,7 @@ nls_free(void *ptr)
 	nls_mem_free_cnt++;
 	ref = --(mem->nm_ref);
 	if (ref < 0) {
-		nls_bug(NLS_BUGFMT_INVALID_REFCOUNT,
+		NLS_BUG(NLS_BUGFMT_INVALID_REFCOUNT,
 			mem, (mem + 1), mem->nm_ref, mem->nm_size);
 		return;
 	}
@@ -108,7 +108,7 @@ nls_mem_chain_add(nls_mem *mem)
 	nls_mem *tail = nls_mem_chain.nm_prev;
 
 	if (&nls_mem_chain == mem) {
-		nls_bug(NLS_BUGMSG_ILLEGAL_MEMCHAIN_OPERATION);
+		NLS_BUG(NLS_BUGMSG_ILLEGAL_MEMCHAIN_OPERATION);
 		return;
 	}
 	mem->nm_next  = &nls_mem_chain;
@@ -121,7 +121,7 @@ static void
 nls_mem_chain_remove(nls_mem *mem)
 {
 	if (&nls_mem_chain == mem) {
-		nls_bug(NLS_BUGMSG_ILLEGAL_MEMCHAIN_OPERATION);
+		NLS_BUG(NLS_BUGMSG_ILLEGAL_MEMCHAIN_OPERATION);
 		return;
 	}
 	mem->nm_next->nm_prev = mem->nm_prev;
