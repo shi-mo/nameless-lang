@@ -67,7 +67,7 @@ nls_reduce(nls_node **tree, int limit)
 	case NLS_TYPE_LIST:
 		return nls_list_reduce(tree, limit);
 	default:
-		nls_error(NLS_ERRMSG_INVALID_NODE_TYPE);
+		nls_bug(NLS_BUGMSG_INVALID_NODE_TYPE);
 		return EINVAL; /* must not happen */
 	}
 }
@@ -142,6 +142,9 @@ nls_tree_free(nls_node *tree)
 			nls_free(app->na_func);
 		}
 		break;
+	default:
+		nls_bug(NLS_BUGMSG_INVALID_NODE_TYPE);
+		return;
 	}
 	nls_free(tree);
 }
@@ -190,7 +193,7 @@ nls_tree_print(FILE *out, nls_node *tree)
 		}
 		return 0;
 	default:
-		nls_error(NLS_ERRMSG_INVALID_NODE_TYPE);
+		nls_bug(NLS_BUGMSG_INVALID_NODE_TYPE);
 		return EINVAL;
 	}
 }
