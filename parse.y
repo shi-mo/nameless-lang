@@ -112,10 +112,11 @@ nls_int_new(int val)
 {
 	nls_node *node = nls_new(nls_node);
 
-	if (node) {
-		node->nn_type = NLS_TYPE_INT;
-		node->nn_int = val;
+	if (!node) {
+		return NULL;
 	}
+	node->nn_type = NLS_TYPE_INT;
+	node->nn_int = val;
 	return node;
 }
 
@@ -124,10 +125,11 @@ nls_var_new(nls_string *name)
 {
 	nls_node *node = nls_new(nls_node);
 
-	if (node) {
-		node->nn_type = NLS_TYPE_VAR;
-		node->nn_var.nv_name = name;
+	if (!node) {
+		return NULL;
 	}
+	node->nn_type = NLS_TYPE_VAR;
+	node->nn_var.nv_name = name;
 	return node;
 }
 
@@ -136,26 +138,27 @@ nls_function_new(nls_function func)
 {
 	nls_node *node = nls_new(nls_node);
 
-	if (node) {
-		node->nn_type = NLS_TYPE_FUNCTION;
-		node->nn_func = func;
+	if (!node) {
+		return NULL;
 	}
+	node->nn_type = NLS_TYPE_FUNCTION;
+	node->nn_func = func;
 	return node;
 }
 
 static nls_node*
 nls_application_new(nls_node *func, nls_node *arg)
 {
+	nls_application *app;
 	nls_node *node = nls_new(nls_node);
 
-	if (node) {
-		nls_application *app;
-
-		node->nn_type = NLS_TYPE_APPLICATION;
-		app = &(node->nn_app);
-		app->na_func = func;
-		app->na_arg  = arg;
+	if (!node) {
+		return NULL;
 	}
+	node->nn_type = NLS_TYPE_APPLICATION;
+	app = &(node->nn_app);
+	app->na_func = func;
+	app->na_arg  = arg;
 	return node;
 }
 
