@@ -16,7 +16,7 @@
 #define NLS_EINFREDUCE EMLINK
 
 /* Output */
-#define nls_error(fmt, ...) \
+#define NLS_ERROR(fmt, ...) \
 	fprintf(nls_sys_err, "ERROR:%s:%d:" fmt "\n", \
 		__FILE__, __LINE__, ## __VA_ARGS__)
 

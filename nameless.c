@@ -55,7 +55,7 @@ nls_reduce(nls_node **tree, int limit)
 	int ret;
 
 	if (limit-- <= 0) {
-		nls_error(NLS_MSG_REDUCTION_TOO_DEEP);
+		NLS_ERROR(NLS_MSG_REDUCTION_TOO_DEEP);
 		return NLS_EINFREDUCE;
 	}
 	switch ((*tree)->nn_type) {

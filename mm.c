@@ -50,7 +50,7 @@ nls_mem_chain_term(void)
 			return;
 		}
 		if (tmp->nm_ref) {
-			nls_error(NLS_MSG_MEMLEAK_DETECTED \
+			NLS_ERROR(NLS_MSG_MEMLEAK_DETECTED \
 				": mem=%p ptr=%p ref=%d size=%d",
 				tmp, (tmp + 1), tmp->nm_ref, tmp->nm_size);
 		}
@@ -92,7 +92,7 @@ nls_free(void *ptr)
 		return;
 	}
 	if (NLS_MAGIC_MEMCHUNK != mem->nm_magic) {
-		nls_error(NLS_MSG_BROKEN_MEMCHAIN);
+		NLS_ERROR(NLS_MSG_BROKEN_MEMCHAIN);
 		return;
 	}
 
