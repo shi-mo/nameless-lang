@@ -23,7 +23,7 @@ int
 nls_main(FILE *in, FILE *out, FILE *err)
 {
 	int ret;
-	nls_node *tree = NULL;
+	nls_node *tree;
 
 	yyin  = in;
 	yyout = out;
