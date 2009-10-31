@@ -52,8 +52,9 @@ nls_mem_chain_term(void)
 		}
 		if (item->nm_ref) {
 			NLS_WARN(NLS_MSG_MEMLEAK_DETECTED \
-				": mem=%p ptr=%p ref=%d size=%d",
-				item, (item + 1), item->nm_ref, item->nm_size);
+				": mem=%p ptr=%p ref=%d size=%d type=%s",
+				item, (item + 1), item->nm_ref, item->nm_size,
+				item->nm_type);
 		}
 		free(item);
 	}
@@ -66,7 +67,7 @@ nls_mem_chain_term(void)
  * Use nls_new(type) / nls_new_array(type) / nls_grab(ptr) instead.
  */
 void*
-_nls_malloc(size_t size)
+_nls_malloc(size_t size, const char *type)
 {
 	nls_mem *mem = malloc(size + sizeof(nls_mem));
 
@@ -75,7 +76,8 @@ _nls_malloc(size_t size)
 	}
 	nls_mem_alloc_cnt++;
 	mem->nm_magic = NLS_MAGIC_MEMCHUNK;
-	mem->nm_ref = 1;
+	mem->nm_type = type;
+	mem->nm_ref  = 1;
 	mem->nm_size = size;
 	nls_mem_chain_add(mem);
 
@@ -100,8 +102,9 @@ nls_free(void *ptr)
 	ref = --(mem->nm_ref);
 	if (ref < 0) {
 		NLS_BUG(NLS_MSG_INVALID_REFCOUNT
-			": mem=%p ptr=%p ref=%d size=%d",
-			mem, (mem + 1), mem->nm_ref, mem->nm_size);
+			": mem=%p ptr=%p ref=%d size=%d type=%s",
+			mem, (mem + 1), mem->nm_ref, mem->nm_size,
+			mem->nm_type);
 		return;
 	}
 	if (!ref) {
