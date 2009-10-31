@@ -3,6 +3,8 @@
 #include "y.tab.h"
 #include "nameless.h"
 
+#define NLS_MSG_ILLEGAL_TOKEN "Illegal token"
+
 static int yywrap(void);
 %}
 %%
@@ -25,6 +27,10 @@ static int yywrap(void);
 	sscanf(yytext, "%d", &temp);
 	yylval.yst_int = temp;
 	return tNUMBER;
+}
+.	{
+	NLS_ERROR(NLS_MSG_ILLEGAL_TOKEN);
+	exit(1);
 }
 %%
 
