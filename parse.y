@@ -14,6 +14,7 @@ NLS_GLOBAL nls_node *nls_sys_parse_result;
 
 static int yyerror(char *msg);
 static nls_node* nls_int_new(int val);
+static nls_node* nls_var_new(nls_string *name);
 static nls_node* nls_function_new(nls_function func);
 static nls_node* nls_application_new(nls_node *func, nls_node *arg);
 static nls_node* nls_list_new(nls_node *node);
@@ -23,6 +24,7 @@ static int nls_list_add(nls_node *list, nls_node *node);
 %union {
 	int yst_token;
 	int yst_int;
+	nls_string *yst_str;
 	nls_node *yst_node;
 }
 
@@ -33,6 +35,7 @@ static int nls_list_add(nls_node *list, nls_node *node);
 %token<yst_token> tOP_MUL tOP_DIV
 %token<yst_token> tOP_MOD
 %token<yst_int> tNUMBER
+%token<yst_str> tIDENT
 
 %type<yst_node> code exprs
 %type<yst_node> expr function
@@ -62,6 +65,10 @@ exprs	: expr
 expr	: tNUMBER
 	{
 		$$ = nls_int_new($1);
+	}
+	| tIDENT
+	{
+		$$ = nls_var_new($1);
 	}
 	| tLBRACE exprs tRBRACE
 	{
@@ -108,6 +115,18 @@ nls_int_new(int val)
 	if (node) {
 		node->nn_type = NLS_TYPE_INT;
 		node->nn_int = val;
+	}
+	return node;
+}
+
+static nls_node*
+nls_var_new(nls_string *name)
+{
+	nls_node *node = nls_new(nls_node);
+
+	if (node) {
+		node->nn_type = NLS_TYPE_VAR;
+		node->nn_var.nv_name = name;
 	}
 	return node;
 }

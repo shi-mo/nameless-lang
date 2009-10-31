@@ -16,6 +16,7 @@ static int nls_list_reduce(nls_node **tree, int limit);
 static int nls_apply(nls_node **node, int limit);
 static void nls_list_item_free(nls_node *list);
 static void nls_tree_free(nls_node *tree);
+static void nls_string_free(nls_string *str);
 static int nls_tree_print(FILE *out, nls_node *tree);
 
 int
@@ -60,6 +61,7 @@ nls_reduce(nls_node **tree, int limit)
 	}
 	switch ((*tree)->nn_type) {
 	case NLS_TYPE_INT:
+	case NLS_TYPE_VAR:
 	case NLS_TYPE_FUNCTION:
 		return 0;
 	case NLS_TYPE_APPLICATION:
@@ -132,6 +134,9 @@ nls_tree_free(nls_node *tree)
 	switch (tree->nn_type) {
 	case NLS_TYPE_INT:
 		break;
+	case NLS_TYPE_VAR:
+		nls_string_free(tree->nn_var.nv_name);
+		break;
 	case NLS_TYPE_FUNCTION:
 		break;
 	case NLS_TYPE_LIST:
@@ -152,6 +157,13 @@ nls_tree_free(nls_node *tree)
 	nls_free(tree);
 }
 
+static void
+nls_string_free(nls_string *str)
+{
+	nls_free(str->ns_bufp);
+	nls_free(str);
+}
+
 static int
 nls_tree_print(FILE *out, nls_node *tree)
 {
@@ -160,6 +172,9 @@ nls_tree_print(FILE *out, nls_node *tree)
 	switch (tree->nn_type) {
 	case NLS_TYPE_INT:
 		fprintf(out, "%d", tree->nn_int);
+		return 0;
+	case NLS_TYPE_VAR:
+		fprintf(out, "%s", tree->nn_var.nv_name->ns_bufp);
 		return 0;
 	case NLS_TYPE_FUNCTION:
 		fprintf(out, "func:%p", tree->nn_func);
