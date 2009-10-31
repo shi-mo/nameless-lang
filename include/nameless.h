@@ -15,16 +15,6 @@
 /* Error Code */
 #define NLS_EINFREDUCE EMLINK
 
-/* Debug */
-#ifdef NLS_DEBUG
-# define NLS_DEBUG_PRINT(fmt, ...) \
-	fprintf(stderr, "DEBUG:%s:%d:" fmt "\n", \
-		__FILE__, __LINE__, ## __VA_ARGS__)
-#else  /* NLS_DEBUG */
-# define NLS_DEBUG_PRINT(fmt, ...) \
-	do {} while(0)
-#endif /* NLS_DEBUG */
-
 /* Output */
 #define nls_error(fmt, ...) \
 	fprintf(nls_sys_err, "ERROR:%s:%d:" fmt "\n", \

@@ -13,7 +13,6 @@ YACC = yacc -d
 CC     = gcc
 CFLAGS = -Wall -g -I$(INCDIR) -I.
 #CFLAGS += -E
-#CFLAGS += -DNLS_DEBUG
 #CFLAGS += -DYYDEBUG=1
 
 .PHONY: all
