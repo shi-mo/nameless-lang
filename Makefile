@@ -69,5 +69,5 @@ y.tab.c: parse.y $(HEADERS)
 
 y.tab.h: y.tab.c
 
-lex.yy.c: lex.l y.tab.h $(HEADERS)
+lex.yy.c: scan.l y.tab.h $(HEADERS)
 	$(LEX) $<
