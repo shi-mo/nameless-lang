@@ -80,33 +80,44 @@ static void
 test_nls_grab(void)
 {
 	nls_mem *mem;
-	nls_node *np1, *np2, *np3;
+	nls_node *node, *ref1, *ref2;
 
 	nls_mem_chain_init();
 
-	np1 = nls_new(nls_node);
-	mem = (nls_mem*)np1 - 1;
+	node = nls_new(nls_node);
+	mem = (nls_mem*)node - 1;
 	NLS_ASSERT_EQUALS(0, mem->nm_ref);
 
-	np2 = nls_grab(np1);
-	NLS_ASSERT_EQUALS(np1, np2);
+	ref1 = nls_grab(node);
+	NLS_ASSERT_EQUALS(node, ref1);
 	NLS_ASSERT_EQUALS(1, mem->nm_ref);
 
-	np3 = nls_grab(np1);
+	ref2 = nls_grab(node);
 	NLS_ASSERT_EQUALS(2, mem->nm_ref);
-	nls_free(np3);
+	nls_release(ref2);
 	NLS_ASSERT_EQUALS(1, mem->nm_ref);
 
-	nls_free(np2); /* free() is called. */
+	nls_release(ref1); /* free() is called. */
 
 	nls_mem_chain_term();
 }
 #endif /* NLS_UNIT_TEST */
 
 void
-nls_free(void *ptr)
+nls_release(void *ptr)
 {
 	int ref;
+	nls_mem *mem = (nls_mem*)(ptr - sizeof(nls_mem));
+
+	ref = --(mem->nm_ref);
+	if (!ref) {
+		nls_free(ptr);
+	}
+}
+
+void
+nls_free(void *ptr)
+{
 	nls_mem *mem = (nls_mem*)(ptr - sizeof(nls_mem));
 
 	if (&nls_mem_chain == mem) {
@@ -118,19 +129,16 @@ nls_free(void *ptr)
 		return;
 	}
 
-	ref = --(mem->nm_ref);
-	if (ref < 0) {
+	if (mem->nm_ref) {
 		NLS_BUG(NLS_MSG_INVALID_REFCOUNT
 			": mem=%p ptr=%p ref=%d size=%d type=%s",
 			mem, (mem + 1), mem->nm_ref, mem->nm_size,
 			mem->nm_type);
 		return;
 	}
-	if (!ref) {
-		nls_mem_free_cnt++;
-		nls_mem_chain_remove(mem);
-		free(mem);
-	}
+	nls_mem_free_cnt++;
+	nls_mem_chain_remove(mem);
+	free(mem);
 }
 
 /*
@@ -175,7 +183,7 @@ test_nls_new(void)
 	NLS_ASSERT_EQUALS(mem, nls_mem_chain.nm_prev);
 	NLS_ASSERT_EQUALS(mem, nls_mem_chain.nm_next);
 
-	nls_free(node);
+	nls_release(node);
 	NLS_ASSERT_EQUALS(&nls_mem_chain, nls_mem_chain.nm_prev);
 	NLS_ASSERT_EQUALS(&nls_mem_chain, nls_mem_chain.nm_next);
 

@@ -1,6 +1,5 @@
 %{
 #include <ctype.h>
-#include <string.h>
 #include <stdio.h>
 #include "nameless.h"
 #include "nameless/parser.h"
@@ -42,7 +41,7 @@ code	: op_spaces
 	| op_spaces exprs op_spaces
 	{
 		$$ = $2;
-		nls_sys_parse_result = nls_grab($$);
+		nls_sys_parse_result = nls_node_grab($$);
 	}
 
 exprs	: expr
@@ -72,7 +71,12 @@ expr	: tNUMBER
 		$$ = nls_application_new($2, $4);
 	}
 
-function: tOP_ADD { $$ = nls_function_new(nls_func_add); }
+function: tIDENT
+	{
+		nls_string_free(nls_grab($1));
+		$$ = nls_function_new(nls_func_abst);
+	}
+	| tOP_ADD { $$ = nls_function_new(nls_func_add); }
 	| tOP_SUB { $$ = nls_function_new(nls_func_sub); }
 	| tOP_MUL { $$ = nls_function_new(nls_func_mul); }
 	| tOP_DIV { $$ = nls_function_new(nls_func_div); }

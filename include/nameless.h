@@ -6,6 +6,9 @@
 
 #define NLS_GLOBAL /* empty */
 
+#define NLS_MSG_INVALID_NODE_TYPE "Invalid node type"
+#define NLS_MSG_NOT_IMPLEMENTED   "Not implemented yet"
+
 #define NLS_WARN(fmt, ...) \
 	fprintf(nls_sys_err, "Warning:%s:%d: " fmt "\n", \
 		__FILE__, __LINE__, ## __VA_ARGS__)
@@ -65,5 +68,6 @@ extern FILE *nls_sys_err;
 
 int nls_main(FILE *in, FILE *out, FILE *err);
 int nls_reduce(nls_node **tree);
+void nls_string_free(nls_string *str);
 
 #endif /* _NAMELESS_H_ */

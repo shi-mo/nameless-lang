@@ -5,17 +5,11 @@
 #include "nameless/parser.h"
 #include "nameless/mm.h"
 
-#define NLS_MSG_REDUCTION_TOO_DEEP "Reduction too deep"
-#define NLS_MSG_INVALID_NODE_TYPE  "Invalid node type"
-
 NLS_GLOBAL FILE *nls_sys_out;
 NLS_GLOBAL FILE *nls_sys_err;
 
 static int nls_list_reduce(nls_node **tree);
 static int nls_apply(nls_node **node);
-static void nls_list_item_free(nls_node *list);
-static void nls_tree_free(nls_node *tree);
-static void nls_string_free(nls_string *str);
 static int nls_tree_print(FILE *out, nls_node *tree);
 
 int
@@ -64,6 +58,7 @@ nls_reduce(nls_node **tree)
 	case NLS_TYPE_INT:
 	case NLS_TYPE_VAR:
 	case NLS_TYPE_FUNCTION:
+	case NLS_TYPE_ABSTRACTION:
 		return 0;
 	case NLS_TYPE_APPLICATION:
 		if ((ret = nls_apply(tree))) {
@@ -73,9 +68,17 @@ nls_reduce(nls_node **tree)
 	case NLS_TYPE_LIST:
 		return nls_list_reduce(tree);
 	default:
-		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE);
+		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE ": type=%d",
+			(*tree)->nn_type);
 		return EINVAL; /* must not happen */
 	}
+}
+
+void
+nls_string_free(nls_string *str)
+{
+	nls_release(str->ns_bufp);
+	nls_release(str);
 }
 
 static int
@@ -101,66 +104,33 @@ static int
 nls_apply(nls_node **node)
 {
 	int ret;
-	nls_node *tmp;
 
 	nls_application *app = &((*node)->nn_app);
-	nls_function func = app->na_func->nn_func;
+	nls_node *func = app->na_func;
 	nls_node **arg = &app->na_arg;
 
-	if ((ret = (func)(*arg, &tmp))) {
-		return ret;
-	}
-	tmp = nls_grab(tmp);
-	nls_tree_free(*node);
-	*node = tmp;
-	return 0;
-}
-
-static void
-nls_list_item_free(nls_node *node)
-{
-	nls_list *list = &(node->nn_list);
-
-	nls_tree_free(list->nl_head);
-	if (list->nl_rest) {
-		nls_tree_free(list->nl_rest);
-	}
-}
-
-static void
-nls_tree_free(nls_node *tree)
-{
-	switch (tree->nn_type) {
-	case NLS_TYPE_INT:
-		break;
-	case NLS_TYPE_VAR:
-		nls_string_free(tree->nn_var.nv_name);
-		break;
+	switch (func->nn_type) {
 	case NLS_TYPE_FUNCTION:
-		break;
-	case NLS_TYPE_LIST:
-		nls_list_item_free(tree);
-		break;
-	case NLS_TYPE_APPLICATION:
 		{
-			nls_application *app = &tree->nn_app;
+			nls_node *out;
+			nls_function fp = func->nn_func;
 
-			nls_tree_free(app->na_arg);
-			nls_free(app->na_func);
+			if ((ret = (fp)(*arg, &out))) {
+				return ret;
+			}
+			out = nls_node_grab(out);
+			nls_tree_free(*node);
+			*node = out;
 		}
 		break;
+	case NLS_TYPE_ABSTRACTION:
+		NLS_ERROR(NLS_MSG_NOT_IMPLEMENTED);
+		break;
 	default:
-		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE);
-		return;
+		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE
+			": type=%d", func->nn_type);
 	}
-	nls_free(tree);
-}
-
-static void
-nls_string_free(nls_string *str)
-{
-	nls_free(str->ns_bufp);
-	nls_free(str);
+	return 0;
 }
 
 static int
@@ -177,6 +147,13 @@ nls_tree_print(FILE *out, nls_node *tree)
 		return 0;
 	case NLS_TYPE_FUNCTION:
 		fprintf(out, "func:%p", tree->nn_func);
+		return 0;
+	case NLS_TYPE_ABSTRACTION:
+		fprintf(out, "(abst(%d): ", tree->nn_abst.nab_num_arg);
+		if ((ret = nls_tree_print(out, tree->nn_abst.nab_def))) {
+			return ret;
+		}
+		fprintf(out, ")");
 		return 0;
 	case NLS_TYPE_APPLICATION:
 		fprintf(out, "(");

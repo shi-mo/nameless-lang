@@ -104,3 +104,32 @@ __nls_int2_func(nls_node *arg1, nls_node *arg2, nls_int2_op op, nls_node **out)
 	*out = node;
 	return 0;
 }
+
+int
+nls_func_abst(nls_node *arg, nls_node **out)
+{
+	int i;
+	nls_node **item, *tmp;
+	nls_node *node, *abst_vars, **abst_def;
+
+	i = 0;
+	nls_list_foreach(arg, &item, &tmp) {
+		switch (++i) {
+		case 1:
+			abst_vars = *item;
+			break;
+		case 2:
+			abst_def = item;
+			break;
+		default:
+			goto new_abst;
+		}
+	}
+new_abst:
+	node = nls_abstraction_new(abst_vars, abst_def);
+	if (!node) {
+		return 1;
+	}
+	*out = node;
+	return 0;
+}
