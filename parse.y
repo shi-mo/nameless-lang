@@ -8,7 +8,7 @@
 #include "nameless/mm.h"
 #include "nameless/function.h"
 
-#define NLS_MSG_BROKEN_LIST        "Broken list"
+#define NLS_MSG_BROKEN_LIST "Broken list"
 
 NLS_GLOBAL nls_node *nls_sys_parse_result;
 
