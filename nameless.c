@@ -24,6 +24,7 @@ nls_main(FILE *in, FILE *out, FILE *err)
 {
 	int ret;
 	nls_node *tree;
+	nls_node **item, *tmp;
 
 	yyin  = in;
 	yyout = out;
@@ -37,8 +38,10 @@ nls_main(FILE *in, FILE *out, FILE *err)
 		goto free_exit;
 	}
 	ret = nls_reduce(&tree, NLS_REDUCTION_LIMIT);
-	nls_tree_print(nls_sys_out, tree);
-	fprintf(out, "\n");
+	nls_list_foreach(tree, &item, &tmp) {
+		nls_tree_print(nls_sys_out, *item);
+		fprintf(out, "\n");
+	}
 free_exit:
 	if (tree) {
 		nls_tree_free(tree);
@@ -211,7 +214,7 @@ nls_tree_print(FILE *out, nls_node *tree)
 		}
 		return 0;
 	default:
-		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE);
+		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE ": type=%d", tree->nn_type);
 		return EINVAL;
 	}
 }
