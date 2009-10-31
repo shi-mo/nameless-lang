@@ -42,7 +42,7 @@ nls_mem_chain_term(void)
 	nls_mem *item, *tmp;
 
 	if (nls_mem_alloc_cnt != nls_mem_free_cnt) {
-		NLS_ERROR(NLS_MSG_ILLEGAL_ALLOCCNT ": alloc=%d free=%d",
+		NLS_WARN(NLS_MSG_ILLEGAL_ALLOCCNT ": alloc=%d free=%d",
 			nls_mem_alloc_cnt, nls_mem_free_cnt);
 	}
 	nls_mem_chain_foreach_safe(&item, &tmp) {
@@ -51,7 +51,7 @@ nls_mem_chain_term(void)
 			return;
 		}
 		if (item->nm_ref) {
-			NLS_ERROR(NLS_MSG_MEMLEAK_DETECTED \
+			NLS_WARN(NLS_MSG_MEMLEAK_DETECTED \
 				": mem=%p ptr=%p ref=%d size=%d",
 				item, (item + 1), item->nm_ref, item->nm_size);
 		}

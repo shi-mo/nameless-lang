@@ -16,9 +16,16 @@
 #define NLS_EINFREDUCE EMLINK
 
 /* Output */
-#define NLS_ERROR(fmt, ...) \
-	fprintf(nls_sys_err, "ERROR:%s:%d: " fmt "\n", \
+#define NLS_WARN(fmt, ...) \
+	fprintf(nls_sys_err, "Warning:%s:%d: " fmt "\n", \
 		__FILE__, __LINE__, ## __VA_ARGS__)
+
+#define NLS_ERROR(fmt, ...) \
+	do { \
+		fprintf(nls_sys_err, "ERROR:%s:%d: " fmt "\n", \
+			__FILE__, __LINE__, ## __VA_ARGS__); \
+		exit(1); \
+	} while(0)
 
 #define NLS_BUG(fmt, ...) \
 	do { \
