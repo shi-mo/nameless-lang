@@ -12,9 +12,9 @@ TODO LIST
 
 [Language Specification]
   variable
-  change list structure (simple linked-list)
   nil terminated list
   procedure/parallel
+  *done* change list structure (simple linked-list)
 
 [Testing]
   #ifdef NLS_UNITTEST
