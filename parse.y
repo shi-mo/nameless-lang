@@ -99,7 +99,7 @@ space	: tSPACE
 static int
 yyerror(char *msg)
 {
-	fprintf(stderr, "ERROR: %s\n", msg);
+	NLS_ERROR("%s", msg);
 
 	return 0;
 }

@@ -8,9 +8,11 @@
 #define NLS_MSG_INVALID_REFCOUNT "Invalid reference count"
 #define NLS_MSG_ILLEGAL_MEMCHAIN_OPERATION "Illegal memchain operation"
 
-#define nls_mem_chain_foreach(tmp) \
-	for (*(tmp) = nls_mem_chain.nm_next; \
-		*(tmp) != &nls_mem_chain; \
+#define nls_mem_chain_foreach_safe(item, tmp) \
+	for (*(item) = nls_mem_chain.nm_next, \
+		*(tmp) = (*(item))->nm_next; \
+		*(item) != &nls_mem_chain; \
+		*(item) = *(tmp), \
 		*(tmp) = (*(tmp))->nm_next)
 
 static int nls_mem_alloc_cnt;
@@ -37,24 +39,23 @@ nls_mem_chain_init(void)
 void
 nls_mem_chain_term(void)
 {
-	nls_mem *tmp;
+	nls_mem *item, *tmp;
 
 	if (nls_mem_alloc_cnt != nls_mem_free_cnt) {
-		NLS_BUG(NLS_MSG_ILLEGAL_ALLOCCNT ": alloc=%d free=%d",
+		NLS_ERROR(NLS_MSG_ILLEGAL_ALLOCCNT ": alloc=%d free=%d",
 			nls_mem_alloc_cnt, nls_mem_free_cnt);
-		return;
 	}
-	nls_mem_chain_foreach(&tmp) {
-		if (NLS_MAGIC_MEMCHUNK != tmp->nm_magic) {
+	nls_mem_chain_foreach_safe(&item, &tmp) {
+		if (NLS_MAGIC_MEMCHUNK != item->nm_magic) {
 			NLS_BUG(NLS_MSG_BROKEN_MEMCHAIN);
 			return;
 		}
-		if (tmp->nm_ref) {
+		if (item->nm_ref) {
 			NLS_ERROR(NLS_MSG_MEMLEAK_DETECTED \
 				": mem=%p ptr=%p ref=%d size=%d",
-				tmp, (tmp + 1), tmp->nm_ref, tmp->nm_size);
+				item, (item + 1), item->nm_ref, item->nm_size);
 		}
-		free(tmp);
+		free(item);
 	}
 }
 
