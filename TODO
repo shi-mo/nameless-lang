@@ -12,6 +12,7 @@ TODO LIST
   *done* add prefix:nls_sys for global symbols
 
 [Language Specification]
+  lambda abstraction
   nil terminated list
   procedure/parallel
   *done* variable
@@ -27,3 +28,6 @@ TODO LIST
   CODINGSTD
   COPYING
   README
+
+[Build Environment]
+  source emmbed sha1-sum
