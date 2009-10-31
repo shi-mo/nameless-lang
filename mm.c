@@ -2,6 +2,12 @@
 #include "nameless.h"
 #include "nameless/mm.h"
 
+#define NLS_MSG_MEMLEAK_DETECTED "Memory leak detected"
+#define NLS_MSG_BROKEN_MEMCHAIN  "Broken memchain"
+#define NLS_MSG_ILLEGAL_ALLOCCNT "Illegal alloc count"
+#define NLS_MSG_INVALID_REFCOUNT "Invalid reference count"
+#define NLS_MSG_ILLEGAL_MEMCHAIN_OPERATION "Illegal memchain operation"
+
 #define nls_mem_chain_foreach(tmp) \
 	for (*(tmp) = nls_mem_chain.nm_next; \
 		*(tmp) != &nls_mem_chain; \
@@ -34,17 +40,18 @@ nls_mem_chain_term(void)
 	nls_mem *tmp;
 
 	if (nls_mem_alloc_cnt != nls_mem_free_cnt) {
-		NLS_BUG(NLS_BUGFMT_ILLEGAL_ALLOCNT,
+		NLS_BUG(NLS_MSG_ILLEGAL_ALLOCCNT ": alloc=%d free=%d",
 			nls_mem_alloc_cnt, nls_mem_free_cnt);
 		return;
 	}
 	nls_mem_chain_foreach(&tmp) {
 		if (NLS_MAGIC_MEMCHUNK != tmp->nm_magic) {
-			NLS_BUG(NLS_BUGMSG_BROKEN_MEMCHAIN);
+			NLS_BUG(NLS_MSG_BROKEN_MEMCHAIN);
 			return;
 		}
 		if (tmp->nm_ref) {
-			nls_error(NLS_ERRFMT_MEMLEAK_DETECTED,
+			nls_error(NLS_MSG_MEMLEAK_DETECTED \
+				": mem=%p ptr=%p ref=%d size=%d",
 				tmp, (tmp + 1), tmp->nm_ref, tmp->nm_size);
 		}
 		free(tmp);
@@ -81,17 +88,18 @@ nls_free(void *ptr)
 	nls_mem *mem = (nls_mem*)(ptr - sizeof(nls_mem));
 
 	if (&nls_mem_chain == mem) {
-		NLS_BUG(NLS_BUGMSG_ILLEGAL_MEMCHAIN_OPERATION);
+		NLS_BUG(NLS_MSG_ILLEGAL_MEMCHAIN_OPERATION);
 		return;
 	}
 	if (NLS_MAGIC_MEMCHUNK != mem->nm_magic) {
-		nls_error(NLS_BUGMSG_BROKEN_MEMCHAIN);
+		nls_error(NLS_MSG_BROKEN_MEMCHAIN);
 		return;
 	}
 
 	ref = --(mem->nm_ref);
 	if (ref < 0) {
-		NLS_BUG(NLS_BUGFMT_INVALID_REFCOUNT,
+		NLS_BUG(NLS_MSG_INVALID_REFCOUNT
+			": mem=%p ptr=%p ref=%d size=%d",
 			mem, (mem + 1), mem->nm_ref, mem->nm_size);
 		return;
 	}
@@ -108,7 +116,7 @@ nls_mem_chain_add(nls_mem *mem)
 	nls_mem *tail = nls_mem_chain.nm_prev;
 
 	if (&nls_mem_chain == mem) {
-		NLS_BUG(NLS_BUGMSG_ILLEGAL_MEMCHAIN_OPERATION);
+		NLS_BUG(NLS_MSG_ILLEGAL_MEMCHAIN_OPERATION);
 		return;
 	}
 	mem->nm_next  = &nls_mem_chain;
@@ -121,7 +129,7 @@ static void
 nls_mem_chain_remove(nls_mem *mem)
 {
 	if (&nls_mem_chain == mem) {
-		NLS_BUG(NLS_BUGMSG_ILLEGAL_MEMCHAIN_OPERATION);
+		NLS_BUG(NLS_MSG_ILLEGAL_MEMCHAIN_OPERATION);
 		return;
 	}
 	mem->nm_next->nm_prev = mem->nm_prev;

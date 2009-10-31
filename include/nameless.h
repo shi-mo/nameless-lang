@@ -15,21 +15,6 @@
 /* Error Code */
 #define NLS_EINFREDUCE EMLINK
 
-/* Error Message */
-#define NLS_ERRMSG_REDUCTION_TOO_DEEP "Reduction too deep."
-#define NLS_ERRFMT_MEMLEAK_DETECTED \
-	"Memory leak detected: mem=%p ptr=%p ref=%d size=%d"
-
-/* BUG Message */
-#define NLS_BUGMSG_INVALID_NODE_TYPE "Invalid node type."
-#define NLS_BUGMSG_BROKEN_LIST       "Broken list."
-#define NLS_BUGMSG_BROKEN_MEMCHAIN   "Broken memchain."
-#define NLS_BUGMSG_ILLEGAL_MEMCHAIN_OPERATION "Illegal memchain operation."
-#define NLS_BUGFMT_ILLEGAL_ALLOCNT \
-	"Illegal alloc count: alloc=%d free=%d"
-#define NLS_BUGFMT_INVALID_REFCOUNT \
-	"Invalid reference count: mem=%p ptr=%p ref=%d size=%d"
-
 /* Debug */
 #ifdef NLS_DEBUG
 # define NLS_DEBUG_PRINT(fmt, ...) \

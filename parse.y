@@ -8,6 +8,8 @@
 #include "nameless/mm.h"
 #include "nameless/function.h"
 
+#define NLS_MSG_BROKEN_LIST        "Broken list"
+
 NLS_GLOBAL nls_node *nls_sys_parse_result;
 
 static int yyerror(char *msg);
@@ -165,7 +167,7 @@ nls_list_add(nls_node *node, nls_node *item)
 
 	list = &(node->nn_list);
 	if (!list->nl_head) {
-		NLS_BUG(NLS_BUGMSG_BROKEN_LIST);
+		NLS_BUG(NLS_MSG_BROKEN_LIST);
 		return 1; /* dummy */
 	}
 	if (list->nl_rest) {

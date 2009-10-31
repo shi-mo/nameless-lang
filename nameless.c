@@ -5,6 +5,9 @@
 #include "nameless/parser.h"
 #include "nameless/mm.h"
 
+#define NLS_MSG_REDUCTION_TOO_DEEP "Reduction too deep"
+#define NLS_MSG_INVALID_NODE_TYPE  "Invalid node type"
+
 NLS_GLOBAL FILE *nls_sys_out;
 NLS_GLOBAL FILE *nls_sys_err;
 
@@ -52,7 +55,7 @@ nls_reduce(nls_node **tree, int limit)
 	int ret;
 
 	if (limit-- <= 0) {
-		nls_error(NLS_ERRMSG_REDUCTION_TOO_DEEP);
+		nls_error(NLS_MSG_REDUCTION_TOO_DEEP);
 		return NLS_EINFREDUCE;
 	}
 	switch ((*tree)->nn_type) {
@@ -67,7 +70,7 @@ nls_reduce(nls_node **tree, int limit)
 	case NLS_TYPE_LIST:
 		return nls_list_reduce(tree, limit);
 	default:
-		NLS_BUG(NLS_BUGMSG_INVALID_NODE_TYPE);
+		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE);
 		return EINVAL; /* must not happen */
 	}
 }
@@ -143,7 +146,7 @@ nls_tree_free(nls_node *tree)
 		}
 		break;
 	default:
-		NLS_BUG(NLS_BUGMSG_INVALID_NODE_TYPE);
+		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE);
 		return;
 	}
 	nls_free(tree);
@@ -193,7 +196,7 @@ nls_tree_print(FILE *out, nls_node *tree)
 		}
 		return 0;
 	default:
-		NLS_BUG(NLS_BUGMSG_INVALID_NODE_TYPE);
+		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE);
 		return EINVAL;
 	}
 }
