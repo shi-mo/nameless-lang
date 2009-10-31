@@ -16,7 +16,6 @@ static nls_node* nls_function_new(nls_function func);
 static nls_node* nls_application_new(nls_node *func, nls_node *arg);
 static nls_node* nls_list_new(nls_node *node);
 static int nls_list_add(nls_node *list, nls_node *node);
-static int nls_list_isfull(nls_node *list);
 %}
 
 %union {
@@ -143,60 +142,40 @@ nls_application_new(nls_node *func, nls_node *arg)
  * List Management *
  *******************/
 static nls_node*
-nls_list_new(nls_node *node)
+nls_list_new(nls_node *item)
 {
-	int sz = (1 << NLS_LIST_ARRAY_EXP);
-	nls_node *ls_nd = nls_new(nls_node);
-	nls_list *list  = &(ls_nd->nn_list);
-	nls_node **ary  = nls_array_new(nls_node*, sz);
+	nls_list *list;
+	nls_node *node = nls_new(nls_node);
 
-	if (ls_nd && ary) {
-		ls_nd->nn_type = NLS_TYPE_LIST;
-		list->nl_num = 1;
-		list->nl_ary_size = sz;
-		list->nl_array = ary;
-		ary[0] = node;
-		return ls_nd;
+	if (!node) {
+		return NULL;
 	}
-	if (ary) {
-		nls_free(ary);
-	}
-	if (ls_nd) {
-		nls_free(ls_nd);
-	}
-	return NULL;
+	list = &(node->nn_list);
+	node->nn_type = NLS_TYPE_LIST;
+	list->nl_head = item;
+	list->nl_rest = NULL;
+	return node;
 }
 
 static int
-nls_list_add(nls_node *ls_nd, nls_node *node)
+nls_list_add(nls_node *node, nls_node *item)
 {
-	int new_size;
-	nls_node **ary;
-	nls_list *list = &(ls_nd->nn_list);
+	nls_list *list;
+	nls_node *new;
 
-	if (!nls_list_isfull(ls_nd)) {
-		list->nl_array[list->nl_num++] = node;
-		return 0;
+	list = &(node->nn_list);
+	if (!list->nl_head) {
+		NLS_BUG(NLS_BUGMSG_BROKEN_LIST);
+		return 1; /* dummy */
+	}
+	if (list->nl_rest) {
+		return nls_list_add(list->nl_rest, item);
 	}
 
-	new_size = (list->nl_ary_size << 1);
-	ary = nls_array_new(nls_node*, new_size);
-	if (ary) {
-		list->nl_ary_size = new_size;
-		memcpy(ary, list->nl_array,
-			(list->nl_ary_size * sizeof(nls_node*)));
-		nls_free(list->nl_array);
-		list->nl_array = ary;
-		list->nl_array[list->nl_num++] = node;
-		return 0;
+	new = nls_list_new(item);
+	if (!new) {
+		return 1;
 	}
-	return 1;
-}
-
-static int
-nls_list_isfull(nls_node *ls_nd)
-{
-	nls_list *list = &(ls_nd->nn_list);
-
-	return (list->nl_ary_size == list->nl_num);
+	list->nl_rest = new;
+	return 0;
 }

@@ -4,7 +4,7 @@
 int
 nls_func_add(nls_node *arg, nls_node **out)
 {
-	nls_node **tmp;
+	nls_node **item, *tmp;
 	nls_node *node = nls_new(nls_node);
 
 	if (!node) {
@@ -12,8 +12,8 @@ nls_func_add(nls_node *arg, nls_node **out)
 	}
 	node->nn_type = NLS_TYPE_INT;
 	node->nn_int = 0;
-	nls_list_foreach(tmp, arg) {
-		node->nn_int += (*tmp)->nn_int;
+	nls_list_foreach(arg, &item, &tmp) {
+		node->nn_int += (*item)->nn_int;
 	}
 	*out = node;
 	return 0;
@@ -22,7 +22,7 @@ nls_func_add(nls_node *arg, nls_node **out)
 int
 nls_func_sub(nls_node *arg, nls_node **out)
 {
-	nls_node **tmp;
+	nls_node **item, *tmp;
 	nls_node *node = nls_new(nls_node);
 
 	if (!node) {
@@ -30,11 +30,11 @@ nls_func_sub(nls_node *arg, nls_node **out)
 	}
 	node->nn_type = NLS_TYPE_INT;
 	node->nn_int = 0;
-	nls_list_foreach(tmp, arg) {
+	nls_list_foreach(arg, &item, &tmp) {
 		if (!node->nn_int) {
-			node->nn_int = (*tmp)->nn_int;
+			node->nn_int = (*item)->nn_int;
 		} else {
-			node->nn_int -= (*tmp)->nn_int;
+			node->nn_int -= (*item)->nn_int;
 		}
 	}
 	*out = node;
@@ -44,7 +44,7 @@ nls_func_sub(nls_node *arg, nls_node **out)
 int
 nls_func_mul(nls_node *arg, nls_node **out)
 {
-	nls_node **tmp;
+	nls_node **item, *tmp;
 	nls_node *node = nls_new(nls_node);
 
 	if (!node) {
@@ -52,11 +52,11 @@ nls_func_mul(nls_node *arg, nls_node **out)
 	}
 	node->nn_type = NLS_TYPE_INT;
 	node->nn_int = 0;
-	nls_list_foreach(tmp, arg) {
+	nls_list_foreach(arg, &item, &tmp) {
 		if (!node->nn_int) {
-			node->nn_int = (*tmp)->nn_int;
+			node->nn_int = (*item)->nn_int;
 		} else {
-			node->nn_int *= (*tmp)->nn_int;
+			node->nn_int *= (*item)->nn_int;
 		}
 	}
 	*out = node;
@@ -66,7 +66,7 @@ nls_func_mul(nls_node *arg, nls_node **out)
 int
 nls_func_div(nls_node *arg, nls_node **out)
 {
-	nls_node **tmp;
+	nls_node **item, *tmp;
 	nls_node *node = nls_new(nls_node);
 
 	if (!node) {
@@ -74,11 +74,11 @@ nls_func_div(nls_node *arg, nls_node **out)
 	}
 	node->nn_type = NLS_TYPE_INT;
 	node->nn_int = 0;
-	nls_list_foreach(tmp, arg) {
+	nls_list_foreach(arg, &item, &tmp) {
 		if (!node->nn_int) {
-			node->nn_int = (*tmp)->nn_int;
+			node->nn_int = (*item)->nn_int;
 		} else {
-			node->nn_int /= (*tmp)->nn_int;
+			node->nn_int /= (*item)->nn_int;
 		}
 	}
 	*out = node;
@@ -88,7 +88,7 @@ nls_func_div(nls_node *arg, nls_node **out)
 int
 nls_func_mod(nls_node *arg, nls_node **out)
 {
-	nls_node **tmp;
+	nls_node **item, *tmp;
 	nls_node *node = nls_new(nls_node);
 
 	if (!node) {
@@ -96,11 +96,11 @@ nls_func_mod(nls_node *arg, nls_node **out)
 	}
 	node->nn_type = NLS_TYPE_INT;
 	node->nn_int = 0;
-	nls_list_foreach(tmp, arg) {
+	nls_list_foreach(arg, &item, &tmp) {
 		if (!node->nn_int) {
-			node->nn_int = (*tmp)->nn_int;
+			node->nn_int = (*item)->nn_int;
 		} else {
-			node->nn_int %= (*tmp)->nn_int;
+			node->nn_int %= (*item)->nn_int;
 		}
 	}
 	*out = node;

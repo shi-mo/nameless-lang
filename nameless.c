@@ -11,7 +11,7 @@ NLS_GLOBAL FILE *nls_sys_err;
 static int nls_reduce(nls_node **tree, int limit);
 static int nls_list_reduce(nls_node **tree, int limit);
 static int nls_apply(nls_node **node, int limit);
-static void nls_list_item_free(nls_node *list_node);
+static void nls_list_item_free(nls_node *list);
 static void nls_tree_free(nls_node *tree);
 static int nls_tree_print(FILE *out, nls_node *tree);
 
@@ -73,13 +73,13 @@ nls_reduce(nls_node **tree, int limit)
 }
 
 static int
-nls_list_reduce(nls_node **tree, int limit)
+nls_list_reduce(nls_node **list, int limit)
 {
 	int ret;
-	nls_node **tmp;
+	nls_node **item, *tmp;
 
-	nls_list_foreach(tmp, (*tree)) {
-		ret = nls_reduce(tmp, --limit);
+	nls_list_foreach(*list, &item, &tmp) {
+		ret = nls_reduce(item, --limit);
 		if (ret) {
 			return ret;
 		}
@@ -113,14 +113,14 @@ nls_apply(nls_node **node, int limit)
 }
 
 static void
-nls_list_item_free(nls_node *list_node)
+nls_list_item_free(nls_node *node)
 {
-	nls_node **tmp;
+	nls_list *list = &(node->nn_list);
 
-	nls_list_foreach(tmp, list_node) {
-		nls_tree_free(*tmp);
+	nls_tree_free(list->nl_head);
+	if (list->nl_rest) {
+		nls_tree_free(list->nl_rest);
 	}
-	nls_free(list_node->nn_list.nl_array);
 }
 
 static void
@@ -175,17 +175,17 @@ nls_tree_print(FILE *out, nls_node *tree)
 	case NLS_TYPE_LIST:
 		{
 			int first = 1;
-			nls_node **tmp;
+			nls_node **item, *tmp;
 
 			fprintf(out, "[");
-			nls_list_foreach(tmp, tree) {
+			nls_list_foreach(tree, &item, &tmp) {
 				if (!first) {
 					fprintf(out, " ");
 				}
 				if (first) {
 					first = 0;
 				}
-				if ((ret = nls_tree_print(out, *tmp))) {
+				if ((ret = nls_tree_print(out, *item))) {
 					return ret;
 				}
 			}

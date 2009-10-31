@@ -10,7 +10,6 @@
 #define NLS_GLOBAL /* empty */
 
 /* Constant */
-#define NLS_LIST_ARRAY_EXP  8
 #define NLS_REDUCTION_LIMIT 10000
 
 /* Error Code */
@@ -22,8 +21,9 @@
 	"Memory leak detected: mem=%p ptr=%p ref=%d size=%d"
 
 /* BUG Message */
-#define NLS_BUGMSG_INVALID_NODE_TYPE  "Invalid node type."
-#define NLS_BUGMSG_BROKEN_MEMCHAIN    "Broken memchain."
+#define NLS_BUGMSG_INVALID_NODE_TYPE "Invalid node type."
+#define NLS_BUGMSG_BROKEN_LIST       "Broken list."
+#define NLS_BUGMSG_BROKEN_MEMCHAIN   "Broken memchain."
 #define NLS_BUGMSG_ILLEGAL_MEMCHAIN_OPERATION "Illegal memchain operation."
 #define NLS_BUGFMT_ILLEGAL_ALLOCNT \
 	"Illegal alloc count: alloc=%d free=%d"
@@ -52,12 +52,18 @@
 		exit(1); \
 	} while(0)
 
-/* List Management */
-#define nls_list_foreach(tmp, list_node) \
-	for ((tmp) = ((list_node)->nn_list.nl_array); \
-		((tmp) != (((list_node)->nn_list.nl_array) \
-		 + ((list_node)->nn_list.nl_num))); \
-		(tmp)++) \
+/*
+ * @see nls_list_reduce()
+ */
+#define nls_list_foreach(list, item, tmp) \
+	for ( \
+		(*(item)) = &((list)->nn_list.nl_head), \
+			(*(tmp)) = (list)->nn_list.nl_rest; \
+		(*(item)); \
+		(*(item)) = ((*(tmp)) ? &((*(tmp))->nn_list.nl_head) : NULL), \
+			(*(tmp)) = ((*(tmp)) ? \
+				(*(tmp))->nn_list.nl_rest : NULL) \
+	) \
 
 /********************
  * GLOBAL VARIABLES *

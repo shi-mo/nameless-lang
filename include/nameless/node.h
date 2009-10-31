@@ -15,9 +15,8 @@ typedef struct _nls_application {
 } nls_application;
 
 typedef struct _nls_list {
-	int nl_num;
-	int nl_ary_size;
-	struct _nls_node **nl_array;
+	struct _nls_node *nl_head;
+	struct _nls_node *nl_rest;
 } nls_list;
 
 typedef int (*nls_function)(struct _nls_node*, struct _nls_node**);
