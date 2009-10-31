@@ -32,10 +32,10 @@ nls_main(FILE *in, FILE *out, FILE *err)
 
 	nls_mem_chain_init();
 	ret = yyparse();
-	if (ret || !nls_sys_parse_result) {
+	tree = nls_sys_parse_result;
+	if (ret || !tree) {
 		goto free_exit;
 	}
-	tree = nls_sys_parse_result;
 	ret = nls_reduce(&tree, NLS_REDUCTION_LIMIT);
 	nls_tree_print(nls_sys_out, tree);
 	fprintf(out, "\n");
