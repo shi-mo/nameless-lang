@@ -9,12 +9,6 @@
  **********/
 #define NLS_GLOBAL /* empty */
 
-/* Constant */
-#define NLS_REDUCTION_LIMIT 10000
-
-/* Error Code */
-#define NLS_EINFREDUCE EMLINK
-
 /* Output */
 #define NLS_WARN(fmt, ...) \
 	fprintf(nls_sys_err, "Warning:%s:%d: " fmt "\n", \
@@ -57,6 +51,7 @@ extern FILE *nls_sys_err;
  * PROTOTYPES *
  **************/
 int nls_main(FILE *in, FILE *out, FILE *err);
+int nls_reduce(nls_node **tree);
 nls_node* nls_int_new(int val);
 
 #endif /* _NAMELESS_H_ */

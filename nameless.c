@@ -11,9 +11,8 @@
 NLS_GLOBAL FILE *nls_sys_out;
 NLS_GLOBAL FILE *nls_sys_err;
 
-static int nls_reduce(nls_node **tree, int limit);
-static int nls_list_reduce(nls_node **tree, int limit);
-static int nls_apply(nls_node **node, int limit);
+static int nls_list_reduce(nls_node **tree);
+static int nls_apply(nls_node **node);
 static void nls_list_item_free(nls_node *list);
 static void nls_tree_free(nls_node *tree);
 static void nls_string_free(nls_string *str);
@@ -37,7 +36,7 @@ nls_main(FILE *in, FILE *out, FILE *err)
 	if (ret || !tree) {
 		goto free_exit;
 	}
-	ret = nls_reduce(&tree, NLS_REDUCTION_LIMIT);
+	ret = nls_reduce(&tree);
 	nls_list_foreach(tree, &item, &tmp) {
 		nls_tree_print(nls_sys_out, *item);
 		fprintf(out, "\n");
@@ -53,27 +52,23 @@ free_exit:
 /*
  * Recursively do application
  */
-static int
-nls_reduce(nls_node **tree, int limit)
+int
+nls_reduce(nls_node **tree)
 {
 	int ret;
 
-	if (limit-- <= 0) {
-		NLS_ERROR(NLS_MSG_REDUCTION_TOO_DEEP);
-		return NLS_EINFREDUCE;
-	}
 	switch ((*tree)->nn_type) {
 	case NLS_TYPE_INT:
 	case NLS_TYPE_VAR:
 	case NLS_TYPE_FUNCTION:
 		return 0;
 	case NLS_TYPE_APPLICATION:
-		if ((ret = nls_apply(tree, limit))) {
+		if ((ret = nls_apply(tree))) {
 			return ret;
 		}
-		return nls_reduce(tree, limit);
+		return nls_reduce(tree);
 	case NLS_TYPE_LIST:
-		return nls_list_reduce(tree, limit);
+		return nls_list_reduce(tree);
 	default:
 		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE);
 		return EINVAL; /* must not happen */
@@ -81,13 +76,13 @@ nls_reduce(nls_node **tree, int limit)
 }
 
 static int
-nls_list_reduce(nls_node **list, int limit)
+nls_list_reduce(nls_node **list)
 {
 	int ret;
 	nls_node **item, *tmp;
 
 	nls_list_foreach(*list, &item, &tmp) {
-		ret = nls_reduce(item, --limit);
+		ret = nls_reduce(item);
 		if (ret) {
 			return ret;
 		}
@@ -100,7 +95,7 @@ nls_list_reduce(nls_node **list, int limit)
  * 	   negative	: error code
  */
 static int
-nls_apply(nls_node **node, int limit)
+nls_apply(nls_node **node)
 {
 	int ret;
 	nls_node *tmp;
@@ -109,9 +104,6 @@ nls_apply(nls_node **node, int limit)
 	nls_function func = app->na_func->nn_func;
 	nls_node **arg = &app->na_arg;
 
-	if ((ret = nls_reduce(arg, --limit))) {
-		return ret;
-	}
 	if ((ret = (func)(*arg, &tmp))) {
 		return ret;
 	}

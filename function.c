@@ -56,23 +56,29 @@ _nls_int2_func(nls_node *args, nls_int2_op op, nls_node **out)
 {
 	int i;
 	int ret;
-	nls_node *arg1, *arg2;
+	nls_node **arg1, **arg2;
 	nls_node **item, *tmp;
 
 	i = 0;
 	nls_list_foreach(args, &item, &tmp) {
 		switch (++i) {
 		case 1:
-			arg1 = *item;
+			arg1 = item;
 			break;
 		case 2:
-			arg2 = *item;
+			arg2 = item;
 			break;
 		default:
 			goto err_exit;
 		}
 	}
-	if ((ret = __nls_int2_func(arg1, arg2, op, out))) {
+	if ((ret = nls_reduce(arg1))) {
+		return ret;
+	}
+	if ((ret = nls_reduce(arg2))) {
+		return ret;
+	}
+	if ((ret = __nls_int2_func(*arg1, *arg2, op, out))) {
 		return ret;
 	}
 	return 0;
