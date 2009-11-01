@@ -36,7 +36,7 @@ typedef struct _nls_mem {
 	uint32_t nm_magic;
 	int nm_ref;
 	size_t nm_size;
-	char *nm_type;
+	const char *nm_type;
 } nls_mem;
 
 /**************
