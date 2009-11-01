@@ -84,6 +84,27 @@ _nls_malloc(size_t size, const char *type)
 	return ++mem;
 }
 
+#ifdef NLS_UNIT_TEST
+static void
+test_nls_new(void)
+{
+	nls_mem *mem;
+	nls_node *node;
+
+	nls_mem_chain_init();
+	node = nls_new(nls_node);
+	mem = (nls_mem*)node - 1;
+
+	NLS_ASSERT_EQUALS(&nls_mem_chain, mem->nm_prev);
+	NLS_ASSERT_EQUALS(&nls_mem_chain, mem->nm_next);
+	NLS_ASSERT_EQUALS(mem, nls_mem_chain.nm_prev);
+	NLS_ASSERT_EQUALS(mem, nls_mem_chain.nm_next);
+
+	nls_free(node);
+	nls_mem_chain_term();
+}
+#endif /* NLS_UNIT_TEST */
+
 void
 nls_free(void *ptr)
 {

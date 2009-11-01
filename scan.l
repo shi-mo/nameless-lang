@@ -98,18 +98,8 @@ nls_strnlen_hash(char *str, size_t n, int *hashp)
 }
 
 #ifdef NLS_UNIT_TEST
-
-#define NLS_ASSERT_EQUALS(expected, actual) \
-	do { \
-		if ((expected) != (actual)) { \
-			NLS_ERROR("Assertion failure"); \
-			exit(1); \
-		} \
-		fprintf(stdout, "."); \
-	} while (0)
-
 static void 
-test_nls_strnlen_hash_when_empty()
+test_nls_strnlen_hash_when_empty(void)
 {
 	int hash;
 	int len = nls_strnlen_hash("", 10, &hash);
@@ -119,7 +109,7 @@ test_nls_strnlen_hash_when_empty()
 }
 
 static void
-test_nls_strnlen_hash_when_length1()
+test_nls_strnlen_hash_when_length1(void)
 {
 	int hash;
 	int len = nls_strnlen_hash("x", 10, &hash);
@@ -129,7 +119,7 @@ test_nls_strnlen_hash_when_length1()
 }
 
 static void
-test_nls_strnlen_hash_when_normal()
+test_nls_strnlen_hash_when_normal(void)
 {
 	int hash, hash1, hash2;
 	int len  = nls_strnlen_hash("abc", 10, &hash);
@@ -141,7 +131,7 @@ test_nls_strnlen_hash_when_normal()
 }
 
 static void
-test_nls_strnlen_hash_when_over_limit()
+test_nls_strnlen_hash_when_over_limit(void)
 {
 	int hash1, hash2;
 	int len1 = nls_strnlen_hash("ABCDEF", 5, &hash1);
@@ -153,26 +143,13 @@ test_nls_strnlen_hash_when_over_limit()
 }
 
 static void
-test_nls_strnlen_hash_when_limit_zero()
+test_nls_strnlen_hash_when_limit_zero(void)
 {
 	int hash;
 	int len = nls_strnlen_hash("x", 0, &hash);
 
 	NLS_ASSERT_EQUALS(0, len);
 	NLS_ASSERT_EQUALS(0, hash);
-}
-
-int
-main(int argc, char *argv[])
-{
-	test_nls_strnlen_hash_when_empty();
-	test_nls_strnlen_hash_when_length1();
-	test_nls_strnlen_hash_when_normal();
-	test_nls_strnlen_hash_when_over_limit();
-	test_nls_strnlen_hash_when_limit_zero();
-
-	fprintf(stdout, "\n");
-	return 0;
 }
 #endif /* NLS_UNIT_TEST */
 

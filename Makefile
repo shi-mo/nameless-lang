@@ -1,5 +1,6 @@
 INCDIR    = include
 TESTDIR   = test
+UTDIR     = ut
 EXPECTDIR = expect
 ACTUALDIR = actual
 OBJDIR    = obj
@@ -8,6 +9,8 @@ SRCS    = main.c nameless.c mm.c function.c
 HEADERS = $(wildcard $(INCDIR)/*.h) $(wildcard $(INCDIR)/**/*.h)
 TESTS   = $(wildcard $(TESTDIR)/*.nls)
 EXPECTS = $(patsubst $(TESTDIR)/%.nls,$(EXPECTDIR)/%.expect,$(TESTS))
+UTSRCS  = lex.yy.c mm.c
+UTBINS  = $(patsubst %.c,$(UTDIR)/%.bin,$(UTSRCS))
 
 GENERATED = lex.yy.c y.tab.c y.tab.h
 OBJS  = $(OBJDIR)/y.tab.o $(OBJDIR)/lex.yy.o
@@ -28,7 +31,7 @@ codegen: $(GENERATED)
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJDIR) $(GENERATED) $(ACTUALDIR)
+	rm -rf $(OBJDIR) $(GENERATED) $(ACTUALDIR) $(UTDIR)
 	find -name '*~' -exec rm {} \;
 
 .PHONY: clobber
@@ -55,6 +58,13 @@ test: $(EXEC) $(TESTS) $(EXPECTS) $(ACTUALDIR)
 			echo "Test result mismatch."; \
 			break; \
 		fi; \
+	done
+
+.PHONY: unittest
+unittest: $(UTBINS)
+	@for UT in $^; do \
+		echo "==== `basename $$UT .bin`.c"; \
+		./$$UT; \
 	done
 
 $(EXEC): $(OBJS)
@@ -85,4 +95,15 @@ lex.yy.c: scan.l y.tab.h $(HEADERS)
 	$(LEX) $<
 
 $(ACTUALDIR):
-	@mkdir -p $(ACTUALDIR)
+	mkdir -p $(ACTUALDIR)
+
+$(UTDIR)/%.c: %.c $(UTDIR)
+	sh scripts/utgen.sh $< > $@
+
+$(UTDIR):
+	mkdir -p $(UTDIR)
+
+$(UTDIR)/%.bin: $(UTDIR)/%.c $(OBJS)
+	@DEP=`ls $^ | sed 's/ /\n/g' | grep -v main.o | grep -v \`basename $< .c\`.o | tr '\r\n' ' '`; \
+	echo "$(CC) -DNLS_UNIT_TEST $(CFLAGS) -o $@ $$DEP"; \
+	$(CC) -DNLS_UNIT_TEST $(CFLAGS) -o $@ $$DEP

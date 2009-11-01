@@ -28,6 +28,16 @@
 		exit(1); \
 	} while(0)
 
+/* Testing */
+#define NLS_ASSERT_EQUALS(expected, actual) \
+	do { \
+		if ((expected) != (actual)) { \
+			NLS_ERROR("Assertion failure"); \
+			exit(1); \
+		} \
+		fprintf(stdout, "."); \
+	} while (0)
+
 /*
  * @see nls_list_reduce()
  */
