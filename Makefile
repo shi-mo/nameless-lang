@@ -1,9 +1,14 @@
-INCDIR  = include
-TESTDIR = test
-OBJDIR  = obj
+INCDIR    = include
+TESTDIR   = test
+EXPECTDIR = expect
+ACTUALDIR = actual
+OBJDIR    = obj
 
 SRCS    = main.c nameless.c mm.c function.c
 HEADERS = $(wildcard $(INCDIR)/*.h) $(wildcard $(INCDIR)/**/*.h)
+TESTS   = $(wildcard $(TESTDIR)/*.nls)
+EXPECTS = $(patsubst $(TESTDIR)/%.nls,$(EXPECTDIR)/%.expect,$(TESTS))
+
 GENERATED = lex.yy.c y.tab.c y.tab.h
 OBJS  = $(OBJDIR)/y.tab.o $(OBJDIR)/lex.yy.o
 OBJS += $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
@@ -23,7 +28,7 @@ codegen: $(GENERATED)
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJDIR) $(GENERATED)
+	rm -rf $(OBJDIR) $(GENERATED) $(ACTUALDIR)
 	find -name '*~' -exec rm {} \;
 
 .PHONY: clobber
@@ -31,16 +36,23 @@ clobber: clean
 	rm -f $(EXEC)
 
 .PHONY: test
-test: $(EXEC)
+test: $(EXEC) $(TESTS) $(EXPECTS) $(ACTUALDIR)
 	@for T in $(TESTDIR)/*.nls; do \
+		NAME=`basename $$T .nls`; \
 		echo "==== `basename $$T`"; \
-		./$(EXEC) < $$T; \
+		./$(EXEC) < $$T > $(ACTUALDIR)/$$NAME.actual; \
 		STATUS=$$?; \
 		if [ 0 -ne $$STATUS ]; then \
-			echo "exit status:$$STATUS"; \
+			echo "Exit status: $$STATUS"; \
 			echo "--------"; \
 			cat $$T; \
 			echo "--------"; \
+			break; \
+		fi; \
+		diff $(EXPECTDIR)/$$NAME.expect $(ACTUALDIR)/$$NAME.actual; \
+		STATUS=$$?; \
+		if [ 0 -ne $$STATUS ]; then \
+			echo "Test result mismatch."; \
 			break; \
 		fi; \
 	done
@@ -71,3 +83,6 @@ y.tab.h: y.tab.c
 
 lex.yy.c: scan.l y.tab.h $(HEADERS)
 	$(LEX) $<
+
+$(ACTUALDIR):
+	@mkdir -p $(ACTUALDIR)

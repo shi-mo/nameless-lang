@@ -2,5 +2,6 @@
 /lex.yy.c
 /nameless
 /y.tab.?
+/actual
 /obj
 *~
