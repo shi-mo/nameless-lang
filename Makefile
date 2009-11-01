@@ -38,6 +38,9 @@ clean:
 clobber: clean
 	rm -f $(EXEC)
 
+.PHONY: testall
+testall: test unittest
+
 .PHONY: test
 test: $(EXEC) $(TESTS) $(EXPECTS) $(ACTUALDIR)
 	@for T in $(TESTDIR)/*.nls; do \
