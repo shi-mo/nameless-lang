@@ -13,7 +13,6 @@
 NLS_GLOBAL nls_node *nls_sys_parse_result;
 
 static int yyerror(char *msg);
-static nls_node* nls_int_new(int val);
 static nls_node* nls_var_new(nls_string *name);
 static nls_node* nls_function_new(nls_function func);
 static nls_node* nls_application_new(nls_node *func, nls_node *arg);
@@ -96,18 +95,7 @@ space	: tSPACE
 
 %%
 
-static int
-yyerror(char *msg)
-{
-	NLS_ERROR("%s", msg);
-
-	return 0;
-}
-
-/*********************
- * Memory Management *
- *********************/
-static nls_node*
+nls_node*
 nls_int_new(int val)
 {
 	nls_node *node = nls_new(nls_node);
@@ -120,6 +108,17 @@ nls_int_new(int val)
 	return node;
 }
 
+static int
+yyerror(char *msg)
+{
+	NLS_ERROR("%s", msg);
+
+	return 0;
+}
+
+/*********************
+ * Memory Management *
+ *********************/
 static nls_node*
 nls_var_new(nls_string *name)
 {

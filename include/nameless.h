@@ -57,5 +57,6 @@ extern FILE *nls_sys_err;
  * PROTOTYPES *
  **************/
 int nls_main(FILE *in, FILE *out, FILE *err);
+nls_node* nls_int_new(int val);
 
 #endif /* _NAMELESS_H_ */
