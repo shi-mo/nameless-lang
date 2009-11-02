@@ -4,20 +4,22 @@ UTDIR     = ut
 EXPECTDIR = expect
 ACTUALDIR = actual
 OBJDIR    = obj
+DOCDIR    = doc
 
-SRCS    = main.c nameless.c mm.c node.c function.c
-HEADERS = $(wildcard $(INCDIR)/*.h) $(wildcard $(INCDIR)/**/*.h)
-TESTS   = $(wildcard $(TESTDIR)/*.nls)
-EXPECTS = $(patsubst $(TESTDIR)/%.nls,$(EXPECTDIR)/%.expect,$(TESTS))
-UTSRCS  = lex.yy.c mm.c
-UTBINS  = $(patsubst %.c,$(UTDIR)/%.bin,$(UTSRCS))
+SRCS     = main.c nameless.c mm.c node.c function.c
+HEADERS  = $(wildcard $(INCDIR)/*.h) $(wildcard $(INCDIR)/**/*.h)
+TESTS    = $(wildcard $(TESTDIR)/*.nls)
+EXPECTS  = $(patsubst $(TESTDIR)/%.nls,$(EXPECTDIR)/%.expect,$(TESTS))
+UTSRCS   = lex.yy.c mm.c
+UTBINS   = $(patsubst %.c,$(UTDIR)/%.bin,$(UTSRCS))
+DOXYFILE = Doxyfile
 
 GENERATED = lex.yy.c y.tab.c y.tab.h
 OBJS  = $(OBJDIR)/y.tab.o $(OBJDIR)/lex.yy.o
 OBJS += $(patsubst %.c,$(OBJDIR)/%.o,$(SRCS))
 EXEC  = nameless
 
-YACC = yacc -d
+YACC   = yacc -d
 CC     = gcc
 CFLAGS = -Wall -g -I$(INCDIR) -I.
 #CFLAGS += -E
@@ -33,7 +35,7 @@ codegen: $(GENERATED)
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJDIR) $(GENERATED) $(ACTUALDIR) $(UTDIR)
+	rm -rf $(OBJDIR) $(GENERATED) $(ACTUALDIR) $(UTDIR) $(DOCDIR)
 	find -name '*~' -exec rm {} \;
 
 .PHONY: clobber
@@ -76,6 +78,9 @@ unittest: $(UTBINS)
 			break; \
 		fi; \
 	done
+
+$(DOCDIR): $(SRCS) $(HEADERS)
+	doxygen $(DOXYFILE)
 
 $(EXEC): $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $^
