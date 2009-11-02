@@ -90,7 +90,7 @@ nls_strnlen_hash(char *str, size_t n, int *hashp)
 		if ('\0' == *str) {
 			break;
 		}
-		hash += *str % NLS_HASH_WIDTH;
+		hash += *str;
 		hash %= NLS_HASH_WIDTH;
 	}
 	*hashp = hash;
