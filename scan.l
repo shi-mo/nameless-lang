@@ -143,6 +143,17 @@ test_nls_strnlen_hash_when_over_limit(void)
 }
 
 static void
+test_nls_strnlen_hash_when_long(void)
+{
+	int hash1, hash2, hash3;
+	nls_strnlen_hash("WXYZabcDEFqpo", 30, &hash1);
+	nls_strnlen_hash("WXYZ",          30, &hash2);
+	nls_strnlen_hash("abcDEFqpo",     30, &hash3);
+
+	NLS_ASSERT_EQUALS(hash1, (hash2 + hash3) % NLS_HASH_WIDTH);
+}
+
+static void
 test_nls_strnlen_hash_when_limit_zero(void)
 {
 	int hash;
