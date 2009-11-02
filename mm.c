@@ -92,15 +92,20 @@ test_nls_new(void)
 	nls_node *node;
 
 	nls_mem_chain_init();
+	NLS_ASSERT_EQUALS(&nls_mem_chain, nls_mem_chain.nm_prev);
+	NLS_ASSERT_EQUALS(&nls_mem_chain, nls_mem_chain.nm_next);
+
 	node = nls_new(nls_node);
 	mem = (nls_mem*)node - 1;
-
 	NLS_ASSERT_EQUALS(&nls_mem_chain, mem->nm_prev);
 	NLS_ASSERT_EQUALS(&nls_mem_chain, mem->nm_next);
 	NLS_ASSERT_EQUALS(mem, nls_mem_chain.nm_prev);
 	NLS_ASSERT_EQUALS(mem, nls_mem_chain.nm_next);
 
 	nls_free(node);
+	NLS_ASSERT_EQUALS(&nls_mem_chain, nls_mem_chain.nm_prev);
+	NLS_ASSERT_EQUALS(&nls_mem_chain, nls_mem_chain.nm_next);
+
 	nls_mem_chain_term();
 }
 #endif /* NLS_UNIT_TEST */
