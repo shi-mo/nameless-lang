@@ -102,7 +102,7 @@ static void
 test_nls_strnlen_hash_when_empty(void)
 {
 	int hash;
-	int len = nls_strnlen_hash("", 10, &hash);
+	size_t len = nls_strnlen_hash("", 10, &hash);
 
 	NLS_ASSERT_EQUALS(0, len);
 	NLS_ASSERT_EQUALS(0, hash);
@@ -112,7 +112,7 @@ static void
 test_nls_strnlen_hash_when_length1(void)
 {
 	int hash;
-	int len = nls_strnlen_hash("x", 10, &hash);
+	size_t len = nls_strnlen_hash("x", 10, &hash);
 
 	NLS_ASSERT_EQUALS(1, len);
 	NLS_ASSERT_EQUALS(('x' % NLS_HASH_WIDTH), hash);
@@ -122,7 +122,7 @@ static void
 test_nls_strnlen_hash_when_normal(void)
 {
 	int hash, hash1, hash2;
-	int len  = nls_strnlen_hash("abc", 10, &hash);
+	size_t len  = nls_strnlen_hash("abc", 10, &hash);
 	nls_strnlen_hash("a",   10, &hash1);
 	nls_strnlen_hash("bc",  10, &hash2);
 
@@ -134,8 +134,8 @@ static void
 test_nls_strnlen_hash_when_over_limit(void)
 {
 	int hash1, hash2;
-	int len1 = nls_strnlen_hash("ABCDEF", 5, &hash1);
-	int len2 = nls_strnlen_hash("ABCDE",  5, &hash2);
+	size_t len1 = nls_strnlen_hash("ABCDEF", 5, &hash1);
+	size_t len2 = nls_strnlen_hash("ABCDE",  5, &hash2);
 
 	NLS_ASSERT_EQUALS(5, len1);
 	NLS_ASSERT_EQUALS(5, len2);
@@ -157,7 +157,7 @@ static void
 test_nls_strnlen_hash_when_limit_zero(void)
 {
 	int hash;
-	int len = nls_strnlen_hash("x", 0, &hash);
+	size_t len = nls_strnlen_hash("x", 0, &hash);
 
 	NLS_ASSERT_EQUALS(0, len);
 	NLS_ASSERT_EQUALS(0, hash);
