@@ -4,9 +4,6 @@
 #include <stdio.h>
 #include "nameless/node.h"
 
-/**********
- * MACROS *
- **********/
 #define NLS_GLOBAL /* empty */
 
 /* Output */
@@ -64,17 +61,10 @@
 				(*(tmp))->nn_list.nl_rest : NULL) \
 	) \
 
-/********************
- * GLOBAL VARIABLES *
- ********************/
 extern FILE *nls_sys_out;
 extern FILE *nls_sys_err;
 
-/**************
- * PROTOTYPES *
- **************/
 int nls_main(FILE *in, FILE *out, FILE *err);
 int nls_reduce(nls_node **tree);
-nls_node* nls_int_new(int val);
 
 #endif /* _NAMELESS_H_ */

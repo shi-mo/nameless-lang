@@ -5,7 +5,7 @@ EXPECTDIR = expect
 ACTUALDIR = actual
 OBJDIR    = obj
 
-SRCS    = main.c nameless.c mm.c function.c
+SRCS    = main.c nameless.c mm.c node.c function.c
 HEADERS = $(wildcard $(INCDIR)/*.h) $(wildcard $(INCDIR)/**/*.h)
 TESTS   = $(wildcard $(TESTDIR)/*.nls)
 EXPECTS = $(patsubst $(TESTDIR)/%.nls,$(EXPECTDIR)/%.expect,$(TESTS))

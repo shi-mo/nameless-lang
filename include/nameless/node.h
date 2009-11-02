@@ -49,4 +49,11 @@ typedef struct _nls_node {
 #define nn_func nn_u.nnu_func
 #define nn_app  nn_u.nnu_app
 
+nls_node* nls_int_new(int val);
+nls_node* nls_var_new(nls_string *name);
+nls_node* nls_function_new(nls_function func);
+nls_node* nls_application_new(nls_node *func, nls_node *arg);
+nls_node* nls_list_new(nls_node *node);
+int nls_list_add(nls_node *list, nls_node *node);
+
 #endif /* _NAMELESS_NODE_H_ */
