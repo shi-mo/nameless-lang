@@ -23,6 +23,8 @@ CFLAGS = -Wall -g -I$(INCDIR) -I.
 #CFLAGS += -E
 #CFLAGS += -DYYDEBUG=1
 
+.PRECIOUS: $(patsubst %.c,$(UTDIR)/%.c,$(UTSRCS))
+
 .PHONY: all
 all: $(EXEC)
 
