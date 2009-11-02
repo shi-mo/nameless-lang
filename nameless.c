@@ -49,8 +49,11 @@ free_exit:
 	return ret;
 }
 
-/*
- * Recursively do application
+/**
+ * [DESTRUCTIVE] Recursively do application.
+ * @param  tree Target syntax tree.
+ * @retval 0    Application succeed.
+ * @retval else Error code.
  */
 int
 nls_reduce(nls_node **tree)
