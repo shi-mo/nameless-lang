@@ -119,10 +119,53 @@ test_nls_strnlen_hash_when_length1(void)
 }
 
 static void
+test_nls_strnlen_hash_differ(void)
+{
+	int hash1, hash2;
+
+	nls_strnlen_hash("a", 10, &hash1);
+	nls_strnlen_hash("b", 10, &hash2);
+	NLS_ASSERT_NOT_EQUALS(hash1, hash2);
+
+	nls_strnlen_hash("a", 10, &hash1);
+	nls_strnlen_hash("c", 10, &hash2);
+	NLS_ASSERT_NOT_EQUALS(hash1, hash2);
+
+	nls_strnlen_hash("a", 10, &hash1);
+	nls_strnlen_hash("A", 10, &hash2);
+	NLS_ASSERT_NOT_EQUALS(hash1, hash2);
+
+	nls_strnlen_hash("m", 10, &hash1);
+	nls_strnlen_hash("n", 10, &hash2);
+	NLS_ASSERT_NOT_EQUALS(hash1, hash2);
+
+	nls_strnlen_hash("m", 10, &hash1);
+	nls_strnlen_hash("o", 10, &hash2);
+	NLS_ASSERT_NOT_EQUALS(hash1, hash2);
+
+	nls_strnlen_hash("m", 10, &hash1);
+	nls_strnlen_hash("M", 10, &hash2);
+	NLS_ASSERT_NOT_EQUALS(hash1, hash2);
+
+	nls_strnlen_hash("x", 10, &hash1);
+	nls_strnlen_hash("y", 10, &hash2);
+	NLS_ASSERT_NOT_EQUALS(hash1, hash2);
+
+	nls_strnlen_hash("x", 10, &hash1);
+	nls_strnlen_hash("z", 10, &hash2);
+	NLS_ASSERT_NOT_EQUALS(hash1, hash2);
+
+	nls_strnlen_hash("x", 10, &hash1);
+	nls_strnlen_hash("X", 10, &hash2);
+	NLS_ASSERT_NOT_EQUALS(hash1, hash2);
+}
+
+static void
 test_nls_strnlen_hash_when_normal(void)
 {
 	int hash, hash1, hash2;
 	size_t len  = nls_strnlen_hash("abc", 10, &hash);
+
 	nls_strnlen_hash("a",   10, &hash1);
 	nls_strnlen_hash("bc",  10, &hash2);
 
@@ -146,6 +189,7 @@ static void
 test_nls_strnlen_hash_when_long(void)
 {
 	int hash1, hash2, hash3;
+
 	nls_strnlen_hash("WXYZabcDEFqpo", 30, &hash1);
 	nls_strnlen_hash("WXYZ",          30, &hash2);
 	nls_strnlen_hash("abcDEFqpo",     30, &hash3);
