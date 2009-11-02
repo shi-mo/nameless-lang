@@ -70,6 +70,11 @@ unittest: $(UTBINS)
 	@for UT in $^; do \
 		echo "==== `basename $$UT .bin`.c"; \
 		./$$UT; \
+		STATUS=$$?; \
+		if [ 0 -ne $$STATUS ]; then \
+			echo "Exit status: $$STATUS"; \
+			break; \
+		fi; \
 	done
 
 $(EXEC): $(OBJS)
