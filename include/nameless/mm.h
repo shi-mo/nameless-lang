@@ -5,9 +5,6 @@
 #include <stdint.h>
 #include "nameless.h"
 
-/**********
- * MACROS *
- **********/
 #define NLS_MAGIC_MEMCHUNK         0x23153e3c /* NMlS_MeMc */
 #define NLS_MAGIC_MEMCHAIN_REMOVED 0x23153c20 /* NMlS_McNO */
 
@@ -15,10 +12,7 @@
 #define nls_array_new(type, n) \
 	((type*)_nls_malloc((sizeof(type) * (n)), "array:" #type))
 
-/*********
- * TYPES *
- *********/
-/*
+/**
  * Structure leading dynamic data area.
  *
  *  +----------------+ <-- malloc() result
@@ -39,9 +33,6 @@ typedef struct _nls_mem {
 	const char *nm_type;
 } nls_mem;
 
-/**************
- * PROTOTYPES *
- **************/
 int  nls_mem_chain_init(void);
 void nls_mem_chain_term(void);
 void* _nls_malloc(size_t size, const char *type);
