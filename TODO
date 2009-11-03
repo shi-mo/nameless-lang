@@ -2,8 +2,8 @@ TODO LIST
 ---------
 
 [Functionality]
-  nls_grab(reference count)
   GC
+  *done* nls_grab(reference count)
   *done* leak check
 
 [Refactoring]

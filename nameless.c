@@ -32,7 +32,7 @@ nls_main(FILE *in, FILE *out, FILE *err)
 
 	nls_mem_chain_init();
 	ret = yyparse();
-	tree = nls_sys_parse_result;
+	tree = nls_sys_parse_result; /* pointer grabbed in yyparse(). */
 	if (ret || !tree) {
 		goto free_exit;
 	}
@@ -110,6 +110,7 @@ nls_apply(nls_node **node)
 	if ((ret = (func)(*arg, &tmp))) {
 		return ret;
 	}
+	tmp = nls_grab(tmp);
 	nls_tree_free(*node);
 	*node = tmp;
 	return 0;

@@ -76,7 +76,7 @@ nls_string_new(char *from)
 	buf[len] = '\0';
 	str->ns_len  = len;
 	str->ns_hash = hash;
-	str->ns_bufp = buf;
+	str->ns_bufp = nls_grab(buf);
 	return str;
 }
 

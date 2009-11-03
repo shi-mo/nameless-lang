@@ -26,7 +26,7 @@ nls_var_new(nls_string *name)
 		return NULL;
 	}
 	node->nn_type = NLS_TYPE_VAR;
-	node->nn_var.nv_name = name;
+	node->nn_var.nv_name = nls_grab(name);
 	return node;
 }
 
@@ -54,8 +54,8 @@ nls_application_new(nls_node *func, nls_node *arg)
 	}
 	node->nn_type = NLS_TYPE_APPLICATION;
 	app = &(node->nn_app);
-	app->na_func = func;
-	app->na_arg  = arg;
+	app->na_func = nls_grab(func);
+	app->na_arg  = nls_grab(arg);
 	return node;
 }
 
@@ -70,7 +70,7 @@ nls_list_new(nls_node *item)
 	}
 	list = &(node->nn_list);
 	node->nn_type = NLS_TYPE_LIST;
-	list->nl_head = item;
+	list->nl_head = nls_grab(item);
 	list->nl_rest = NULL;
 	return node;
 }
@@ -94,6 +94,6 @@ nls_list_add(nls_node *node, nls_node *item)
 	if (!new) {
 		return 1;
 	}
-	list->nl_rest = new;
+	list->nl_rest = nls_grab(new);
 	return 0;
 }

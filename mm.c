@@ -7,6 +7,7 @@
 #define NLS_MSG_ILLEGAL_ALLOCCNT "Illegal alloc count"
 #define NLS_MSG_INVALID_REFCOUNT "Invalid reference count"
 #define NLS_MSG_ILLEGAL_MEMCHAIN_OPERATION "Illegal memchain operation"
+#define NLS_MSG_GRAB_NULL "Grabbing NULL pointer"
 
 #define nls_mem_chain_foreach_safe(item, tmp) \
 	for (*(item) = nls_mem_chain.nm_next, \
@@ -60,6 +61,48 @@ nls_mem_chain_term(void)
 	}
 }
 
+void*
+nls_grab(void *ptr)
+{
+	nls_mem *mem;
+
+	if (!ptr) {
+		NLS_BUG(NLS_MSG_GRAB_NULL);
+		return NULL;
+	}
+	mem = (nls_mem*)(ptr - sizeof(nls_mem));
+	mem->nm_ref++;
+	return ptr;
+}
+
+#ifdef NLS_UNIT_TEST
+static void
+test_nls_grab(void)
+{
+	nls_mem *mem;
+	nls_node *np1, *np2, *np3;
+
+	nls_mem_chain_init();
+
+	np1 = nls_new(nls_node);
+	mem = (nls_mem*)np1 - 1;
+	NLS_ASSERT_EQUALS(0, mem->nm_ref);
+
+	np2 = nls_grab(np1);
+	NLS_ASSERT_EQUALS(np1, np2);
+	NLS_ASSERT_EQUALS(1, mem->nm_ref);
+
+	np3 = nls_grab(np1);
+	NLS_ASSERT_EQUALS(2, mem->nm_ref);
+	nls_free(np3);
+	NLS_ASSERT_EQUALS(1, mem->nm_ref);
+
+	nls_free(np2); /* free() is called. */
+
+	nls_mem_chain_term();
+}
+#endif /* NLS_UNIT_TEST */
+
 /*
  * Allocate memory & add to memchain
  *
@@ -77,7 +120,7 @@ _nls_malloc(size_t size, const char *type)
 	nls_mem_alloc_cnt++;
 	mem->nm_magic = NLS_MAGIC_MEMCHUNK;
 	mem->nm_type = type;
-	mem->nm_ref  = 1;
+	mem->nm_ref  = 0;
 	mem->nm_size = size;
 	nls_mem_chain_add(mem);
 
@@ -95,7 +138,7 @@ test_nls_new(void)
 	NLS_ASSERT_EQUALS(&nls_mem_chain, nls_mem_chain.nm_prev);
 	NLS_ASSERT_EQUALS(&nls_mem_chain, nls_mem_chain.nm_next);
 
-	node = nls_new(nls_node);
+	node = nls_grab(nls_new(nls_node));
 	mem = (nls_mem*)node - 1;
 	NLS_ASSERT_EQUALS(&nls_mem_chain, mem->nm_prev);
 	NLS_ASSERT_EQUALS(&nls_mem_chain, mem->nm_next);
