@@ -21,6 +21,7 @@ TODO LIST
   *done* change list structure (simple linked-list)
 
 [Testing]
+  Automatically add nls_init(), nls_term().
   *done* #ifdef NLS_UNITTEST
 
 [Documentation]
