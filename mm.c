@@ -103,6 +103,36 @@ test_nls_grab(void)
 }
 #endif /* NLS_UNIT_TEST */
 
+void
+nls_free(void *ptr)
+{
+	int ref;
+	nls_mem *mem = (nls_mem*)(ptr - sizeof(nls_mem));
+
+	if (&nls_mem_chain == mem) {
+		NLS_BUG(NLS_MSG_ILLEGAL_MEMCHAIN_OPERATION);
+		return;
+	}
+	if (NLS_MAGIC_MEMCHUNK != mem->nm_magic) {
+		NLS_ERROR(NLS_MSG_BROKEN_MEMCHAIN);
+		return;
+	}
+
+	ref = --(mem->nm_ref);
+	if (ref < 0) {
+		NLS_BUG(NLS_MSG_INVALID_REFCOUNT
+			": mem=%p ptr=%p ref=%d size=%d type=%s",
+			mem, (mem + 1), mem->nm_ref, mem->nm_size,
+			mem->nm_type);
+		return;
+	}
+	if (!ref) {
+		nls_mem_free_cnt++;
+		nls_mem_chain_remove(mem);
+		free(mem);
+	}
+}
+
 /*
  * Allocate memory & add to memchain
  *
@@ -152,36 +182,6 @@ test_nls_new(void)
 	nls_mem_chain_term();
 }
 #endif /* NLS_UNIT_TEST */
-
-void
-nls_free(void *ptr)
-{
-	int ref;
-	nls_mem *mem = (nls_mem*)(ptr - sizeof(nls_mem));
-
-	if (&nls_mem_chain == mem) {
-		NLS_BUG(NLS_MSG_ILLEGAL_MEMCHAIN_OPERATION);
-		return;
-	}
-	if (NLS_MAGIC_MEMCHUNK != mem->nm_magic) {
-		NLS_ERROR(NLS_MSG_BROKEN_MEMCHAIN);
-		return;
-	}
-
-	ref = --(mem->nm_ref);
-	if (ref < 0) {
-		NLS_BUG(NLS_MSG_INVALID_REFCOUNT
-			": mem=%p ptr=%p ref=%d size=%d type=%s",
-			mem, (mem + 1), mem->nm_ref, mem->nm_size,
-			mem->nm_type);
-		return;
-	}
-	if (!ref) {
-		nls_mem_free_cnt++;
-		nls_mem_chain_remove(mem);
-		free(mem);
-	}
-}
 
 static void
 nls_mem_chain_add(nls_mem *mem)

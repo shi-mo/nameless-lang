@@ -36,7 +36,7 @@ typedef struct _nls_mem {
 int  nls_mem_chain_init(void);
 void nls_mem_chain_term(void);
 void* nls_grab(void *ptr);
-void* _nls_malloc(size_t size, const char *type);
 void nls_free(void *ptr);
+void* _nls_malloc(size_t size, const char *type);
 
 #endif /* _NAMELESS_MM_H_ */
