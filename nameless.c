@@ -382,7 +382,7 @@ nls_tree_print(FILE *out, nls_node *tree)
 		fprintf(out, "func:%p", tree->nn_func);
 		return 0;
 	case NLS_TYPE_ABSTRACTION:
-		fprintf(out, "(abst(%d): ", tree->nn_abst.nab_num_arg);
+		fprintf(out, "(abst(%d) ", tree->nn_abst.nab_num_arg);
 		if ((ret = nls_tree_print(out, tree->nn_abst.nab_def))) {
 			return ret;
 		}
