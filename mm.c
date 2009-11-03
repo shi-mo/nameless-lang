@@ -5,7 +5,6 @@
 #define NLS_MSG_MEMLEAK_DETECTED "Memory leak detected"
 #define NLS_MSG_BROKEN_MEMCHAIN  "Broken memchain"
 #define NLS_MSG_ILLEGAL_ALLOCCNT "Illegal alloc count"
-#define NLS_MSG_INVALID_REFCOUNT "Invalid reference count"
 #define NLS_MSG_ILLEGAL_MEMCHAIN_OPERATION "Illegal memchain operation"
 #define NLS_MSG_GRAB_NULL "Grabbing NULL pointer"
 

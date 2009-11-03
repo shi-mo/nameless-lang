@@ -7,6 +7,7 @@
 #define NLS_GLOBAL /* empty */
 
 #define NLS_MSG_INVALID_NODE_TYPE "Invalid node type"
+#define NLS_MSG_INVALID_REFCOUNT  "Invalid reference count"
 #define NLS_MSG_NOT_IMPLEMENTED   "Not implemented yet"
 
 #define NLS_WARN(fmt, ...) \
@@ -68,6 +69,9 @@ extern FILE *nls_sys_err;
 
 int nls_main(FILE *in, FILE *out, FILE *err);
 int nls_reduce(nls_node **tree);
+nls_string* nls_string_new(char *s);
+nls_string* nls_string_grab(nls_string *str);
+void nls_string_release(nls_string *str);
 void nls_string_free(nls_string *str);
 
 #endif /* _NAMELESS_H_ */

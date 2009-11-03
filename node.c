@@ -31,7 +31,7 @@ nls_tree_free(nls_node *tree)
 	case NLS_TYPE_INT:
 		break;
 	case NLS_TYPE_VAR:
-		nls_string_free(tree->nn_var.nv_name);
+		nls_string_release(tree->nn_var.nv_name);
 		break;
 	case NLS_TYPE_FUNCTION:
 		break;
@@ -85,7 +85,7 @@ nls_var_new(nls_string *name)
 	if (!node) {
 		return NULL;
 	}
-	node->nn_var.nv_name = nls_grab(name);
+	node->nn_var.nv_name = nls_string_grab(name);
 	return node;
 }
 
