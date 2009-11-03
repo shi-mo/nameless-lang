@@ -21,7 +21,7 @@ nls_node_grab(nls_node *node)
 }
 
 void
-nls_tree_free(nls_node *tree)
+nls_node_release(nls_node *tree)
 {
 	if (--(tree->nn_ref) > 0) {
 		nls_release(tree);
@@ -44,7 +44,7 @@ nls_tree_free(nls_node *tree)
 				nls_arg_ref_free(abst->nab_arg_ref[i]);
 			}
 			nls_release(abst->nab_arg_ref);
-			nls_tree_free(abst->nab_def);
+			nls_node_release(abst->nab_def);
 		}
 		break;
 	case NLS_TYPE_LIST:
@@ -54,8 +54,8 @@ nls_tree_free(nls_node *tree)
 		{
 			nls_application *app = &tree->nn_app;
 
-			nls_tree_free(app->na_arg);
-			nls_tree_free(app->na_func);
+			nls_node_release(app->na_arg);
+			nls_node_release(app->na_func);
 		}
 		break;
 	default:
@@ -217,9 +217,9 @@ nls_list_item_free(nls_node *node)
 {
 	nls_list *list = &(node->nn_list);
 
-	nls_tree_free(list->nl_head);
+	nls_node_release(list->nl_head);
 	if (list->nl_rest) {
-		nls_tree_free(list->nl_rest);
+		nls_node_release(list->nl_rest);
 	}
 }
 

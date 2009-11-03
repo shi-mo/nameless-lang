@@ -41,7 +41,7 @@ nls_main(FILE *in, FILE *out, FILE *err)
 	}
 free_exit:
 	if (tree) {
-		nls_tree_free(tree);
+		nls_node_release(tree);
 	}
 	nls_mem_chain_term();
 	return ret;
@@ -352,7 +352,7 @@ nls_apply(nls_node **node)
 				return ret;
 			}
 			out = nls_node_grab(out);
-			nls_tree_free(*node);
+			nls_node_release(*node);
 			*node = out;
 		}
 		break;

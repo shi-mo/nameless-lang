@@ -66,7 +66,7 @@ typedef struct _nls_node {
 #define nn_app  nn_u.nnu_app
 
 nls_node* nls_node_grab(nls_node *node);
-void nls_tree_free(nls_node *tree);
+void nls_node_release(nls_node *tree);
 nls_node* nls_int_new(int val);
 nls_node* nls_var_new(nls_string *name);
 nls_node* nls_function_new(nls_function func);
