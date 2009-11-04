@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include <errno.h>
 #include "nameless.h"
 #include "nameless/node.h"
@@ -13,6 +14,7 @@ static int nls_op_div(int a, int b);
 static int nls_op_mod(int a, int b);
 static int _nls_int2_func(nls_node *args, nls_int2_op op, nls_node **out);
 static int __nls_int2_func(nls_node *arg1, nls_node *arg2, nls_int2_op op, nls_node **out);
+static int nls_argn_get(nls_node *args, int n, ...);
 
 NLS_DEF_INT2_FUNC(nls_func_add, nls_op_add);
 static int
@@ -52,23 +54,11 @@ nls_op_mod(int a, int b)
 static int
 _nls_int2_func(nls_node *args, nls_int2_op op, nls_node **out)
 {
-	int i;
 	int ret;
 	nls_node **arg1, **arg2;
-	nls_node **item, *tmp;
 
-	i = 0;
-	nls_list_foreach(args, &item, &tmp) {
-		switch (++i) {
-		case 1:
-			arg1 = item;
-			break;
-		case 2:
-			arg2 = item;
-			break;
-		default:
-			goto err_exit;
-		}
+	if ((ret = nls_argn_get(args, 2, &arg1, &arg2))) {
+		return ret;
 	}
 	if ((ret = nls_reduce(arg1))) {
 		return ret;
@@ -80,9 +70,6 @@ _nls_int2_func(nls_node *args, nls_int2_op op, nls_node **out)
 		return ret;
 	}
 	return 0;
-err_exit:
-	NLS_ERROR(NLS_MSG_TOO_MANY_ARGS);
-	return EINVAL;
 }
 
 static int
@@ -103,30 +90,39 @@ __nls_int2_func(nls_node *arg1, nls_node *arg2, nls_int2_op op, nls_node **out)
 	return 0;
 }
 
-int
-nls_func_abst(nls_node *arg, nls_node **out)
+static int
+nls_argn_get(nls_node *args, int n, ...)
 {
 	int i;
 	nls_node **item, *tmp;
-	nls_node *node, *abst_vars, **abst_def;
+	nls_node ***out;
+	va_list alist;
 
+	va_start(alist, n);
 	i = 0;
-	nls_list_foreach(arg, &item, &tmp) {
-		switch (++i) {
-		case 1:
-			abst_vars = *item;
+	nls_list_foreach(args, &item, &tmp) {
+		if (++i > n) {
 			break;
-		case 2:
-			abst_def = item;
-			break;
-		default:
-			goto new_abst;
 		}
+		out = va_arg(alist, nls_node***);
+		*out = item;
 	}
-new_abst:
-	node = nls_abstraction_new(abst_vars, abst_def);
+	va_end(alist);
+	return 0;
+}
+
+int
+nls_func_abst(nls_node *arg, nls_node **out)
+{
+	int ret;
+	nls_node *node, **abst_vars, **abst_def;
+
+	if ((ret = nls_argn_get(arg, 2, &abst_vars, &abst_def))) {
+		return ret;
+	}
+	node = nls_abstraction_new(*abst_vars, abst_def);
 	if (!node) {
-		return 1;
+		return ENOMEM;
 	}
 	*out = node;
 	return 0;
