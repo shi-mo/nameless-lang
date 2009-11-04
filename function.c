@@ -51,6 +51,23 @@ nls_op_mod(int a, int b)
 	return a % b;
 }
 
+int
+nls_func_lambda(nls_node *arg, nls_node **out)
+{
+	int ret;
+	nls_node *node, **abst_vars, **abst_def;
+
+	if ((ret = nls_argn_get(arg, 2, &abst_vars, &abst_def))) {
+		return ret;
+	}
+	node = nls_abstraction_new(*abst_vars, abst_def);
+	if (!node) {
+		return ENOMEM;
+	}
+	*out = node;
+	return 0;
+}
+
 static int
 _nls_int2_func(nls_node *args, nls_int2_op op, nls_node **out)
 {
@@ -108,22 +125,5 @@ nls_argn_get(nls_node *args, int n, ...)
 		*out = item;
 	}
 	va_end(alist);
-	return 0;
-}
-
-int
-nls_func_abst(nls_node *arg, nls_node **out)
-{
-	int ret;
-	nls_node *node, **abst_vars, **abst_def;
-
-	if ((ret = nls_argn_get(arg, 2, &abst_vars, &abst_def))) {
-		return ret;
-	}
-	node = nls_abstraction_new(*abst_vars, abst_def);
-	if (!node) {
-		return ENOMEM;
-	}
-	*out = node;
 	return 0;
 }

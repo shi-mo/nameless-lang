@@ -17,6 +17,6 @@ int nls_func_sub(nls_node*, nls_node**);
 int nls_func_mul(nls_node*, nls_node**);
 int nls_func_div(nls_node*, nls_node**);
 int nls_func_mod(nls_node*, nls_node**);
-int nls_func_abst(nls_node*, nls_node**);
+int nls_func_lambda(nls_node*, nls_node**);
 
 #endif /* _NAMELESS_FUNCTION_H_ */

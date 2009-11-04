@@ -74,7 +74,7 @@ expr	: tNUMBER
 function: tIDENT
 	{
 		nls_string_free($1);
-		$$ = nls_function_new(nls_func_abst);
+		$$ = nls_function_new(nls_func_lambda);
 	}
 	| tOP_ADD { $$ = nls_function_new(nls_func_add); }
 	| tOP_SUB { $$ = nls_function_new(nls_func_sub); }
