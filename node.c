@@ -6,7 +6,7 @@
 
 #define NLS_MSG_BROKEN_LIST "Broken list"
 
-static nls_node* nls_node_new(nls_node_type type);
+static nls_node* nls_node_new(nls_node_type_t type);
 static void nls_list_item_free(nls_node *list);
 static void nls_arg_ref_free(nls_arg_ref *ref);
 static int nls_list_count(nls_node *list);
@@ -199,7 +199,7 @@ nls_list_add(nls_node *node, nls_node *item)
 }
 
 static nls_node*
-nls_node_new(nls_node_type type)
+nls_node_new(nls_node_type_t type)
 {
 	nls_node *node = nls_new(nls_node);
 

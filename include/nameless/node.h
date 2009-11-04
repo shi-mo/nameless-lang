@@ -1,14 +1,14 @@
 #ifndef _NAMELESS_NODE_H_
 #define _NAMELESS_NODE_H_
 
-typedef enum _nls_node_type {
+typedef enum {
 	NLS_TYPE_INT = 1,
 	NLS_TYPE_VAR,
 	NLS_TYPE_FUNCTION,
 	NLS_TYPE_ABSTRACTION,
 	NLS_TYPE_APPLICATION,
 	NLS_TYPE_LIST,
-} nls_node_type;
+} nls_node_type_t;
 
 typedef struct _nls_string {
 	int ns_len;
@@ -45,7 +45,7 @@ typedef struct _nls_list {
 typedef int (*nls_function)(struct _nls_node*, struct _nls_node**);
 
 typedef struct _nls_node {
-	nls_node_type nn_type;
+	nls_node_type_t nn_type;
 	union {
 		int nnu_int;
 		nls_var nnu_var;
