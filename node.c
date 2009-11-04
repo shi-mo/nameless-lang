@@ -16,14 +16,13 @@ static int nls_register_refs(nls_node **tree, nls_node *var, nls_arg_ref **ref);
 nls_node*
 nls_node_grab(nls_node *node)
 {
-	node->nn_ref++;
 	return nls_grab(node);
 }
 
 void
 nls_node_release(nls_node *tree)
 {
-	if (--(tree->nn_ref) > 0) {
+	if (!nls_is_last_ref(tree)) {
 		nls_release(tree);
 		return;
 	}
@@ -208,7 +207,6 @@ nls_node_new(nls_node_type type)
 		return NULL;
 	}
 	node->nn_type = type;
-	node->nn_ref  = 0;
 	return node;
 }
 

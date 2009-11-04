@@ -97,8 +97,7 @@ nls_string_new(char *s)
 	}
 	strncpy(buf, s, len);
 	buf[len] = '\0';
-	str->ns_ref = 0;
-	str->ns_len = len;
+	str->ns_len  = len;
 	str->ns_hash = hash;
 	str->ns_bufp = nls_grab(buf);
 	return str;
@@ -107,14 +106,13 @@ nls_string_new(char *s)
 nls_string*
 nls_string_grab(nls_string *str)
 {
-	str->ns_ref++;
 	return nls_grab(str);
 }
 
 void
 nls_string_release(nls_string *str)
 {
-	if (--(str->ns_ref) > 0) {
+	if (!nls_is_last_ref(str)) {
 		nls_release(str);
 		return;
 	}
@@ -134,21 +132,17 @@ test_nls_string_release(void)
 
 	str = nls_string_new("abc");
 	mem = (nls_mem*)str - 1;
-	NLS_ASSERT_EQUALS(0, str->ns_ref);
 	NLS_ASSERT_EQUALS(0, mem->nm_ref);
 
 	ref1 = nls_string_grab(str);
 	NLS_ASSERT_EQUALS(str, ref1);
-	NLS_ASSERT_EQUALS(1, str->ns_ref);
 	NLS_ASSERT_EQUALS(1, mem->nm_ref);
 
 	ref2 = nls_string_grab(str);
 	NLS_ASSERT_EQUALS(str, ref2);
-	NLS_ASSERT_EQUALS(2, str->ns_ref);
 	NLS_ASSERT_EQUALS(2, mem->nm_ref);
 
 	nls_string_release(ref2);
-	NLS_ASSERT_EQUALS(1, str->ns_ref);
 	NLS_ASSERT_EQUALS(1, mem->nm_ref);
 
 	nls_string_release(ref1); /* free() called. */
@@ -160,10 +154,6 @@ test_nls_string_release(void)
 void
 nls_string_free(nls_string *str)
 {
-	if (str->ns_ref) {
-		NLS_BUG(NLS_MSG_INVALID_REFCOUNT);
-		return;
-	}
 	nls_release(str->ns_bufp);
 	nls_free(str);
 }
@@ -178,9 +168,7 @@ test_nls_string_free(void)
 	nls_mem_chain_init();
 
 	str = nls_string_new("XYZ");
-	NLS_ASSERT_EQUALS(0, str->ns_ref);
-
-	nls_string_free(str); /* free() called. */
+	nls_string_free(str); /* Must not raise error. */
 
 	nls_mem_chain_term();
 }

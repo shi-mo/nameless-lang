@@ -38,6 +38,7 @@ void nls_mem_chain_term(void);
 void* nls_grab(void *ptr);
 void nls_release(void *ptr);
 void nls_free(void *ptr);
+int nls_is_last_ref(void *ptr);
 void* _nls_malloc(size_t size, const char *type);
 
 #endif /* _NAMELESS_MM_H_ */

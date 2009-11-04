@@ -29,9 +29,9 @@
 	} while(0)
 
 #ifdef NLS_UNIT_TEST
-# define NLS_ASSERT_EQUALS(expected, actual) \
+# define NLS_ASSERT(expr) \
 	do { \
-		if ((expected) != (actual)) { \
+		if (!(expr)) { \
 			fprintf(stderr, "Assertion failure:%s:%d:%s\n", \
 				__FILE__, __LINE__, __FUNCTION__); \
 			exit(1); \
@@ -39,15 +39,14 @@
 		fprintf(stdout, "."); \
 	} while (0)
 
-# define NLS_ASSERT_NOT_EQUALS(expr1, expr2) \
-	do { \
-		if ((expr1) == (expr2)) { \
-			fprintf(stderr, "Assertion failure:%s:%d:%s\n", \
-				__FILE__, __LINE__, __FUNCTION__); \
-			exit(1); \
-		} \
-		fprintf(stdout, "."); \
-	} while (0)
+# define NLS_ASSERT_NOT(expr) \
+	NLS_ASSERT(!(expr))
+
+# define NLS_ASSERT_EQUALS(expected, actual) \
+	NLS_ASSERT((expected) == (actual))
+
+# define NLS_ASSERT_NOT_EQUALS(expected, actual) \
+	NLS_ASSERT((expected) != (actual))
 #endif /* NLS_UNIT_TEST */
 
 /**

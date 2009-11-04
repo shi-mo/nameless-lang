@@ -11,7 +11,6 @@ typedef enum _nls_node_type {
 } nls_node_type;
 
 typedef struct _nls_string {
-	int ns_ref;
 	int ns_len;
 	int ns_hash;
 	char *ns_bufp;
@@ -46,7 +45,6 @@ typedef struct _nls_list {
 typedef int (*nls_function)(struct _nls_node*, struct _nls_node**);
 
 typedef struct _nls_node {
-	int nn_ref;
 	nls_node_type nn_type;
 	union {
 		int nnu_int;

@@ -140,6 +140,37 @@ nls_free(void *ptr)
 	free(mem);
 }
 
+int
+nls_is_last_ref(void *ptr)
+{
+	nls_mem *mem = (nls_mem*)(ptr - sizeof(nls_mem));
+
+	return (1 == mem->nm_ref);
+}
+
+#ifdef NLS_UNIT_TEST
+static void
+test_nls_is_last_ref(void)
+{
+	nls_node *node, *ref1, *ref2;
+
+	nls_mem_chain_init();
+
+	node = nls_new(nls_node);
+	ref1 = nls_grab(node);
+	NLS_ASSERT(nls_is_last_ref(ref1));
+
+	ref2 = nls_grab(node);
+	NLS_ASSERT_NOT(nls_is_last_ref(ref2));
+	nls_release(ref2);
+	NLS_ASSERT(nls_is_last_ref(ref1));
+
+	nls_release(ref1); /* free() is called. */
+
+	nls_mem_chain_term();
+}
+#endif /* NLS_UNIT_TEST */
+
 /*
  * Allocate memory & add to memchain
  *
