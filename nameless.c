@@ -182,10 +182,7 @@ nls_strnlen_hash(char *str, size_t n, int *hashp)
 	size_t i;
 	int hash = 0;
 
-	for (i = 0; i < n; i++, str++) {
-		if ('\0' == *str) {
-			break;
-		}
+	for (i = 0; (i < n) && ('\0' != *str); i++, str++) {
 		hash += *str;
 		hash %= NLS_HASH_WIDTH;
 	}
