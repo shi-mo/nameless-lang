@@ -333,7 +333,7 @@ nls_apply(nls_node **node)
 	case NLS_TYPE_FUNCTION:
 		{
 			nls_node *out;
-			nls_function fp = func->nn_func;
+			nls_fp fp = func->nn_func.nf_fp;
 
 			if ((ret = (fp)(*arg, &out))) {
 				return ret;
@@ -366,7 +366,7 @@ nls_tree_print(FILE *out, nls_node *tree)
 		fprintf(out, "%s", tree->nn_var.nv_name->ns_bufp);
 		return 0;
 	case NLS_TYPE_FUNCTION:
-		fprintf(out, "func:%p", tree->nn_func);
+		fprintf(out, "%s", tree->nn_func.nf_name);
 		return 0;
 	case NLS_TYPE_ABSTRACTION:
 		fprintf(out, "(lambda");

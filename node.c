@@ -93,14 +93,15 @@ nls_var_new(nls_string *name)
 }
 
 nls_node*
-nls_function_new(nls_function func)
+nls_function_new(nls_fp fp, const char *name)
 {
 	nls_node *node = nls_node_new(NLS_TYPE_FUNCTION);
 
 	if (!node) {
 		return NULL;
 	}
-	node->nn_func = func;
+	strncpy(node->nn_func.nf_name, name, NLS_FUNC_NAME_BUF_SIZE);
+	node->nn_func.nf_fp = fp;
 	return node;
 }
 

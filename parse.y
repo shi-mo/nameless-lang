@@ -74,13 +74,28 @@ expr	: tNUMBER
 function: tIDENT
 	{
 		nls_string_free($1);
-		$$ = nls_function_new(nls_func_lambda);
+		$$ = nls_function_new(nls_func_lambda, "lambda");
 	}
-	| tOP_ADD { $$ = nls_function_new(nls_func_add); }
-	| tOP_SUB { $$ = nls_function_new(nls_func_sub); }
-	| tOP_MUL { $$ = nls_function_new(nls_func_mul); }
-	| tOP_DIV { $$ = nls_function_new(nls_func_div); }
-	| tOP_MOD { $$ = nls_function_new(nls_func_mod); }
+	| tOP_ADD
+	{
+		$$ = nls_function_new(nls_func_add, "+");
+	}
+	| tOP_SUB
+	{
+		$$ = nls_function_new(nls_func_sub, "-");
+	}
+	| tOP_MUL
+	{
+		$$ = nls_function_new(nls_func_mul, "*");
+	}
+	| tOP_DIV
+	{
+		$$ = nls_function_new(nls_func_div, "/");
+	}
+	| tOP_MOD
+	{
+		$$ = nls_function_new(nls_func_mod, "%");
+	}
 
 op_spaces: /* empty */
 	| op_spaces spaces
