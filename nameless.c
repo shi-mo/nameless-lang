@@ -28,7 +28,7 @@ nls_main(FILE *in, FILE *out, FILE *err)
 	nls_sys_out = out;
 	nls_sys_err = err;
 
-	nls_mem_chain_init();
+	nls_init();
 	ret = yyparse();
 	tree = nls_sys_parse_result; /* pointer grabbed in yyparse(). */
 	if (ret || !tree) {
@@ -43,8 +43,20 @@ free_exit:
 	if (tree) {
 		nls_node_release(tree);
 	}
-	nls_mem_chain_term();
+	nls_term();
 	return ret;
+}
+
+void
+nls_init(void)
+{
+	nls_mem_chain_init();
+}
+
+void
+nls_term(void)
+{
+	nls_mem_chain_term();
 }
 
 /**
@@ -127,9 +139,6 @@ test_nls_string_release(void)
 	nls_mem *mem;
 	nls_string *str, *ref1, *ref2;
 
-	nls_sys_err = stderr;
-	nls_mem_chain_init();
-
 	str = nls_string_new("abc");
 	mem = (nls_mem*)str - 1;
 	NLS_ASSERT_EQUALS(0, mem->nm_ref);
@@ -146,8 +155,6 @@ test_nls_string_release(void)
 	NLS_ASSERT_EQUALS(1, mem->nm_ref);
 
 	nls_string_release(ref1); /* free() called. */
-
-	nls_mem_chain_term();
 }
 #endif /* NLS_UNIT_TEST */
 
@@ -164,13 +171,8 @@ test_nls_string_free(void)
 {
 	nls_string *str;
 
-	nls_sys_err = stderr;
-	nls_mem_chain_init();
-
 	str = nls_string_new("XYZ");
 	nls_string_free(str); /* Must not raise error. */
-
-	nls_mem_chain_term();
 }
 #endif /* NLS_UNIT_TEST */
 

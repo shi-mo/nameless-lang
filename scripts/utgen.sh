@@ -13,6 +13,8 @@ cat << EOL
 int
 main()
 {
+	nls_init();
+
 EOL
 
 grep '^test_' ${SRC} | sed 's/^\(test_[_[:alnum:]]*\)(.*$/\t\1();/'
@@ -20,6 +22,7 @@ grep '^test_' ${SRC} | sed 's/^\(test_[_[:alnum:]]*\)(.*$/\t\1();/'
 cat << EOL
 
         fprintf(stdout, "\n");
+	nls_term();
 	return 0;
 }
 #endif /* NLS_UNIT_TEST */

@@ -67,6 +67,8 @@ extern FILE *nls_sys_out;
 extern FILE *nls_sys_err;
 
 int nls_main(FILE *in, FILE *out, FILE *err);
+void nls_init(void);
+void nls_term(void);
 int nls_reduce(nls_node **tree);
 nls_string* nls_string_new(char *s);
 nls_string* nls_string_grab(nls_string *str);

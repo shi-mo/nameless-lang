@@ -81,8 +81,6 @@ test_nls_grab(void)
 	nls_mem *mem;
 	nls_node *node, *ref1, *ref2;
 
-	nls_mem_chain_init();
-
 	node = nls_new(nls_node);
 	mem = (nls_mem*)node - 1;
 	NLS_ASSERT_EQUALS(0, mem->nm_ref);
@@ -97,8 +95,6 @@ test_nls_grab(void)
 	NLS_ASSERT_EQUALS(1, mem->nm_ref);
 
 	nls_release(ref1); /* free() is called. */
-
-	nls_mem_chain_term();
 }
 #endif /* NLS_UNIT_TEST */
 
@@ -154,8 +150,6 @@ test_nls_is_last_ref(void)
 {
 	nls_node *node, *ref1, *ref2;
 
-	nls_mem_chain_init();
-
 	node = nls_new(nls_node);
 	ref1 = nls_grab(node);
 	NLS_ASSERT(nls_is_last_ref(ref1));
@@ -166,8 +160,6 @@ test_nls_is_last_ref(void)
 	NLS_ASSERT(nls_is_last_ref(ref1));
 
 	nls_release(ref1); /* free() is called. */
-
-	nls_mem_chain_term();
 }
 #endif /* NLS_UNIT_TEST */
 
