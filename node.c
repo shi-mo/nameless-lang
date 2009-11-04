@@ -8,10 +8,9 @@
 
 static nls_node* nls_node_new(nls_node_type_t type);
 static void nls_list_item_free(nls_node *list);
-static void nls_arg_ref_free(nls_arg_ref *ref);
 static int nls_list_count(nls_node *list);
 static int nls_strcmp(nls_string *s1, nls_string *s2);
-static int nls_register_refs(nls_node **tree, nls_node *var, nls_arg_ref **ref);
+static int nls_register_vars(nls_node **tree, nls_node *var);
 
 nls_node*
 nls_node_grab(nls_node *node)
@@ -36,13 +35,17 @@ nls_node_release(nls_node *tree)
 		break;
 	case NLS_TYPE_ABSTRACTION:
 		{
-			int i;
 			nls_abstraction *abst = &(tree->nn_abst);
+			nls_node **var, *tmp;
 
-			for (i = 0; i < abst->nab_num_arg; i++) {
-				nls_arg_ref_free(abst->nab_arg_ref[i]);
+			nls_list_foreach(abst->nab_vars, &var, &tmp) {
+				nls_node *ref;
+				for (ref = (*var)->nn_var.nv_next; ref;
+					ref = ref->nn_var.nv_next) {
+					nls_node_release(ref);
+				}
 			}
-			nls_release(abst->nab_arg_ref);
+			nls_node_release(abst->nab_vars);
 			nls_node_release(abst->nab_def);
 		}
 		break;
@@ -84,6 +87,7 @@ nls_var_new(nls_string *name)
 	if (!node) {
 		return NULL;
 	}
+	node->nn_var.nv_next = NULL;
 	node->nn_var.nv_name = nls_string_grab(name);
 	return node;
 }
@@ -106,42 +110,26 @@ nls_abstraction_new(nls_node *vars, nls_node **def)
 	int ret;
 	int i, n = nls_list_count(vars);
 	nls_abstraction *abst;
-	nls_arg_ref **ref_ary;
 	nls_node *node;
 	nls_node **var, *tmp;
 
-	if (!(ref_ary = nls_array_new(nls_arg_ref*, n))) {
+	if (!(node = nls_node_new(NLS_TYPE_ABSTRACTION))) {
 		return NULL;
 	}
-	if (!(node = nls_new(nls_node))) {
-		goto free_exit;
-	}
 
-	memset(ref_ary, 0, sizeof(nls_arg_ref*) * n);
 	i = 0;
 	nls_list_foreach(vars, &var, &tmp) {
-		if ((ret = nls_register_refs(def, (*var), &ref_ary[i]))) {
+		if ((ret = nls_register_vars(def, *var))) {
 			goto free_exit;
 		}
 	}
-	node->nn_type = NLS_TYPE_ABSTRACTION;
 	abst = &(node->nn_abst);
 	abst->nab_num_arg = n;
-	abst->nab_arg_ref = nls_grab(ref_ary);
-	abst->nab_def = nls_node_grab(*def);
+	abst->nab_vars = nls_node_grab(vars);
+	abst->nab_def  = nls_node_grab(*def);
 	return node;
 free_exit:
-	for (i = 0; i < n; i++) {
-		if (ref_ary[i]) {
-			nls_free(ref_ary[i]);
-		}
-	}
-	if (ref_ary) {
-		nls_free(ref_ary);
-	}
-	if (node) {
-		nls_free(node);
-	}
+	nls_node_release(node);
 	return NULL;
 }
 
@@ -221,17 +209,6 @@ nls_list_item_free(nls_node *node)
 	}
 }
 
-static void
-nls_arg_ref_free(nls_arg_ref *ref)
-{
-	while (ref) {
-		nls_arg_ref *next = ref->nar_next;
-
-		nls_release(ref);
-		ref = next;
-	}
-}
-
 static int
 nls_list_count(nls_node *list)
 {
@@ -257,37 +234,33 @@ nls_strcmp(nls_string *s1, nls_string *s2)
 }
 
 static int
-nls_register_refs(nls_node **tree, nls_node *var, nls_arg_ref **ref)
+nls_register_vars(nls_node **tree, nls_node *var)
 {
 	switch ((*tree)->nn_type) {
 	case NLS_TYPE_INT:
 		return 0;
 	case NLS_TYPE_VAR:
 		if (!nls_strcmp((*tree)->nn_var.nv_name, var->nn_var.nv_name)) {
-			nls_arg_ref *new_ref = nls_new(nls_arg_ref);
+			nls_node *next = var->nn_var.nv_next;
 
-			if (!new_ref) {
-				return ENOMEM;
-			}
-			new_ref->nar_next = *ref ? nls_grab(*ref) : NULL;
-			new_ref->nar_node = tree;
-			*ref = nls_grab(new_ref);
+			(*tree)->nn_var.nv_next = next ? nls_node_grab(next) : NULL;
+			var->nn_var.nv_next = nls_node_grab(*tree);
 		}
 		return 0;
 	case NLS_TYPE_FUNCTION:
 		return 0;
 	case NLS_TYPE_ABSTRACTION:
 		NLS_WARN(NLS_MSG_NOT_IMPLEMENTED);
-		return ENOTSUP;
+		return EPERM;
 	case NLS_TYPE_APPLICATION:
-		nls_register_refs(&((*tree)->nn_app.na_arg), var, ref);
+		nls_register_vars(&((*tree)->nn_app.na_arg), var);
 		return 0;
 	case NLS_TYPE_LIST:
 		{
 			nls_node **item, *tmp;
 
 			nls_list_foreach((*tree), &item, &tmp) {
-				nls_register_refs(item, var, ref);
+				nls_register_vars(item, var);
 			}
 		}
 		return 0;

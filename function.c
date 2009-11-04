@@ -4,8 +4,6 @@
 #include "nameless/mm.h"
 #include "nameless/function.h"
 
-#define NLS_ISINT(node) (NLS_TYPE_INT == (node)->nn_type)
-#define NLS_INT_VAL(node) ((node)->nn_int)
 #define NLS_MSG_TOO_MANY_ARGS "Too many arguments"
 
 static int nls_op_add(int a, int b);

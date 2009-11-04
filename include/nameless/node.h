@@ -1,6 +1,10 @@
 #ifndef _NAMELESS_NODE_H_
 #define _NAMELESS_NODE_H_
 
+#define NLS_ISINT(node) (NLS_TYPE_INT == (node)->nn_type)
+#define NLS_ISVAR(node) (NLS_TYPE_VAR == (node)->nn_type)
+#define NLS_INT_VAL(node) ((node)->nn_int)
+
 typedef enum {
 	NLS_TYPE_INT = 1,
 	NLS_TYPE_VAR,
@@ -16,19 +20,15 @@ typedef struct _nls_string {
 	char *ns_bufp;
 } nls_string;
 
+struct _nls_node;
 typedef struct _nls_var {
+	struct _nls_node *nv_next;
 	nls_string *nv_name;
 } nls_var;
 
-struct _nls_node;
-typedef struct _nls_arg_ref {
-	struct _nls_arg_ref *nar_next;
-	struct _nls_node **nar_node;
-} nls_arg_ref;
-
 typedef struct _nls_abstraction {
 	int nab_num_arg;
-	nls_arg_ref **nab_arg_ref;
+	struct _nls_node *nab_vars;
 	struct _nls_node *nab_def;
 } nls_abstraction;
 
