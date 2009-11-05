@@ -17,7 +17,7 @@ main()
 
 EOL
 
-grep '^test_' ${SRC} | sed 's/^\(test_[_[:alnum:]]*\)(.*$/\t\1();/'
+grep '^test_' ${SRC} | sed 's/^\(test_[_[:alnum:]]*\)(.*$/	\1();/'
 
 cat << EOL
 
