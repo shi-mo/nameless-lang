@@ -50,7 +50,7 @@ test: $(EXEC) $(TESTS) $(EXPECTS) $(ACTUALDIR)
 	@for T in $(TESTDIR)/*.nls; do \
 		NAME=`basename $$T .nls`; \
 		echo "==== `basename $$T`"; \
-		./$(EXEC) < $$T > $(ACTUALDIR)/$$NAME.actual; \
+		./$(EXEC) < $$T | tr -d '\r' > $(ACTUALDIR)/$$NAME.actual; \
 		STATUS=$$?; \
 		if [ 0 -ne $$STATUS ]; then \
 			echo "Exit status: $$STATUS"; \
