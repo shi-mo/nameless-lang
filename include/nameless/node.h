@@ -1,7 +1,7 @@
 #ifndef _NAMELESS_NODE_H_
 #define _NAMELESS_NODE_H_
 
-#define NLS_FUNC_NAME_BUF_SIZE 64
+#define NLS_FUNC_NAME_BUF_SIZE 8
 
 #define NLS_ISINT(node) (NLS_TYPE_INT == (node)->nn_type)
 #define NLS_ISVAR(node) (NLS_TYPE_VAR == (node)->nn_type)
