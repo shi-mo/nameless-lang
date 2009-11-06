@@ -1,6 +1,8 @@
 #ifndef _NAMELESS_NODE_H_
 #define _NAMELESS_NODE_H_
 
+#include "nameless/string.h"
+
 #define NLS_ISINT(node) (NLS_TYPE_INT == (node)->nn_type)
 #define NLS_ISVAR(node) (NLS_TYPE_VAR == (node)->nn_type)
 #define NLS_INT_VAL(node) ((node)->nn_int)
@@ -13,12 +15,6 @@ typedef enum {
 	NLS_TYPE_APPLICATION,
 	NLS_TYPE_LIST,
 } nls_node_type_t;
-
-typedef struct _nls_string {
-	int ns_len;
-	int ns_hash;
-	char *ns_bufp;
-} nls_string;
 
 struct _nls_node;
 typedef struct _nls_var {

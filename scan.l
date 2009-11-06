@@ -1,7 +1,5 @@
 %{
 #include <stdio.h>
-#include <stdint.h>
-#include <limits.h>
 #include "y.tab.h"
 #include "nameless.h"
 #include "nameless/mm.h"

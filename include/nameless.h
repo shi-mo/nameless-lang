@@ -72,10 +72,5 @@ int nls_main(FILE *in, FILE *out, FILE *err);
 void nls_init(FILE *out, FILE *err);
 void nls_term(void);
 int nls_reduce(nls_node **tree);
-nls_string* nls_string_new(char *s);
-nls_string* nls_string_grab(nls_string *str);
-void nls_string_release(nls_string *str);
-void nls_string_free(nls_string *str);
-int nls_strcmp(nls_string *s1, nls_string *s2);
 
 #endif /* _NAMELESS_H_ */
