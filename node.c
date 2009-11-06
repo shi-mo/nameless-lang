@@ -9,7 +9,6 @@
 static nls_node* nls_node_new(nls_node_type_t type);
 static void nls_list_item_free(nls_node *list);
 static int nls_list_count(nls_node *list);
-static int nls_strcmp(nls_string *s1, nls_string *s2);
 static int nls_register_vars(nls_node **tree, nls_node *var);
 
 nls_node*
@@ -93,14 +92,20 @@ nls_var_new(nls_string *name)
 }
 
 nls_node*
-nls_function_new(nls_fp fp, const char *name)
+nls_function_new(nls_fp fp, char *name)
 {
-	nls_node *node = nls_node_new(NLS_TYPE_FUNCTION);
+	nls_node *node;
+	nls_string *str = nls_string_new(name);
 
-	if (!node) {
+	if (!name) {
 		return NULL;
 	}
-	strncpy(node->nn_func.nf_name, name, NLS_FUNC_NAME_BUF_SIZE);
+	node = nls_node_new(NLS_TYPE_FUNCTION);
+	if (!node) {
+		nls_string_free(str);
+		return NULL;
+	}
+	node->nn_func.nf_name = str;
 	node->nn_func.nf_fp = fp;
 	return node;
 }
@@ -220,18 +225,6 @@ nls_list_count(nls_node *list)
 		n++;
 	}
 	return n;
-}
-
-static int
-nls_strcmp(nls_string *s1, nls_string *s2)
-{
-	if (s1->ns_hash != s2->ns_hash) {
-		return s1->ns_hash - s2->ns_hash;
-	}
-	if (s1->ns_len != s2->ns_len) {
-		return s1->ns_len - s2->ns_len;
-	}
-	return strncmp(s1->ns_bufp, s2->ns_bufp, s1->ns_len);
 }
 
 static int

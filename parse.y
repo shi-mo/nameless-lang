@@ -7,6 +7,8 @@
 #include "nameless/mm.h"
 #include "nameless/function.h"
 
+#define NLS_MSG_NO_SUCH_SYMBOL "No such symbol"
+
 NLS_GLOBAL nls_node *nls_sys_parse_result;
 
 static int yyerror(char *msg);
@@ -22,9 +24,6 @@ static int yyerror(char *msg);
 %token<yst_token> tSPACE  tNEWLINE
 %token<yst_token> tLPAREN tRPAREN
 %token<yst_token> tLBRACE tRBRACE
-%token<yst_token> tOP_ADD tOP_SUB
-%token<yst_token> tOP_MUL tOP_DIV
-%token<yst_token> tOP_MOD
 %token<yst_int> tNUMBER
 %token<yst_str> tIDENT
 
@@ -73,28 +72,14 @@ expr	: tNUMBER
 
 function: tIDENT
 	{
+		nls_hash_entry *ent, *prev;
+		ent = nls_hash_search(&nls_sys_sym_table, $1, &prev);
 		nls_string_free($1);
-		$$ = nls_function_new(nls_func_lambda, "lambda");
-	}
-	| tOP_ADD
-	{
-		$$ = nls_function_new(nls_func_add, "+");
-	}
-	| tOP_SUB
-	{
-		$$ = nls_function_new(nls_func_sub, "-");
-	}
-	| tOP_MUL
-	{
-		$$ = nls_function_new(nls_func_mul, "*");
-	}
-	| tOP_DIV
-	{
-		$$ = nls_function_new(nls_func_div, "/");
-	}
-	| tOP_MOD
-	{
-		$$ = nls_function_new(nls_func_mod, "%");
+		if (!ent) {
+			NLS_ERROR(NLS_MSG_NO_SUCH_SYMBOL);
+			YYERROR;
+		}
+		$$ = ent->nhe_node;
 	}
 
 op_spaces: /* empty */

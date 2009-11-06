@@ -13,7 +13,7 @@ cat << EOL
 int
 main()
 {
-	nls_init();
+	nls_init(stdout, stderr);
 
 EOL
 

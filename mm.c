@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <errno.h>
 #include "nameless.h"
 #include "nameless/mm.h"
 
@@ -6,7 +7,9 @@
 #define NLS_MSG_BROKEN_MEMCHAIN  "Broken memchain"
 #define NLS_MSG_ILLEGAL_ALLOCCNT "Illegal alloc count"
 #define NLS_MSG_ILLEGAL_MEMCHAIN_OPERATION "Illegal memchain operation"
-#define NLS_MSG_GRAB_NULL "Grabbing NULL pointer"
+#define NLS_MSG_GRAB_NULL    "Grabbing NULL pointer"
+#define NLS_MSG_RELEASE_NULL "Releasing NULL pointer"
+#define NLS_MSG_FREE_NULL    "Freeing NULL pointer"
 
 #define nls_mem_chain_foreach_safe(item, tmp) \
 	for (*(item) = nls_mem_chain.nm_next, \
@@ -102,8 +105,13 @@ void
 nls_release(void *ptr)
 {
 	int ref;
-	nls_mem *mem = (nls_mem*)(ptr - sizeof(nls_mem));
+	nls_mem *mem;
 
+	if (!ptr) {
+		NLS_BUG(NLS_MSG_RELEASE_NULL);
+		return;
+	}
+	mem = (nls_mem*)(ptr - sizeof(nls_mem));
 	ref = --(mem->nm_ref);
 	if (!ref) {
 		nls_free(ptr);
@@ -113,8 +121,13 @@ nls_release(void *ptr)
 void
 nls_free(void *ptr)
 {
-	nls_mem *mem = (nls_mem*)(ptr - sizeof(nls_mem));
+	nls_mem *mem;
 
+	if (!ptr) {
+		NLS_BUG(NLS_MSG_FREE_NULL);
+		return;
+	}
+	mem = (nls_mem*)(ptr - sizeof(nls_mem));
 	if (&nls_mem_chain == mem) {
 		NLS_BUG(NLS_MSG_ILLEGAL_MEMCHAIN_OPERATION);
 		return;
@@ -139,8 +152,13 @@ nls_free(void *ptr)
 int
 nls_is_last_ref(void *ptr)
 {
-	nls_mem *mem = (nls_mem*)(ptr - sizeof(nls_mem));
+	nls_mem *mem;
 
+	if (!ptr) {
+		NLS_BUG(NLS_MSG_RELEASE_NULL);
+		return EINVAL;
+	}
+	mem = (nls_mem*)(ptr - sizeof(nls_mem));
 	return (1 == mem->nm_ref);
 }
 
@@ -194,6 +212,8 @@ test_nls_new(void)
 	nls_mem *mem;
 	nls_node *node;
 
+	nls_term();
+
 	nls_mem_chain_init();
 	NLS_ASSERT_EQUALS(&nls_mem_chain, nls_mem_chain.nm_prev);
 	NLS_ASSERT_EQUALS(&nls_mem_chain, nls_mem_chain.nm_next);
@@ -210,6 +230,7 @@ test_nls_new(void)
 	NLS_ASSERT_EQUALS(&nls_mem_chain, nls_mem_chain.nm_next);
 
 	nls_mem_chain_term();
+	nls_init(stdout, stderr);
 }
 #endif /* NLS_UNIT_TEST */
 

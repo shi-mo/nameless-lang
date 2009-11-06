@@ -13,11 +13,6 @@ static int yywrap(void);
 %}
 %%
 
-"+"	{ return tOP_ADD; }
-"-"	{ return tOP_SUB; }
-"*"	{ return tOP_MUL; }
-"/"	{ return tOP_DIV; }
-"%"	{ return tOP_MOD; }
 "("	{ return tLPAREN; }
 ")"	{ return tRPAREN; }
 "["	{ return tLBRACE; }
@@ -33,7 +28,7 @@ static int yywrap(void);
 	return tNUMBER;
 }
 
-[_[:alpha:]][_[:alnum:]]*	{
+[_+\-*/%[:alpha:]][_[:alnum:]]*	{
 	nls_string *str;
 
 	str = nls_string_new(yytext);
