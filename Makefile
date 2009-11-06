@@ -6,11 +6,11 @@ ACTUALDIR = actual
 OBJDIR    = obj
 DOCDIR    = doc
 
-SRCS     = main.c nameless.c mm.c node.c function.c
+SRCS     = main.c nameless.c mm.c node.c hash.c function.c
 HEADERS  = $(wildcard $(INCDIR)/*.h) $(wildcard $(INCDIR)/**/*.h)
 TESTS    = $(wildcard $(TESTDIR)/*.nls)
 EXPECTS  = $(patsubst $(TESTDIR)/%.nls,$(EXPECTDIR)/%.expect,$(TESTS))
-UTSRCS   = nameless.c mm.c
+UTSRCS   = nameless.c mm.c hash.c
 UTBINS   = $(patsubst %.c,$(UTDIR)/%.bin,$(UTSRCS))
 DOXYFILE = Doxyfile
 

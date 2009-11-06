@@ -3,10 +3,9 @@
 
 #include <stdio.h>
 #include "nameless/node.h"
+#include "nameless/hash.h"
 
 #define NLS_GLOBAL /* empty */
-
-#define NLS_HASH_WIDTH 251
 
 #define NLS_MSG_INVALID_NODE_TYPE "Invalid node type"
 #define NLS_MSG_INVALID_REFCOUNT  "Invalid reference count"
@@ -65,17 +64,6 @@
 				(*(tmp))->nn_list.nl_rest : NULL) \
 	) \
 
-typedef struct _nls_hash_entry {
-	struct _nls_hash_entry *nhe_next;
-	nls_string *nhe_key;
-	nls_node *nhe_node;
-} nls_hash_entry;
-
-typedef struct _nls_hash {
-	int nh_num;
-	nls_hash_entry nh_table[NLS_HASH_WIDTH];
-} nls_hash;
-
 extern FILE *nls_sys_out;
 extern FILE *nls_sys_err;
 extern nls_hash nls_sys_sym_table;
@@ -89,6 +77,5 @@ nls_string* nls_string_grab(nls_string *str);
 void nls_string_release(nls_string *str);
 void nls_string_free(nls_string *str);
 int nls_strcmp(nls_string *s1, nls_string *s2);
-nls_hash_entry* nls_hash_search(nls_hash *hash, nls_string *key, nls_hash_entry **prevp);
 
 #endif /* _NAMELESS_H_ */
