@@ -48,8 +48,8 @@ nls_node_release(nls_node *tree)
 		{
 			nls_application *app = &tree->nn_app;
 
-			nls_node_release(app->na_arg);
-			nls_node_release(app->na_func);
+			nls_node_release(app->nap_args);
+			nls_node_release(app->nap_func);
 		}
 		break;
 	default:
@@ -142,8 +142,8 @@ nls_application_new(nls_node *func, nls_node *arg)
 		return NULL;
 	}
 	app = &(node->nn_app);
-	app->na_func = nls_node_grab(func);
-	app->na_arg  = nls_node_grab(arg);
+	app->nap_func = nls_node_grab(func);
+	app->nap_args  = nls_node_grab(arg);
 	return node;
 }
 
@@ -240,7 +240,7 @@ nls_register_vars(nls_node **tree, nls_node *var)
 		NLS_WARN(NLS_MSG_NOT_IMPLEMENTED);
 		return EPERM;
 	case NLS_TYPE_APPLICATION:
-		nls_register_vars(&((*tree)->nn_app.na_arg), var);
+		nls_register_vars(&((*tree)->nn_app.nap_args), var);
 		return 0;
 	case NLS_TYPE_LIST:
 		{

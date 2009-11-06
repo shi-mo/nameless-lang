@@ -149,8 +149,8 @@ nls_apply(nls_node **node)
 
 retry:
 	app  = &((*node)->nn_app);
-	func = &(app->na_func);
-	args = &(app->na_arg);
+	func = &(app->nap_func);
+	args = &(app->nap_args);
 
 	switch ((*func)->nn_type) {
 	case NLS_TYPE_FUNCTION:
@@ -249,11 +249,11 @@ nls_tree_print(FILE *out, nls_node *tree)
 		return 0;
 	case NLS_TYPE_APPLICATION:
 		fprintf(out, "(");
-		if ((ret = nls_tree_print(out, tree->nn_app.na_func))) {
+		if ((ret = nls_tree_print(out, tree->nn_app.nap_func))) {
 			return ret;
 		}
 		fprintf(out, " ");
-		if ((ret = nls_tree_print(out, tree->nn_app.na_arg))) {
+		if ((ret = nls_tree_print(out, tree->nn_app.nap_args))) {
 			return ret;
 		}
 		fprintf(out, ")");

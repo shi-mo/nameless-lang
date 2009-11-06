@@ -29,8 +29,8 @@ typedef struct _nls_abstraction {
 } nls_abstraction;
 
 typedef struct _nls_application {
-	struct _nls_node *na_func;
-	struct _nls_node *na_arg;
+	struct _nls_node *nap_func;
+	struct _nls_node *nap_args;
 } nls_application;
 
 typedef struct _nls_list {
