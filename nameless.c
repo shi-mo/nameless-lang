@@ -263,7 +263,7 @@ nls_tree_print(FILE *out, nls_node *tree)
 			int first = 1;
 			nls_node **item, *tmp;
 
-			fprintf(out, "[");
+			fprintf(out, "(");
 			nls_list_foreach(tree, &item, &tmp) {
 				if (!first) {
 					fprintf(out, " ");
@@ -275,7 +275,7 @@ nls_tree_print(FILE *out, nls_node *tree)
 					return ret;
 				}
 			}
-			fprintf(out, "]");
+			fprintf(out, ")");
 		}
 		return 0;
 	default:

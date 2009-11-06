@@ -73,7 +73,7 @@ expr	: expr tLPAREN op_spaces exprs op_spaces tRPAREN
 			$$ = ent->nhe_node;
 		}
 	}
-	| tLBRACE exprs tRBRACE
+	| tLPAREN exprs tRPAREN
 	{
 		$$ = $2;
 	}

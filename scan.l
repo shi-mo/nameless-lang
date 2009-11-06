@@ -13,8 +13,6 @@ static int yywrap(void);
 
 "("	{ return tLPAREN; }
 ")"	{ return tRPAREN; }
-"["	{ return tLBRACE; }
-"]"	{ return tRBRACE; }
 [ \t]+	{ return tSPACE; }
 \r|\n|\n\r	{ return tNEWLINE; }
 
