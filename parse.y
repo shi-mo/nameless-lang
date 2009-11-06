@@ -23,7 +23,6 @@ static int yyerror(char *msg);
 
 %token<yst_token> tSPACE  tNEWLINE
 %token<yst_token> tLPAREN tRPAREN
-%token<yst_token> tLBRACE tRBRACE
 %token<yst_int> tNUMBER
 %token<yst_str> tIDENT
 
