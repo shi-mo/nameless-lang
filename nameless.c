@@ -237,26 +237,23 @@ nls_tree_print(FILE *out, nls_node *tree)
 		fprintf(out, "%s", tree->nn_func.nf_name->ns_bufp);
 		return 0;
 	case NLS_TYPE_ABSTRACTION:
-		fprintf(out, "(lambda");
+		fprintf(out, "lambda");
 		if ((ret = nls_tree_print(out, tree->nn_abst.nab_vars))) {
 			return ret;
 		}
-		fprintf(out, " ");
+		fprintf(out, "(");
 		if ((ret = nls_tree_print(out, tree->nn_abst.nab_def))) {
 			return ret;
 		}
 		fprintf(out, ")");
 		return 0;
 	case NLS_TYPE_APPLICATION:
-		fprintf(out, "(");
 		if ((ret = nls_tree_print(out, tree->nn_app.nap_func))) {
 			return ret;
 		}
-		fprintf(out, " ");
 		if ((ret = nls_tree_print(out, tree->nn_app.nap_args))) {
 			return ret;
 		}
-		fprintf(out, ")");
 		return 0;
 	case NLS_TYPE_LIST:
 		{
