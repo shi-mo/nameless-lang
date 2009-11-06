@@ -12,6 +12,7 @@ TODO LIST
   *done* add prefix:nls_sys for global symbols
 
 [Language Specification]
+  Suppress SEGV on syntax error
   set
   cond
   procedure/parallel
