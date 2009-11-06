@@ -18,7 +18,7 @@ typedef enum {
 
 struct _nls_node;
 typedef struct _nls_var {
-	struct _nls_node *nv_next;
+	struct _nls_node **nv_next_ref;
 	nls_string *nv_name;
 } nls_var;
 

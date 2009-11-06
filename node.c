@@ -36,15 +36,7 @@ nls_node_release(nls_node *tree)
 	case NLS_TYPE_ABSTRACTION:
 		{
 			nls_abstraction *abst = &(tree->nn_abst);
-			nls_node **var, *tmp;
 
-			nls_list_foreach(abst->nab_vars, &var, &tmp) {
-				nls_node *ref;
-				for (ref = (*var)->nn_var.nv_next; ref;
-					ref = ref->nn_var.nv_next) {
-					nls_node_release(ref);
-				}
-			}
 			nls_node_release(abst->nab_vars);
 			nls_node_release(abst->nab_def);
 		}
@@ -87,7 +79,7 @@ nls_var_new(nls_string *name)
 	if (!node) {
 		return NULL;
 	}
-	node->nn_var.nv_next = NULL;
+	node->nn_var.nv_next_ref = NULL;
 	node->nn_var.nv_name = nls_string_grab(name);
 	return node;
 }
@@ -236,10 +228,10 @@ nls_register_vars(nls_node **tree, nls_node *var)
 		return 0;
 	case NLS_TYPE_VAR:
 		if (!nls_strcmp((*tree)->nn_var.nv_name, var->nn_var.nv_name)) {
-			nls_node *next = var->nn_var.nv_next;
+			nls_node **next_ref = var->nn_var.nv_next_ref;
 
-			(*tree)->nn_var.nv_next = next ? nls_node_grab(next) : NULL;
-			var->nn_var.nv_next = nls_node_grab(*tree);
+			(*tree)->nn_var.nv_next_ref = next_ref;
+			var->nn_var.nv_next_ref = tree;
 		}
 		return 0;
 	case NLS_TYPE_FUNCTION:

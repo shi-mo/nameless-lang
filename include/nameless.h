@@ -64,6 +64,22 @@
 				(*(tmp))->nn_list.nl_rest : NULL) \
 	) \
 
+#define nls_double_list_foreach(list1, list2, item1, item2, tmp1, tmp2) \
+	for ( \
+		((*(item1)) = &((list1)->nn_list.nl_head), \
+			(*(tmp1)) = (list1)->nn_list.nl_rest, \
+			(*(item2)) = &((list2)->nn_list.nl_head), \
+			(*(tmp2)) = (list2)->nn_list.nl_rest); \
+		(*(item1) && *(item2)); \
+		(*(item1) = (*(tmp1) ? &((*(tmp1))->nn_list.nl_head) : NULL), \
+			(*(tmp1)) = ((*(tmp1)) ? \
+				(*(tmp1))->nn_list.nl_rest : NULL), \
+			(*(item2)) = ((*(tmp2)) ? \
+				&((*(tmp2))->nn_list.nl_head) : NULL), \
+			(*(tmp2)) = ((*(tmp2)) ? \
+				(*(tmp2))->nn_list.nl_rest : NULL)) \
+	) \
+
 extern FILE *nls_sys_out;
 extern FILE *nls_sys_err;
 extern nls_hash nls_sys_sym_table;

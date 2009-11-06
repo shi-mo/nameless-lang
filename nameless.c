@@ -16,6 +16,7 @@ static void nls_sym_table_init(void);
 static void nls_sym_table_term(void);
 static int nls_list_reduce(nls_node **tree);
 static int nls_apply(nls_node **node);
+static int nls_apply_abstraction(nls_node **func, nls_node *args);
 static int nls_tree_print(FILE *out, nls_node *tree);
 
 int
@@ -144,12 +145,12 @@ nls_apply(nls_node **node)
 {
 	int ret;
 	nls_application *app;
-	nls_node **func, **arg;
+	nls_node **func, **args;
 
 retry:
 	app  = &((*node)->nn_app);
 	func = &(app->na_func);
-	arg  = &(app->na_arg);
+	args = &(app->na_arg);
 
 	switch ((*func)->nn_type) {
 	case NLS_TYPE_FUNCTION:
@@ -157,7 +158,7 @@ retry:
 			nls_node *out;
 			nls_fp fp = (*func)->nn_func.nf_fp;
 
-			if ((ret = (fp)(*arg, &out))) {
+			if ((ret = (fp)(*args, &out))) {
 				return ret;
 			}
 			out = nls_node_grab(out);
@@ -166,7 +167,16 @@ retry:
 		}
 		break;
 	case NLS_TYPE_ABSTRACTION:
-		NLS_ERROR(NLS_MSG_NOT_IMPLEMENTED);
+		{
+			nls_node *out;
+
+			if ((ret = nls_apply_abstraction(func, *args))) {
+				return ret;
+			}
+			out = nls_node_grab(*func);
+			nls_node_release(*node);
+			*node = out;
+		}
 		break;
 	case NLS_TYPE_APPLICATION:
 		if ((ret = nls_reduce(func))) {
@@ -176,6 +186,37 @@ retry:
 	default:
 		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE
 			": type=%d", (*func)->nn_type);
+	}
+	return 0;
+}
+
+static int
+nls_apply_abstraction(nls_node **func, nls_node *args)
+{
+	int ret;
+
+	nls_node *out;
+	nls_abstraction *abst = &((*func)->nn_abst);
+	nls_node *vars = abst->nab_vars;
+
+	nls_node **var, **arg, *tmp1, *tmp2;
+	nls_double_list_foreach(vars, args, &var, &arg, &tmp1, &tmp2) {
+		nls_node **replace, **next;
+
+		for (replace = (*var)->nn_var.nv_next_ref,
+			next = replace ? (*replace)->nn_var.nv_next_ref : NULL;
+			replace;
+			replace = next,
+			next = next ? (*next)->nn_var.nv_next_ref : NULL) {
+			nls_node_release(*replace);
+			*replace = nls_node_grab(*arg);
+		}
+	}
+	out = nls_node_grab(abst->nab_def);
+	nls_node_release(*func);
+	*func = out;
+	if ((ret = nls_reduce(func))) {
+		return ret;
 	}
 	return 0;
 }

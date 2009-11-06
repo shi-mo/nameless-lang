@@ -12,10 +12,10 @@ TODO LIST
   *done* add prefix:nls_sys for global symbols
 
 [Language Specification]
-  lambda abstraction
   nil terminated list
   cond
   procedure/parallel
+  *done* lambda abstraction
   *done* symbol table
   *done* variable
   *done* change list structure (simple linked-list)
