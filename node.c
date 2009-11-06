@@ -31,6 +31,7 @@ nls_node_release(nls_node *tree)
 		nls_string_release(tree->nn_var.nv_name);
 		break;
 	case NLS_TYPE_FUNCTION:
+		nls_string_release(tree->nn_func.nf_name);
 		break;
 	case NLS_TYPE_ABSTRACTION:
 		{
@@ -105,7 +106,7 @@ nls_function_new(nls_fp fp, char *name)
 		nls_string_free(str);
 		return NULL;
 	}
-	node->nn_func.nf_name = str;
+	node->nn_func.nf_name = nls_string_grab(str);
 	node->nn_func.nf_fp = fp;
 	return node;
 }
