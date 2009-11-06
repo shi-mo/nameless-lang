@@ -12,15 +12,17 @@ TODO LIST
   *done* add prefix:nls_sys for global symbols
 
 [Language Specification]
-  nil terminated list
+  set
   cond
   procedure/parallel
+  nil terminated list
   *done* lambda abstraction
   *done* symbol table
   *done* variable
   *done* change list structure (simple linked-list)
 
 [Testing]
+  Detect SEGV
   *done* Automatically add nls_init(), nls_term().
   *done* #ifdef NLS_UNITTEST
 
