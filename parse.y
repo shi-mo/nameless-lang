@@ -28,7 +28,7 @@ static int yyerror(char *msg);
 %token<yst_str> tIDENT
 
 %type<yst_node> code exprs
-%type<yst_node> expr function
+%type<yst_node> expr
 
 %start code
 
@@ -53,33 +53,29 @@ exprs	: expr
 		$$ = $1;
 	}
 
-expr	: tNUMBER
+expr	: expr tLPAREN op_spaces exprs op_spaces tRPAREN
+	{
+		$$ = nls_application_new($1, $4);
+	}
+	| tNUMBER
 	{
 		$$ = nls_int_new($1);
 	}
 	| tIDENT
 	{
-		$$ = nls_var_new($1);
+		nls_hash_entry *ent, *prev;
+
+		ent = nls_hash_search(&nls_sys_sym_table, $1, &prev);
+		if (!ent) {
+			$$ = nls_var_new($1);
+		} else {
+			nls_string_free($1);
+			$$ = ent->nhe_node;
+		}
 	}
 	| tLBRACE exprs tRBRACE
 	{
 		$$ = $2;
-	}
-	| tLPAREN function spaces exprs tRPAREN
-	{
-		$$ = nls_application_new($2, $4);
-	}
-
-function: tIDENT
-	{
-		nls_hash_entry *ent, *prev;
-		ent = nls_hash_search(&nls_sys_sym_table, $1, &prev);
-		nls_string_free($1);
-		if (!ent) {
-			NLS_ERROR(NLS_MSG_NO_SUCH_SYMBOL);
-			YYERROR;
-		}
-		$$ = ent->nhe_node;
 	}
 
 op_spaces: /* empty */

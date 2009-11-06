@@ -143,16 +143,19 @@ static int
 nls_apply(nls_node **node)
 {
 	int ret;
+	nls_application *app;
+	nls_node **func, **arg;
 
-	nls_application *app = &((*node)->nn_app);
-	nls_node *func = app->na_func;
-	nls_node **arg = &app->na_arg;
+retry:
+	app  = &((*node)->nn_app);
+	func = &(app->na_func);
+	arg  = &(app->na_arg);
 
-	switch (func->nn_type) {
+	switch ((*func)->nn_type) {
 	case NLS_TYPE_FUNCTION:
 		{
 			nls_node *out;
-			nls_fp fp = func->nn_func.nf_fp;
+			nls_fp fp = (*func)->nn_func.nf_fp;
 
 			if ((ret = (fp)(*arg, &out))) {
 				return ret;
@@ -165,9 +168,14 @@ nls_apply(nls_node **node)
 	case NLS_TYPE_ABSTRACTION:
 		NLS_ERROR(NLS_MSG_NOT_IMPLEMENTED);
 		break;
+	case NLS_TYPE_APPLICATION:
+		if ((ret = nls_reduce(func))) {
+			return ret;
+		}
+		goto retry;
 	default:
 		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE
-			": type=%d", func->nn_type);
+			": type=%d", (*func)->nn_type);
 	}
 	return 0;
 }
