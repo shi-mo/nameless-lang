@@ -49,7 +49,7 @@ exprs	: expr
 	}
 	| exprs spaces expr
 	{
-		nls_list_add($1, $3); /* TODO: malloc failure */
+		nls_list_add($1, $3);
 		$$ = $1;
 	}
 
@@ -72,13 +72,18 @@ expr	: tNUMBER
 	{
 		$$ = nls_abstraction_new($3, $6);
 	}
+	| tLPAREN expr tRPAREN
+	{
+		$$ = nls_list_new($2);
+	}
+	| tLPAREN exprs spaces expr tRPAREN
+	{
+		nls_list_add($2, $4);
+		$$ = $2;
+	}
 	| abstraction tLPAREN op_spaces exprs op_spaces tRPAREN
 	{
 		$$ = nls_application_new($1, $4);
-	}
-	| tLPAREN exprs tRPAREN
-	{
-		$$ = $2;
 	}
 
 abstraction: tIDENT

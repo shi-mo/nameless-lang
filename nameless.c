@@ -14,7 +14,6 @@ NLS_GLOBAL nls_hash nls_sys_sym_table;
 
 static void nls_sym_table_init(void);
 static void nls_sym_table_term(void);
-static int nls_list_reduce(nls_node **tree);
 static int nls_apply(nls_node **node);
 static int nls_apply_abstraction(nls_node **func, nls_node *args);
 static int nls_tree_print(FILE *out, nls_node *tree);
@@ -37,8 +36,10 @@ nls_main(FILE *in, FILE *out, FILE *err)
 	if (ret || !tree) {
 		goto free_exit;
 	}
-	ret = nls_reduce(&tree);
 	nls_list_foreach(tree, &item, &tmp) {
+		if ((ret = nls_reduce(item))) {
+			goto free_exit;
+		}
 		nls_tree_print(nls_sys_out, *item);
 		fprintf(out, "\n");
 	}
@@ -92,7 +93,7 @@ nls_reduce(nls_node **tree)
 		}
 		return nls_reduce(tree);
 	case NLS_TYPE_LIST:
-		return nls_list_reduce(tree);
+		return 0;
 	default:
 		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE ": type=%d",
 			(*tree)->nn_type);
@@ -138,21 +139,6 @@ static void
 nls_sym_table_term(void)
 {
 	nls_hash_term(&nls_sys_sym_table);
-}
-
-static int
-nls_list_reduce(nls_node **list)
-{
-	int ret;
-	nls_node **item, *tmp;
-
-	nls_list_foreach(*list, &item, &tmp) {
-		ret = nls_reduce(item);
-		if (ret) {
-			return ret;
-		}
-	}
-	return 0;
 }
 
 /*
