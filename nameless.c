@@ -53,6 +53,9 @@ free_exit:
 void
 nls_init(FILE *out, FILE *err)
 {
+#if YYDEBUG
+	yydebug = 1;
+#endif /* YYDEBUG */
 	nls_sys_out = out;
 	nls_sys_err = err;
 	nls_mem_chain_init();
