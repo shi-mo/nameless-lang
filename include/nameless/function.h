@@ -3,11 +3,12 @@
 
 #include "nameless/node.h"
 
-#define NLS_DEF_INT2_FUNC(name, op) \
+#define NLS_DEF_INT2_FUNC(name) \
 	int \
-	name(nls_node *args, nls_node **out) \
+	nls_func_##name(nls_node *args, nls_node **out) \
 	{ \
-		return _nls_int2_func(args, (op), out); \
+		return _nls_int2_func(nls_func_##name, #name, \
+			nls_op_##name, args, out); \
 	}
 
 typedef int (*nls_int2_op)(int a, int b);

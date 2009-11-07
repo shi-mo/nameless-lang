@@ -1,5 +1,6 @@
 #include <stdarg.h>
 #include <errno.h>
+#include <string.h>
 #include "nameless.h"
 #include "nameless/node.h"
 #include "nameless/mm.h"
@@ -12,39 +13,41 @@ static int nls_op_sub(int a, int b);
 static int nls_op_mul(int a, int b);
 static int nls_op_div(int a, int b);
 static int nls_op_mod(int a, int b);
-static int _nls_int2_func(nls_node *args, nls_int2_op op, nls_node **out);
+static int _nls_int2_func(nls_fp fp, char *name, nls_int2_op op, nls_node *args, nls_node **out);
 static int __nls_int2_func(nls_node *arg1, nls_node *arg2, nls_int2_op op, nls_node **out);
 static int nls_argn_get(nls_node *args, int n, ...);
+static int nls_curry_new(nls_fp fp, char *name, int num_lack, nls_node *args, nls_node **out);
+static nls_node* nls_vars_new(int n);
 
-NLS_DEF_INT2_FUNC(nls_func_add, nls_op_add);
+NLS_DEF_INT2_FUNC(add);
 static int
 nls_op_add(int a, int b)
 {
 	return a + b;
 }
 
-NLS_DEF_INT2_FUNC(nls_func_sub, nls_op_sub);
+NLS_DEF_INT2_FUNC(sub);
 static int
 nls_op_sub(int a, int b)
 {
 	return a - b;
 }
 
-NLS_DEF_INT2_FUNC(nls_func_mul, nls_op_mul);
+NLS_DEF_INT2_FUNC(mul);
 static int
 nls_op_mul(int a, int b)
 {
 	return a * b;
 }
 
-NLS_DEF_INT2_FUNC(nls_func_div, nls_op_div);
+NLS_DEF_INT2_FUNC(div);
 static int
 nls_op_div(int a, int b)
 {
 	return a / b;
 }
 
-NLS_DEF_INT2_FUNC(nls_func_mod, nls_op_mod);
+NLS_DEF_INT2_FUNC(mod);
 static int
 nls_op_mod(int a, int b)
 {
@@ -69,11 +72,19 @@ nls_func_abst(nls_node *arg, nls_node **out)
 }
 
 static int
-_nls_int2_func(nls_node *args, nls_int2_op op, nls_node **out)
+_nls_int2_func(nls_fp fp, char *name, nls_int2_op op, nls_node *args, nls_node **out)
 {
 	int ret;
 	nls_node **arg1, **arg2;
 
+	switch (nls_list_count(args)) {
+	case 1:
+		return nls_curry_new(fp, name, 1, args, out);
+	case 2:
+		break;
+	default:
+		return EINVAL;
+	}
 	if ((ret = nls_argn_get(args, 2, &arg1, &arg2))) {
 		return ret;
 	}
@@ -126,4 +137,85 @@ nls_argn_get(nls_node *args, int n, ...)
 	}
 	va_end(alist);
 	return 0;
+}
+
+static int
+nls_curry_new(nls_fp fp, char *name, int num_lack, nls_node *args, nls_node **out)
+{
+	nls_node *vars, *add_vars;
+	nls_node *def, *func, *curry;
+
+	vars = nls_vars_new(num_lack);
+	if (!vars) {
+		return ENOMEM;
+	}
+	add_vars = nls_vars_new(num_lack);
+	if (!add_vars) {
+		nls_node_release(nls_node_grab(vars));
+		return ENOMEM;
+	}
+	func = nls_function_new(fp, name);
+	if (!func) {
+		nls_node_release(nls_node_grab(vars));
+		nls_node_release(nls_node_grab(add_vars));
+		return ENOMEM;
+	}
+	nls_list_concat(args, add_vars);
+	def = nls_application_new(func, args);
+	if (!def) {
+		nls_node_release(nls_node_grab(func));
+		nls_node_release(vars);
+		return ENOMEM;
+	}
+	curry = nls_abstraction_new(vars, def);
+	if (!curry) {
+		nls_node_release(nls_node_grab(def));
+		nls_node_release(vars);
+		return ENOMEM;
+	}
+	*out = curry;
+	return 0;
+}
+
+#define NLS_ANON_VAR_NAME_BUF_SIZE 32
+#define NLS_ANON_VAR_PREFIX 'x'
+static nls_node*
+nls_vars_new(int n)
+{
+	int i;
+	char *bufp, buf[NLS_ANON_VAR_NAME_BUF_SIZE];
+	nls_node *var;
+	nls_node *vars = NULL;
+
+	buf[0] = NLS_ANON_VAR_PREFIX;
+	bufp = buf + 1;
+	for (i = 1; i <= n; i++) {
+		nls_string *name;
+
+		snprintf(bufp, NLS_ANON_VAR_NAME_BUF_SIZE-1, "%d", i);
+		name = nls_string_new(buf);
+		if (!name) {
+			goto free_exit;
+		}
+		var = nls_var_new(name);
+		if (!var) {
+			nls_string_free(name);
+			goto free_exit;
+		}
+		if (!vars) {
+			vars = nls_list_new(var);
+			if (!vars) {
+				nls_node_release(nls_node_grab(var));
+				return NULL;
+			}
+			continue;
+		}
+		nls_list_add(vars, var);
+	}
+	return vars;
+free_exit:
+	if (vars) {
+		nls_node_release(nls_node_grab(vars));
+	}
+	return NULL;
 }

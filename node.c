@@ -7,8 +7,8 @@
 #define NLS_MSG_BROKEN_LIST "Broken list"
 
 static nls_node* nls_node_new(nls_node_type_t type);
-static void nls_list_item_free(nls_node *list);
-static int nls_list_count(nls_node *list);
+static void nls_list_item_free(nls_node *node);
+static nls_node* nls_list_tail_entry(nls_node *node);
 static int nls_register_vars(nls_node **tree, nls_node *var);
 
 nls_node*
@@ -143,7 +143,7 @@ nls_application_new(nls_node *func, nls_node *arg)
 	}
 	app = &(node->nn_app);
 	app->nap_func = nls_node_grab(func);
-	app->nap_args  = nls_node_grab(arg);
+	app->nap_args = nls_node_grab(arg);
 	return node;
 }
 
@@ -163,26 +163,43 @@ nls_list_new(nls_node *item)
 }
 
 int
-nls_list_add(nls_node *node, nls_node *item)
+nls_list_add(nls_node *ent, nls_node *item)
 {
 	nls_list *list;
-	nls_node *new;
+	nls_node *tail, *new;
 
-	list = &(node->nn_list);
-	if (!list->nl_head) {
-		NLS_BUG(NLS_MSG_BROKEN_LIST);
-		return 1; /* dummy */
-	}
-	if (list->nl_rest) {
-		return nls_list_add(list->nl_rest, item);
-	}
-
+	tail = nls_list_tail_entry(ent);
+	list = &(tail->nn_list);
 	new = nls_list_new(item);
 	if (!new) {
 		return 1;
 	}
 	list->nl_rest = nls_node_grab(new);
 	return 0;
+}
+
+int
+nls_list_concat(nls_node *ent1, nls_node *ent2)
+{
+	nls_list *list;
+	nls_node *tail;
+
+	tail = nls_list_tail_entry(ent1);
+	list = &(tail->nn_list);
+	list->nl_rest = nls_node_grab(ent2);
+	return 0;
+}
+
+int
+nls_list_count(nls_node *ent)
+{
+	nls_node **item, *tmp;
+	int n = 0;
+
+	nls_list_foreach(ent, &item, &tmp) {
+		n++;
+	}
+	return n;
 }
 
 static nls_node*
@@ -208,16 +225,20 @@ nls_list_item_free(nls_node *node)
 	}
 }
 
-static int
-nls_list_count(nls_node *list)
+static nls_node*
+nls_list_tail_entry(nls_node *node)
 {
-	nls_node **item, *tmp;
-	int n = 0;
+	nls_list *list;
 
-	nls_list_foreach(list, &item, &tmp) {
-		n++;
+	list = &(node->nn_list);
+	if (!list->nl_head) {
+		NLS_BUG(NLS_MSG_BROKEN_LIST);
+		return NULL;
 	}
-	return n;
+	if (list->nl_rest) {
+		return nls_list_tail_entry(list->nl_rest);
+	}
+	return node;
 }
 
 static int

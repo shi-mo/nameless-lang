@@ -72,6 +72,8 @@ nls_node* nls_function_new(nls_fp fp, char *name);
 nls_node* nls_abstraction_new(nls_node *vars, nls_node *def);
 nls_node* nls_application_new(nls_node *func, nls_node *arg);
 nls_node* nls_list_new(nls_node *node);
-int nls_list_add(nls_node *list, nls_node *node);
+int nls_list_add(nls_node *ent, nls_node *item);
+int nls_list_concat(nls_node *ent1, nls_node *ent2);
+int nls_list_count(nls_node *ent);
 
 #endif /* _NAMELESS_NODE_H_ */
