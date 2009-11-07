@@ -8,6 +8,8 @@
 #include "nameless/hash.h"
 #include "nameless/function.h"
 
+#define NLS_MSG_REDUCTION_FAIL "Reduction failure"
+
 NLS_GLOBAL FILE *nls_sys_out;
 NLS_GLOBAL FILE *nls_sys_err;
 NLS_GLOBAL nls_hash nls_sys_sym_table;
@@ -38,6 +40,7 @@ nls_main(FILE *in, FILE *out, FILE *err)
 	}
 	nls_list_foreach(tree, &item, &tmp) {
 		if ((ret = nls_reduce(item))) {
+			NLS_ERROR(NLS_MSG_REDUCTION_FAIL ": errno=%d", ret);
 			goto free_exit;
 		}
 		nls_tree_print(nls_sys_out, *item);
