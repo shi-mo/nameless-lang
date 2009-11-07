@@ -1,1 +1,1 @@
-lambda((x) *(*(x x) *(x x)))(2)
+(lambda(x).mul(mul(x x) mul(x x)))(2)

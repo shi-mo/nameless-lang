@@ -69,7 +69,7 @@ void nls_node_release(nls_node *tree);
 nls_node* nls_int_new(int val);
 nls_node* nls_var_new(nls_string *name);
 nls_node* nls_function_new(nls_fp fp, char *name);
-nls_node* nls_abstraction_new(nls_node *vars, nls_node **def);
+nls_node* nls_abstraction_new(nls_node *vars, nls_node *def);
 nls_node* nls_application_new(nls_node *func, nls_node *arg);
 nls_node* nls_list_new(nls_node *node);
 int nls_list_add(nls_node *list, nls_node *node);

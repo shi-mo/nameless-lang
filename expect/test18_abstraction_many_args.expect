@@ -1,1 +1,1 @@
-lambda(x y z)(+(*(x y) z))
+lambda(x y z).add(mul(x y) z)

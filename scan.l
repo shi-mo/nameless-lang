@@ -5,7 +5,6 @@
 #include "nameless/mm.h"
 
 #define NLS_MSG_ILLEGAL_TOKEN "Illegal token"
-#define NLS_MSG_FAILED_TO_ALLOCATE_MEMORY "Failed to allocate memory"
 
 static int yywrap(void);
 %}
@@ -13,8 +12,10 @@ static int yywrap(void);
 
 "("	{ return tLPAREN; }
 ")"	{ return tRPAREN; }
+"."	{ return tDOT; }
 [ \t]+	{ return tSPACE; }
 \r|\n|\n\r	{ return tNEWLINE; }
+"lambda"	{ return tLAMBDA; }
 
 [1-9][0-9]*	{
 	int temp;

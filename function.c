@@ -52,7 +52,7 @@ nls_op_mod(int a, int b)
 }
 
 int
-nls_func_lambda(nls_node *arg, nls_node **out)
+nls_func_abst(nls_node *arg, nls_node **out)
 {
 	int ret;
 	nls_node *node, **abst_vars, **abst_def;
@@ -60,7 +60,7 @@ nls_func_lambda(nls_node *arg, nls_node **out)
 	if ((ret = nls_argn_get(arg, 2, &abst_vars, &abst_def))) {
 		return ret;
 	}
-	node = nls_abstraction_new(*abst_vars, abst_def);
+	node = nls_abstraction_new(*abst_vars, *abst_def);
 	if (!node) {
 		return ENOMEM;
 	}

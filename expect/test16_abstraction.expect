@@ -1,1 +1,1 @@
-lambda(x)(+(1 x))
+lambda(x).add(1 x)

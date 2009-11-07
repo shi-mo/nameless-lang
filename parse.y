@@ -23,11 +23,12 @@ static int yyerror(char *msg);
 
 %token<yst_token> tSPACE  tNEWLINE
 %token<yst_token> tLPAREN tRPAREN
+%token<yst_token> tDOT    tLAMBDA
 %token<yst_int> tNUMBER
 %token<yst_str> tIDENT
 
 %type<yst_node> code exprs
-%type<yst_node> expr
+%type<yst_node> expr abstraction
 
 %start code
 
@@ -46,39 +47,58 @@ exprs	: expr
 	{
 		$$ = nls_list_new($1);
 	}
-	| exprs op_spaces expr
+	| exprs spaces expr
 	{
 		nls_list_add($1, $3); /* TODO: malloc failure */
 		$$ = $1;
 	}
 
-expr	: expr tLPAREN op_spaces exprs op_spaces tRPAREN
-	{
-		$$ = nls_application_new($1, $4);
-	}
-	| tNUMBER
+expr	: tNUMBER
 	{
 		$$ = nls_int_new($1);
 	}
 	| tIDENT
 	{
-		nls_hash_entry *ent, *prev;
+		nls_node *sym = nls_symbol_get($1);
 
-		ent = nls_hash_search(&nls_sys_sym_table, $1, &prev);
-		if (!ent) {
-			$$ = nls_var_new($1);
-		} else {
+		if (sym) {
 			nls_string_free($1);
-			$$ = ent->nhe_node;
+			$$ = sym;
+		} else {
+			$$ = nls_var_new($1);
 		}
+	}
+	| tLAMBDA tLPAREN exprs tRPAREN tDOT expr
+	{
+		$$ = nls_abstraction_new($3, $6);
+	}
+	| abstraction tLPAREN op_spaces exprs op_spaces tRPAREN
+	{
+		$$ = nls_application_new($1, $4);
 	}
 	| tLPAREN exprs tRPAREN
 	{
 		$$ = $2;
 	}
 
+abstraction: tIDENT
+	{
+		nls_node *sym = nls_symbol_get($1);
+
+		if (!sym) {
+			NLS_ERROR(NLS_MSG_NO_SUCH_SYMBOL);
+			YYERROR;
+		}
+		nls_string_free($1);
+		$$ = sym;
+	}
+	| tLPAREN expr tRPAREN
+	{
+		$$ = $2;
+	}
+
 op_spaces: /* empty */
-	| op_spaces spaces
+	| spaces
 
 spaces	: space
 	| spaces space

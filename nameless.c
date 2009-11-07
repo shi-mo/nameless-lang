@@ -97,6 +97,18 @@ nls_reduce(nls_node **tree)
 	}
 }
 
+nls_node*
+nls_symbol_get(nls_string *name)
+{
+	nls_hash_entry *ent, *prev;
+
+	ent = nls_hash_search(&nls_sys_sym_table, name, &prev);
+	if (!ent) {
+		return NULL;
+	}
+	return ent->nhe_node;
+}
+
 static void
 nls_sym_table_init(void)
 {
@@ -104,14 +116,18 @@ nls_sym_table_init(void)
 #define NLS_SYM_TABLE_ADD_FUNC(fp, name) \
 	do { \
 		nls_node *func = nls_function_new((fp), (name)); \
+		if (!func) { \
+			NLS_ERROR(NLS_MSG_FAILED_TO_ALLOCATE_MEMORY); \
+			return; \
+		} \
 		nls_hash_add(&nls_sys_sym_table, func->nn_func.nf_name, func); \
 	} while(0)
-	NLS_SYM_TABLE_ADD_FUNC(nls_func_lambda , "lambda");
-	NLS_SYM_TABLE_ADD_FUNC(nls_func_add , "+");
-	NLS_SYM_TABLE_ADD_FUNC(nls_func_sub , "-");
-	NLS_SYM_TABLE_ADD_FUNC(nls_func_mul , "*");
-	NLS_SYM_TABLE_ADD_FUNC(nls_func_div , "/");
-	NLS_SYM_TABLE_ADD_FUNC(nls_func_mod , "%");
+	NLS_SYM_TABLE_ADD_FUNC(nls_func_abst, "abst");
+	NLS_SYM_TABLE_ADD_FUNC(nls_func_add,  "add");
+	NLS_SYM_TABLE_ADD_FUNC(nls_func_sub,  "sub");
+	NLS_SYM_TABLE_ADD_FUNC(nls_func_mul,  "mul");
+	NLS_SYM_TABLE_ADD_FUNC(nls_func_div,  "div");
+	NLS_SYM_TABLE_ADD_FUNC(nls_func_mod,  "mod");
 #undef  NLS_SYM_TABLE_ADD_FUNC
 }
 
@@ -241,11 +257,10 @@ nls_tree_print(FILE *out, nls_node *tree)
 		if ((ret = nls_tree_print(out, tree->nn_abst.nab_vars))) {
 			return ret;
 		}
-		fprintf(out, "(");
+		fprintf(out, ".");
 		if ((ret = nls_tree_print(out, tree->nn_abst.nab_def))) {
 			return ret;
 		}
-		fprintf(out, ")");
 		return 0;
 	case NLS_TYPE_APPLICATION:
 		if ((ret = nls_tree_print(out, tree->nn_app.nap_func))) {

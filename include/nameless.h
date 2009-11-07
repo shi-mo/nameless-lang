@@ -10,6 +10,7 @@
 #define NLS_MSG_INVALID_NODE_TYPE "Invalid node type"
 #define NLS_MSG_INVALID_REFCOUNT  "Invalid reference count"
 #define NLS_MSG_NOT_IMPLEMENTED   "Not implemented yet"
+#define NLS_MSG_FAILED_TO_ALLOCATE_MEMORY "Failed to allocate memory"
 
 #define NLS_WARN(fmt, ...) \
 	fprintf(nls_sys_err, "Warning:%s:%d:%s: " fmt "\n", \
@@ -88,5 +89,6 @@ int nls_main(FILE *in, FILE *out, FILE *err);
 void nls_init(FILE *out, FILE *err);
 void nls_term(void);
 int nls_reduce(nls_node **tree);
+nls_node* nls_symbol_get(nls_string *name);
 
 #endif /* _NAMELESS_H_ */

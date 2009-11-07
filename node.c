@@ -104,7 +104,7 @@ nls_function_new(nls_fp fp, char *name)
 }
 
 nls_node*
-nls_abstraction_new(nls_node *vars, nls_node **def)
+nls_abstraction_new(nls_node *vars, nls_node *def)
 {
 	int ret;
 	int i, n = nls_list_count(vars);
@@ -118,14 +118,14 @@ nls_abstraction_new(nls_node *vars, nls_node **def)
 
 	i = 0;
 	nls_list_foreach(vars, &var, &tmp) {
-		if ((ret = nls_register_vars(def, *var))) {
+		if ((ret = nls_register_vars(&def, *var))) {
 			goto free_exit;
 		}
 	}
 	abst = &(node->nn_abst);
 	abst->nab_num_arg = n;
 	abst->nab_vars = nls_node_grab(vars);
-	abst->nab_def  = nls_node_grab(*def);
+	abst->nab_def  = nls_node_grab(def);
 	return node;
 free_exit:
 	nls_node_release(node);
