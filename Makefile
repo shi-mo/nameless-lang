@@ -43,7 +43,7 @@ clobber: clean
 	rm -f $(EXEC)
 
 .PHONY: testall
-testall: test unittest
+testall: unittest test
 
 .PHONY: test
 test: $(EXEC) $(TESTS) $(EXPECTS) $(ACTUALDIR)
