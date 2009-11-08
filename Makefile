@@ -10,7 +10,7 @@ SRCS     = main.c nameless.c mm.c node.c hash.c string.c function.c
 HEADERS  = $(wildcard $(INCDIR)/*.h) $(wildcard $(INCDIR)/**/*.h)
 TESTS    = $(wildcard $(TESTDIR)/*.nls)
 EXPECTS  = $(patsubst $(TESTDIR)/%.nls,$(EXPECTDIR)/%.expect,$(TESTS))
-UTSRCS   = mm.c hash.c string.c
+UTSRCS   = mm.c node.c hash.c string.c
 UTBINS   = $(patsubst %.c,$(UTDIR)/%.bin,$(UTSRCS))
 DOXYFILE = Doxyfile
 

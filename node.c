@@ -85,7 +85,7 @@ nls_var_new(nls_string *name)
 }
 
 nls_node*
-nls_function_new(nls_fp fp, char *name)
+nls_function_new(nls_fp fp, int num_args, char *name)
 {
 	nls_node *node;
 	nls_string *str = nls_string_new(name);
@@ -98,6 +98,7 @@ nls_function_new(nls_fp fp, char *name)
 		nls_string_free(str);
 		return NULL;
 	}
+	node->nn_func.nf_num_args = num_args;
 	node->nn_func.nf_name = nls_string_grab(str);
 	node->nn_func.nf_fp = fp;
 	return node;
@@ -201,6 +202,35 @@ nls_list_count(nls_node *ent)
 	}
 	return n;
 }
+
+#ifdef NLS_UNIT_TEST
+static void
+test_nls_list_count_when_size1(void)
+{
+	nls_node *node = nls_int_new(1);
+	nls_node *list = nls_list_new(node);
+	NLS_ASSERT_EQUALS(1, nls_list_count(list));
+
+	nls_node_release(nls_node_grab(list));
+}
+
+static void
+test_nls_list_count_when_size3(void)
+{
+	nls_node *node1 = nls_int_new(1);
+	nls_node *node2 = nls_int_new(2);
+	nls_node *node3 = nls_int_new(2);
+	nls_node *list = nls_list_new(node1);
+
+	nls_list_add(list, node2);
+	NLS_ASSERT_EQUALS(2, nls_list_count(list));
+
+	nls_list_add(list, node3);
+	NLS_ASSERT_EQUALS(3, nls_list_count(list));
+
+	nls_node_release(nls_node_grab(list));
+}
+#endif /* NLS_UNIT_TEST */
 
 static nls_node*
 nls_node_new(nls_node_type_t type)
