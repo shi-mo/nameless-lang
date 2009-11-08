@@ -52,36 +52,6 @@
 	NLS_ASSERT((expected) != (actual))
 #endif /* NLS_UNIT_TEST */
 
-/**
- * Traverse all items in nls_list.
- * @see nls_list_reduce()
- */
-#define nls_list_foreach(list, item, tmp) \
-	for ( \
-		(*(item)) = &((list)->nn_list.nl_head), \
-			(*(tmp)) = (list)->nn_list.nl_rest; \
-		(*(item)); \
-		(*(item)) = ((*(tmp)) ? &((*(tmp))->nn_list.nl_head) : NULL), \
-			(*(tmp)) = ((*(tmp)) ? \
-				(*(tmp))->nn_list.nl_rest : NULL) \
-	) \
-
-#define nls_double_list_foreach(list1, list2, item1, item2, tmp1, tmp2) \
-	for ( \
-		((*(item1)) = &((list1)->nn_list.nl_head), \
-			(*(tmp1)) = (list1)->nn_list.nl_rest, \
-			(*(item2)) = &((list2)->nn_list.nl_head), \
-			(*(tmp2)) = (list2)->nn_list.nl_rest); \
-		(*(item1) && *(item2)); \
-		(*(item1) = (*(tmp1) ? &((*(tmp1))->nn_list.nl_head) : NULL), \
-			(*(tmp1)) = ((*(tmp1)) ? \
-				(*(tmp1))->nn_list.nl_rest : NULL), \
-			(*(item2)) = ((*(tmp2)) ? \
-				&((*(tmp2))->nn_list.nl_head) : NULL), \
-			(*(tmp2)) = ((*(tmp2)) ? \
-				(*(tmp2))->nn_list.nl_rest : NULL)) \
-	) \
-
 extern FILE *nls_sys_out;
 extern FILE *nls_sys_err;
 extern nls_hash nls_sys_sym_table;

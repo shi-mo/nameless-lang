@@ -1,0 +1,1 @@
+lambda(c d e).mod(mul(3 4) add(c d))

@@ -1,0 +1,1 @@
+lambda(c d e).mod(div(3 mul(4 c)) add(3 add(d e)))

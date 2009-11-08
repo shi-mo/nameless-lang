@@ -3,8 +3,9 @@
 
 #include "nameless/string.h"
 
-#define NLS_ISINT(node) (NLS_TYPE_INT == (node)->nn_type)
-#define NLS_ISVAR(node) (NLS_TYPE_VAR == (node)->nn_type)
+#define NLS_ISINT(node)  (NLS_TYPE_INT  == (node)->nn_type)
+#define NLS_ISVAR(node)  (NLS_TYPE_VAR  == (node)->nn_type)
+#define NLS_ISLIST(node) (NLS_TYPE_LIST == (node)->nn_type)
 #define NLS_INT_VAL(node) ((node)->nn_int)
 
 typedef enum {
@@ -65,6 +66,36 @@ typedef struct _nls_node {
 #define nn_abst nn_u.nnu_abst
 #define nn_app  nn_u.nnu_app
 
+/**
+ * Traverse all items in nls_list.
+ * @see nls_list_reduce()
+ */
+#define nls_list_foreach(list, item, tmp) \
+	for ( \
+		(*(item)) = &((list)->nn_list.nl_head), \
+			(*(tmp)) = (list)->nn_list.nl_rest; \
+		(*(item)); \
+		(*(item)) = ((*(tmp)) ? &((*(tmp))->nn_list.nl_head) : NULL), \
+			(*(tmp)) = ((*(tmp)) ? \
+				(*(tmp))->nn_list.nl_rest : NULL) \
+	) \
+
+#define nls_double_list_foreach(list1, list2, item1, item2, tmp1, tmp2) \
+	for ( \
+		((*(item1)) = &((list1)->nn_list.nl_head), \
+			(*(tmp1)) = (list1)->nn_list.nl_rest, \
+			(*(item2)) = &((list2)->nn_list.nl_head), \
+			(*(tmp2)) = (list2)->nn_list.nl_rest); \
+		(*(item1) && *(item2)); \
+		(*(item1) = (*(tmp1) ? &((*(tmp1))->nn_list.nl_head) : NULL), \
+			(*(tmp1)) = ((*(tmp1)) ? \
+				(*(tmp1))->nn_list.nl_rest : NULL), \
+			(*(item2)) = ((*(tmp2)) ? \
+				&((*(tmp2))->nn_list.nl_head) : NULL), \
+			(*(tmp2)) = ((*(tmp2)) ? \
+				(*(tmp2))->nn_list.nl_rest : NULL)) \
+	) \
+
 nls_node* nls_node_grab(nls_node *node);
 void nls_node_release(nls_node *tree);
 nls_node* nls_int_new(int val);
@@ -74,6 +105,7 @@ nls_node* nls_abstraction_new(nls_node *vars, nls_node *def);
 nls_node* nls_application_new(nls_node *func, nls_node *arg);
 nls_node* nls_list_new(nls_node *node);
 int nls_list_add(nls_node *ent, nls_node *item);
+void nls_list_remove(nls_node **ent);
 int nls_list_concat(nls_node *ent1, nls_node *ent2);
 int nls_list_count(nls_node *ent);
 

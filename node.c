@@ -179,6 +179,41 @@ nls_list_add(nls_node *ent, nls_node *item)
 	return 0;
 }
 
+void
+nls_list_remove(nls_node **ent)
+{
+	nls_list *list;
+	nls_node *tmp = *ent;
+
+	if (!NLS_ISLIST(*ent)) {
+		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE);
+		return;
+	}
+	list = &(tmp->nn_list);
+	*ent = list->nl_rest;
+	tmp->nn_list.nl_rest = NULL;
+	nls_node_release(tmp);
+}
+
+#ifdef NLS_UNIT_TEST
+static void
+test_nls_list_remove(void)
+{
+	nls_node *list;
+	nls_node *node1 = nls_int_new(1);
+	nls_node *node2 = nls_int_new(2);
+	nls_node *node3 = nls_int_new(3);
+
+	list = nls_node_grab(nls_list_new(node1));
+	nls_list_add(list, node2);
+	nls_list_add(list, node3);
+
+	nls_list_remove(&list);
+	NLS_ASSERT_EQUALS(2, nls_list_count(list));
+	nls_node_release(list);
+}
+#endif /* NLS_UNIT_TEST */
+
 int
 nls_list_concat(nls_node *ent1, nls_node *ent2)
 {
@@ -219,7 +254,7 @@ test_nls_list_count_when_size3(void)
 {
 	nls_node *node1 = nls_int_new(1);
 	nls_node *node2 = nls_int_new(2);
-	nls_node *node3 = nls_int_new(2);
+	nls_node *node3 = nls_int_new(3);
 	nls_node *list = nls_list_new(node1);
 
 	nls_list_add(list, node2);

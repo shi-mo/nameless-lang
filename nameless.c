@@ -10,6 +10,9 @@
 
 #define NLS_MSG_REDUCTION_FAIL "Reduction failure"
 
+#define NLS_ANON_VAR_NAME_BUF_SIZE 32
+#define NLS_ANON_VAR_PREFIX 'x'
+
 NLS_GLOBAL FILE *nls_sys_out;
 NLS_GLOBAL FILE *nls_sys_err;
 NLS_GLOBAL nls_hash nls_sys_sym_table;
@@ -20,6 +23,7 @@ static int nls_apply(nls_node **node);
 static int nls_apply_function(nls_node *func, nls_node *args, nls_node **out);
 static int nls_part_apply_function(nls_node *func, nls_node *args, nls_node **out);
 static int nls_apply_abstraction(nls_node **func, nls_node *args);
+static void nls_replace_vars(nls_node *vars, nls_node *args);
 static nls_node* nls_vars_new(int n);
 static int nls_tree_print(FILE *out, nls_node *tree);
 
@@ -261,23 +265,28 @@ static int
 nls_apply_abstraction(nls_node **func, nls_node *args)
 {
 	int ret;
+	int num_args = nls_list_count(args);
 
 	nls_node *out;
 	nls_abstraction *abst = &((*func)->nn_abst);
-	nls_node *vars = abst->nab_vars;
+	nls_node **vars = &(abst->nab_vars);
+	int func_nargs  = abst->nab_num_arg;
 
-	nls_node **var, **arg, *tmp1, *tmp2;
-	nls_double_list_foreach(vars, args, &var, &arg, &tmp1, &tmp2) {
-		nls_node **replace, **next;
+	if (num_args > func_nargs) {
+		NLS_ERROR(NLS_MSG_TOO_MANY_ARGS " expected=%d actual=%d",
+			func_nargs, num_args);
+		return EINVAL;
+	}
 
-		for (replace = (*var)->nn_var.nv_next_ref,
-			next = replace ? (*replace)->nn_var.nv_next_ref : NULL;
-			replace;
-			replace = next,
-			next = next ? (*next)->nn_var.nv_next_ref : NULL) {
-			nls_node_release(*replace);
-			*replace = nls_node_grab(*arg);
+	nls_replace_vars(*vars, args);
+	if (num_args < func_nargs) {
+		int i;
+
+		for (i = 0; i < num_args; i++) {
+			nls_list_remove(vars);
 		}
+		abst->nab_num_arg -= num_args;
+		return 0;
 	}
 	out = nls_node_grab(abst->nab_def);
 	nls_node_release(*func);
@@ -288,8 +297,24 @@ nls_apply_abstraction(nls_node **func, nls_node *args)
 	return 0;
 }
 
-#define NLS_ANON_VAR_NAME_BUF_SIZE 32
-#define NLS_ANON_VAR_PREFIX 'x'
+static void
+nls_replace_vars(nls_node *vars, nls_node *args)
+{
+	nls_node **var, **arg, *tmp1, *tmp2;
+
+	nls_double_list_foreach(vars, args, &var, &arg, &tmp1, &tmp2) {
+		nls_node **replace = (*var)->nn_var.nv_next_ref;
+		nls_node **next = replace ?(*replace)->nn_var.nv_next_ref : NULL;
+
+		while (replace) {
+			nls_node_release(*replace);
+			*replace = nls_node_grab(*arg);
+			replace = next;
+			next = next ? (*next)->nn_var.nv_next_ref : NULL;
+		}
+	}
+}
+
 static nls_node*
 nls_vars_new(int n)
 {
