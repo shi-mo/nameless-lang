@@ -156,44 +156,34 @@ static int
 nls_apply(nls_node **node)
 {
 	int ret;
-	nls_application *app;
-	nls_node **func, **args;
+	nls_node *out;
 
-retry:
-	app  = &((*node)->nn_app);
-	func = &(app->nap_func);
-	args = &(app->nap_args);
+	nls_application *app = &((*node)->nn_app);
+	nls_node **func = &(app->nap_func);
+	nls_node **args = &(app->nap_args);
 
 	switch ((*func)->nn_type) {
 	case NLS_TYPE_FUNCTION:
-		{
-			nls_node *out;
-
-			if ((ret = nls_apply_function(*func, *args, &out))) {
-				return ret;
-			}
-			out = nls_node_grab(out);
-			nls_node_release(*node);
-			*node = out;
+		if ((ret = nls_apply_function(*func, *args, &out))) {
+			return ret;
 		}
+		out = nls_node_grab(out);
+		nls_node_release(*node);
+		*node = out;
 		break;
 	case NLS_TYPE_ABSTRACTION:
-		{
-			nls_node *out;
-
-			if ((ret = nls_apply_abstraction(func, *args))) {
-				return ret;
-			}
-			out = nls_node_grab(*func);
-			nls_node_release(*node);
-			*node = out;
+		if ((ret = nls_apply_abstraction(func, *args))) {
+			return ret;
 		}
+		out = nls_node_grab(*func);
+		nls_node_release(*node);
+		*node = out;
 		break;
 	case NLS_TYPE_APPLICATION:
 		if ((ret = nls_reduce(func))) {
 			return ret;
 		}
-		goto retry;
+		return nls_apply(node);
 	default:
 		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE
 			": type=%d", (*func)->nn_type);
