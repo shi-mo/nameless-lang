@@ -24,6 +24,7 @@ static int nls_apply_function(nls_node *func, nls_node *args, nls_node **out);
 static int nls_part_apply_function(nls_node *func, nls_node *args, nls_node **out);
 static int nls_apply_abstraction(nls_node **func, nls_node *args);
 static void nls_replace_vars(nls_node *vars, nls_node *args);
+static void nls_remove_head_vars(nls_node *func, int n);
 static nls_node* nls_vars_new(int n);
 static int nls_tree_print(FILE *out, nls_node *tree);
 
@@ -280,12 +281,8 @@ nls_apply_abstraction(nls_node **func, nls_node *args)
 
 	nls_replace_vars(*vars, args);
 	if (num_args < func_nargs) {
-		int i;
-
-		for (i = 0; i < num_args; i++) {
-			nls_list_remove(vars);
-		}
-		abst->nab_num_args -= num_args;
+		/* Partial apply */
+		nls_remove_head_vars(*func, num_args);
 		return 0;
 	}
 	out = nls_node_grab(abst->nab_def);
@@ -313,6 +310,19 @@ nls_replace_vars(nls_node *vars, nls_node *args)
 			next = next ? (*next)->nn_var.nv_next_ref : NULL;
 		}
 	}
+}
+
+static void
+nls_remove_head_vars(nls_node *func, int n)
+{
+	int i;
+	nls_abstraction *abst = &(func->nn_abst);
+	nls_node **vars = &(abst->nab_vars);
+
+	for (i = 0; i < n; i++) {
+		nls_list_remove(vars);
+	}
+	abst->nab_num_args -= n;
 }
 
 static nls_node*
