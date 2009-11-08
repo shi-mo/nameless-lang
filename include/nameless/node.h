@@ -24,7 +24,7 @@ typedef struct _nls_var {
 } nls_var;
 
 typedef struct _nls_abstraction {
-	int nab_num_arg;
+	int nab_num_args;
 	struct _nls_node *nab_vars;
 	struct _nls_node *nab_def;
 } nls_abstraction;

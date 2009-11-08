@@ -124,7 +124,7 @@ nls_abstraction_new(nls_node *vars, nls_node *def)
 		}
 	}
 	abst = &(node->nn_abst);
-	abst->nab_num_arg = n;
+	abst->nab_num_args = n;
 	abst->nab_vars = nls_node_grab(vars);
 	abst->nab_def  = nls_node_grab(def);
 	return node;

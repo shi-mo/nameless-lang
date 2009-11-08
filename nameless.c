@@ -270,7 +270,7 @@ nls_apply_abstraction(nls_node **func, nls_node *args)
 	nls_node *out;
 	nls_abstraction *abst = &((*func)->nn_abst);
 	nls_node **vars = &(abst->nab_vars);
-	int func_nargs  = abst->nab_num_arg;
+	int func_nargs  = abst->nab_num_args;
 
 	if (num_args > func_nargs) {
 		NLS_ERROR(NLS_MSG_TOO_MANY_ARGS " expected=%d actual=%d",
@@ -285,7 +285,7 @@ nls_apply_abstraction(nls_node **func, nls_node *args)
 		for (i = 0; i < num_args; i++) {
 			nls_list_remove(vars);
 		}
-		abst->nab_num_arg -= num_args;
+		abst->nab_num_args -= num_args;
 		return 0;
 	}
 	out = nls_node_grab(abst->nab_def);
