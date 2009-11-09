@@ -55,14 +55,12 @@ nls_string_grab(nls_string *str)
 }
 
 void
-nls_string_release(nls_string *str)
+nls_string_free(void *ptr)
 {
-	if (!nls_is_last_ref(str)) {
-		nls_release(str);
-		return;
-	}
+	nls_string *str = (nls_string*)ptr;
+
 	nls_release(str->ns_bufp);
-	nls_release(str);
+	nls_free(str);
 }
 
 #ifdef NLS_UNIT_TEST
@@ -84,21 +82,12 @@ test_nls_string_release(void)
 	NLS_ASSERT_EQUALS(str, ref2);
 	NLS_ASSERT_EQUALS(2, mem->nm_ref);
 
-	nls_string_release(ref2);
+	nls_release(ref2);
 	NLS_ASSERT_EQUALS(1, mem->nm_ref);
 
-	nls_string_release(ref1); /* free() called. */
-}
-#endif /* NLS_UNIT_TEST */
-
-void
-nls_string_free(nls_string *str)
-{
-	nls_release(str->ns_bufp);
-	nls_free(str);
+	nls_release(ref1); /* free() called. */
 }
 
-#ifdef NLS_UNIT_TEST
 static void
 test_nls_string_free(void)
 {

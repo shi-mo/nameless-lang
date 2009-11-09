@@ -74,7 +74,7 @@ nls_main(FILE *in, FILE *out, FILE *err)
 	}
 free_exit:
 	if (tree) {
-		nls_node_release(tree);
+		nls_release(tree);
 	}
 	nls_term();
 	return ret;
@@ -190,7 +190,7 @@ nls_apply(nls_node **node)
 			return ret;
 		}
 		out = nls_node_grab(out);
-		nls_node_release(*node);
+		nls_release(*node);
 		*node = out;
 		break;
 	case NLS_TYPE_ABSTRACTION:
@@ -198,7 +198,7 @@ nls_apply(nls_node **node)
 			return ret;
 		}
 		out = nls_node_grab(*func);
-		nls_node_release(*node);
+		nls_release(*node);
 		*node = out;
 		break;
 	case NLS_TYPE_APPLICATION:
@@ -253,26 +253,26 @@ nls_part_apply_function(nls_node *func, nls_node *args, nls_node **out)
 	}
 	add_vars = nls_vars_new(num_lack);
 	if (!add_vars) {
-		nls_node_release(nls_node_grab(vars));
+		nls_release(nls_node_grab(vars));
 		return ENOMEM;
 	}
 	func = nls_function_new(fp, num_args, name->ns_bufp);
 	if (!func) {
-		nls_node_release(nls_node_grab(vars));
-		nls_node_release(nls_node_grab(add_vars));
+		nls_release(nls_node_grab(vars));
+		nls_release(nls_node_grab(add_vars));
 		return ENOMEM;
 	}
 	nls_list_concat(args, add_vars);
 	def = nls_application_new(func, args);
 	if (!def) {
-		nls_node_release(nls_node_grab(func));
-		nls_node_release(vars);
+		nls_release(nls_node_grab(func));
+		nls_release(vars);
 		return ENOMEM;
 	}
 	curry = nls_abstraction_new(vars, def);
 	if (!curry) {
-		nls_node_release(nls_node_grab(def));
-		nls_node_release(vars);
+		nls_release(nls_node_grab(def));
+		nls_release(vars);
 		return ENOMEM;
 	}
 	*out = curry;
@@ -303,7 +303,7 @@ nls_apply_abstraction(nls_node **func, nls_node *args)
 		return 0;
 	}
 	out = nls_node_grab(abst->nab_def);
-	nls_node_release(*func);
+	nls_release(*func);
 	*func = out;
 	if ((ret = nls_reduce(func))) {
 		return ret;
@@ -321,7 +321,7 @@ nls_replace_vars(nls_node *vars, nls_node *args)
 		nls_node **next = replace ?(*replace)->nn_var.nv_next_ref : NULL;
 
 		while (replace) {
-			nls_node_release(*replace);
+			nls_release(*replace);
 			*replace = nls_node_grab(*arg);
 			replace = next;
 			next = next ? (*next)->nn_var.nv_next_ref : NULL;
@@ -368,7 +368,7 @@ nls_vars_new(int n)
 		if (!vars) {
 			vars = nls_list_new(var);
 			if (!vars) {
-				nls_node_release(nls_node_grab(var));
+				nls_release(nls_node_grab(var));
 				return NULL;
 			}
 			continue;
@@ -378,7 +378,7 @@ nls_vars_new(int n)
 	return vars;
 free_exit:
 	if (vars) {
-		nls_node_release(nls_node_grab(vars));
+		nls_release(nls_node_grab(vars));
 	}
 	return NULL;
 }

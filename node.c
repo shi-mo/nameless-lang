@@ -35,27 +35,25 @@ nls_node_grab(nls_node *node)
 }
 
 void
-nls_node_release(nls_node *tree)
+nls_node_free(void *ptr)
 {
-	if (!nls_is_last_ref(tree)) {
-		nls_release(tree);
-		return;
-	}
+	nls_node *tree = (nls_node*)ptr;
+
 	switch (tree->nn_type) {
 	case NLS_TYPE_INT:
 		break;
 	case NLS_TYPE_VAR:
-		nls_string_release(tree->nn_var.nv_name);
+		nls_release(tree->nn_var.nv_name);
 		break;
 	case NLS_TYPE_FUNCTION:
-		nls_string_release(tree->nn_func.nf_name);
+		nls_release(tree->nn_func.nf_name);
 		break;
 	case NLS_TYPE_ABSTRACTION:
 		{
 			nls_abstraction *abst = &(tree->nn_abst);
 
-			nls_node_release(abst->nab_vars);
-			nls_node_release(abst->nab_def);
+			nls_release(abst->nab_vars);
+			nls_release(abst->nab_def);
 		}
 		break;
 	case NLS_TYPE_LIST:
@@ -65,15 +63,16 @@ nls_node_release(nls_node *tree)
 		{
 			nls_application *app = &tree->nn_app;
 
-			nls_node_release(app->nap_args);
-			nls_node_release(app->nap_func);
+			nls_release(app->nap_args);
+			nls_release(app->nap_func);
 		}
 		break;
 	default:
-		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE);
+		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE ": type=%d",
+			tree->nn_type);
 		return;
 	}
-	nls_release(tree);
+	nls_free(tree);
 }
 
 nls_node*
@@ -146,7 +145,7 @@ nls_abstraction_new(nls_node *vars, nls_node *def)
 	abst->nab_def  = nls_node_grab(def);
 	return node;
 free_exit:
-	nls_node_release(node);
+	nls_release(node);
 	return NULL;
 }
 
@@ -209,7 +208,7 @@ nls_list_remove(nls_node **ent)
 	list = &(tmp->nn_list);
 	*ent = list->nl_rest;
 	tmp->nn_list.nl_rest = NULL;
-	nls_node_release(tmp);
+	nls_release(tmp);
 }
 
 #ifdef NLS_UNIT_TEST
@@ -227,7 +226,7 @@ test_nls_list_remove(void)
 
 	nls_list_remove(&list);
 	NLS_ASSERT_EQUALS(2, nls_list_count(list));
-	nls_node_release(list);
+	nls_release(list);
 }
 #endif /* NLS_UNIT_TEST */
 
@@ -263,7 +262,7 @@ test_nls_list_count_when_size1(void)
 	nls_node *list = nls_list_new(node);
 	NLS_ASSERT_EQUALS(1, nls_list_count(list));
 
-	nls_node_release(nls_node_grab(list));
+	nls_release(nls_node_grab(list));
 }
 
 static void
@@ -280,7 +279,7 @@ test_nls_list_count_when_size3(void)
 	nls_list_add(list, node3);
 	NLS_ASSERT_EQUALS(3, nls_list_count(list));
 
-	nls_node_release(nls_node_grab(list));
+	nls_release(nls_node_grab(list));
 }
 #endif /* NLS_UNIT_TEST */
 
@@ -301,9 +300,9 @@ nls_list_item_free(nls_node *node)
 {
 	nls_list *list = &(node->nn_list);
 
-	nls_node_release(list->nl_head);
+	nls_release(list->nl_head);
 	if (list->nl_rest) {
-		nls_node_release(list->nl_rest);
+		nls_release(list->nl_rest);
 	}
 }
 

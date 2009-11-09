@@ -24,7 +24,7 @@
 
 static nls_hash_entry* nls_hash_entry_new(nls_string *key, nls_node *node);
 static nls_hash_entry* nls_hash_entry_grab(nls_hash_entry *ent);
-static void nls_hash_entry_release(nls_hash_entry *ent);
+static void nls_hash_entry_free(void *ptr);
 
 void
 nls_hash_init(nls_hash *hash)
@@ -50,7 +50,7 @@ nls_hash_term(nls_hash *hash)
 
 	for (i = 0; i < NLS_HASH_WIDTH; i++) {
 		if (table[i].nhe_next) {
-			nls_hash_entry_release(table[i].nhe_next);
+			nls_release(table[i].nhe_next);
 		}
 		table[i].nhe_next = NULL;
 	}
@@ -93,7 +93,7 @@ nls_hash_add(nls_hash *hash, nls_string *key, nls_node *item)
 	}
 	if (head->nhe_next) {
 		ent->nhe_next = nls_hash_entry_grab(head->nhe_next);
-		nls_hash_entry_release(head->nhe_next);
+		nls_release(head->nhe_next);
 	}
 	head->nhe_next = nls_hash_entry_grab(ent);
 	hash->nh_num++;
@@ -117,10 +117,10 @@ test_nls_hash_add(void)
 	nls_hash_add(&hash, key2, item2);
 	NLS_ASSERT_EQUALS(2, hash.nh_num);
 
-	nls_string_release(key1);
-	nls_string_release(key2);
-	nls_node_release(item1);
-	nls_node_release(item2);
+	nls_release(key1);
+	nls_release(key2);
+	nls_release(item1);
+	nls_release(item2);
 	nls_hash_term(&hash);
 }
 #endif /* NLS_UNIT_TEST */
@@ -138,7 +138,7 @@ nls_hash_remove(nls_hash *hash, nls_string *key)
 	if (ent->nhe_next) {
 		prev->nhe_next = nls_hash_entry_grab(ent->nhe_next);
 	}
-	nls_hash_entry_release(ent);
+	nls_release(ent);
 	hash->nh_num--;
 	return 0;
 }
@@ -163,10 +163,10 @@ test_nls_hash_remove(void)
 	nls_hash_remove(&hash, key2);
 	NLS_ASSERT_EQUALS(0, hash.nh_num);
 
-	nls_string_release(key1);
-	nls_string_release(key2);
-	nls_node_release(item1);
-	nls_node_release(item2);
+	nls_release(key1);
+	nls_release(key2);
+	nls_release(item1);
+	nls_release(item2);
 	nls_hash_term(&hash);
 }
 #endif /* NLS_UNIT_TEST */
@@ -192,16 +192,14 @@ nls_hash_entry_grab(nls_hash_entry *ent)
 }
 
 static void
-nls_hash_entry_release(nls_hash_entry *ent)
+nls_hash_entry_free(void *ptr)
 {
-	if (!nls_is_last_ref(ent)) {
-		nls_release(ent);
-		return;
-	}
+	nls_hash_entry *ent = (nls_hash_entry*)ptr;
+
 	if (ent->nhe_next) {
-		nls_hash_entry_release(ent->nhe_next);
+		nls_release(ent->nhe_next);
 	}
-	nls_string_release(ent->nhe_key);
-	nls_node_release(ent->nhe_node);
-	nls_release(ent);
+	nls_release(ent->nhe_key);
+	nls_release(ent->nhe_node);
+	nls_free(ent);
 }

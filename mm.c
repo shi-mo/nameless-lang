@@ -95,13 +95,15 @@ nls_grab(void *ptr)
 }
 
 #ifdef NLS_UNIT_TEST
+#include "nameless/node.h"
+
 static void
 test_nls_grab(void)
 {
 	nls_mem *mem;
 	nls_node *node, *ref1, *ref2;
 
-	node = nls_new(nls_node);
+	node = nls_int_new(5);
 	mem = (nls_mem*)node - 1;
 	NLS_ASSERT_EQUALS(0, mem->nm_ref);
 
@@ -121,7 +123,6 @@ test_nls_grab(void)
 void
 nls_release(void *ptr)
 {
-	int ref;
 	nls_mem *mem;
 
 	if (!ptr) {
@@ -129,9 +130,8 @@ nls_release(void *ptr)
 		return;
 	}
 	mem = (nls_mem*)(ptr - sizeof(nls_mem));
-	ref = --(mem->nm_ref);
-	if (!ref) {
-		nls_free(ptr);
+	if (!--(mem->nm_ref)) {
+		(mem->nm_free_op)(ptr);
 	}
 }
 
@@ -185,7 +185,7 @@ test_nls_is_last_ref(void)
 {
 	nls_node *node, *ref1, *ref2;
 
-	node = nls_new(nls_node);
+	node = nls_int_new(100);
 	ref1 = nls_grab(node);
 	NLS_ASSERT(nls_is_last_ref(ref1));
 
@@ -205,7 +205,7 @@ test_nls_is_last_ref(void)
  * Use nls_new(type) / nls_new_array(type) / nls_grab(ptr) instead.
  */
 void*
-_nls_malloc(size_t size, const char *type)
+_nls_malloc(size_t size, const char *type, nls_free_op free_op)
 {
 	nls_mem *mem = malloc(size + sizeof(nls_mem));
 
@@ -217,6 +217,7 @@ _nls_malloc(size_t size, const char *type)
 	mem->nm_type = type;
 	mem->nm_ref  = 0;
 	mem->nm_size = size;
+	mem->nm_free_op = free_op;
 	nls_mem_chain_add(mem);
 
 	return ++mem;
@@ -235,7 +236,7 @@ test_nls_new(void)
 	NLS_ASSERT_EQUALS(&nls_mem_chain, nls_mem_chain.nm_prev);
 	NLS_ASSERT_EQUALS(&nls_mem_chain, nls_mem_chain.nm_next);
 
-	node = nls_grab(nls_new(nls_node));
+	node = nls_grab(nls_int_new(256));
 	mem = (nls_mem*)node - 1;
 	NLS_ASSERT_EQUALS(&nls_mem_chain, mem->nm_prev);
 	NLS_ASSERT_EQUALS(&nls_mem_chain, mem->nm_next);

@@ -115,7 +115,7 @@ typedef struct _nls_node {
 	) \
 
 nls_node* nls_node_grab(nls_node *node);
-void nls_node_release(nls_node *tree);
+void nls_node_free(void *ptr);
 nls_node* nls_int_new(int val);
 nls_node* nls_var_new(nls_string *name);
 nls_node* nls_function_new(nls_fp fp, int num_args, char *name);
