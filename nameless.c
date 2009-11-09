@@ -253,26 +253,26 @@ nls_part_apply_function(nls_node *func, nls_node *args, nls_node **out)
 	}
 	add_vars = nls_vars_new(num_lack);
 	if (!add_vars) {
-		nls_release(nls_grab(vars));
+		nls_node_free(vars);
 		return ENOMEM;
 	}
 	func = nls_function_new(fp, num_args, name->ns_bufp);
 	if (!func) {
-		nls_release(nls_grab(vars));
-		nls_release(nls_grab(add_vars));
+		nls_node_free(vars);
+		nls_node_free(add_vars);
 		return ENOMEM;
 	}
 	nls_list_concat(args, add_vars);
 	def = nls_application_new(func, args);
 	if (!def) {
-		nls_release(nls_grab(func));
-		nls_release(vars);
+		nls_node_free(func);
+		nls_node_free(vars);
 		return ENOMEM;
 	}
 	curry = nls_abstraction_new(vars, def);
 	if (!curry) {
-		nls_release(nls_grab(def));
-		nls_release(vars);
+		nls_node_free(def);
+		nls_node_free(vars);
 		return ENOMEM;
 	}
 	*out = curry;
@@ -368,7 +368,7 @@ nls_vars_new(int n)
 		if (!vars) {
 			vars = nls_list_new(var);
 			if (!vars) {
-				nls_release(nls_grab(var));
+				nls_node_free(var);
 				return NULL;
 			}
 			continue;
@@ -378,7 +378,7 @@ nls_vars_new(int n)
 	return vars;
 free_exit:
 	if (vars) {
-		nls_release(nls_grab(vars));
+		nls_node_free(vars);
 	}
 	return NULL;
 }

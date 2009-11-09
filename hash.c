@@ -91,8 +91,7 @@ nls_hash_add(nls_hash *hash, nls_string *key, nls_node *item)
 		return ENOMEM;
 	}
 	if (head->nhe_next) {
-		ent->nhe_next = nls_grab(head->nhe_next);
-		nls_release(head->nhe_next);
+		ent->nhe_next = head->nhe_next;
 	}
 	head->nhe_next = nls_grab(ent);
 	hash->nh_num++;
@@ -136,6 +135,8 @@ nls_hash_remove(nls_hash *hash, nls_string *key)
 	}
 	if (ent->nhe_next) {
 		prev->nhe_next = nls_grab(ent->nhe_next);
+	} else {
+		prev->nhe_next = NULL;
 	}
 	nls_release(ent);
 	hash->nh_num--;

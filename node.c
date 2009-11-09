@@ -256,7 +256,7 @@ test_nls_list_count_when_size1(void)
 	nls_node *list = nls_list_new(node);
 	NLS_ASSERT_EQUALS(1, nls_list_count(list));
 
-	nls_release(nls_grab(list));
+	nls_node_free(list);
 }
 
 static void
@@ -273,7 +273,7 @@ test_nls_list_count_when_size3(void)
 	nls_list_add(list, node3);
 	NLS_ASSERT_EQUALS(3, nls_list_count(list));
 
-	nls_release(nls_grab(list));
+	nls_node_free(list);
 }
 #endif /* NLS_UNIT_TEST */
 

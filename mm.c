@@ -121,8 +121,9 @@ test_nls_grab(void)
 #endif /* NLS_UNIT_TEST */
 
 void
-nls_release(void *ptr)
+_nls_release(void *ptr, const char *file, int line, const char *func)
 {
+	int ref;
 	nls_mem *mem;
 
 	if (!ptr) {
@@ -130,13 +131,22 @@ nls_release(void *ptr)
 		return;
 	}
 	mem = (nls_mem*)(ptr - sizeof(nls_mem));
-	if (!--(mem->nm_ref)) {
+	ref = --(mem->nm_ref);
+	if (ref < 0) {
+		NLS_BUG(NLS_MSG_INVALID_REFCOUNT "\n"
+			"\tRelease at %s:%d:%s\n"
+			"\tTarget: mem=%p ptr=%p ref=%d size=%d type=%s",
+			file, line, func, mem, (mem + 1), mem->nm_ref,
+			mem->nm_size, mem->nm_type);
+		return;
+	}
+	if (!ref) {
 		(mem->nm_free_op)(ptr);
 	}
 }
 
 void
-nls_free(void *ptr)
+_nls_free(void *ptr, const char *file, int line, const char *func)
 {
 	nls_mem *mem;
 
@@ -155,15 +165,22 @@ nls_free(void *ptr)
 	}
 
 	if (mem->nm_ref) {
-		NLS_BUG(NLS_MSG_INVALID_REFCOUNT
-			": mem=%p ptr=%p ref=%d size=%d type=%s",
-			mem, (mem + 1), mem->nm_ref, mem->nm_size,
-			mem->nm_type);
+		NLS_BUG(NLS_MSG_INVALID_REFCOUNT "\n"
+			"\tFree at file:%s line:%d function:%s\n"
+			"\tTarget: mem=%p ptr=%p ref=%d size=%d type=%s",
+			file, line, func, mem, (mem + 1), mem->nm_ref,
+			mem->nm_size, mem->nm_type);
 		return;
 	}
 	nls_mem_free_cnt++;
 	nls_mem_chain_remove(mem);
 	free(mem);
+}
+
+void
+nls_array_free(void *ptr)
+{
+	nls_free(ptr);
 }
 
 /*
