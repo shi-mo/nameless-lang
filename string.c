@@ -48,12 +48,6 @@ nls_string_new(char *s)
 	return str;
 }
 
-nls_string*
-nls_string_grab(nls_string *str)
-{
-	return nls_grab(str);
-}
-
 void
 nls_string_free(void *ptr)
 {
@@ -74,11 +68,11 @@ test_nls_string_release(void)
 	mem = (nls_mem*)str - 1;
 	NLS_ASSERT_EQUALS(0, mem->nm_ref);
 
-	ref1 = nls_string_grab(str);
+	ref1 = nls_grab(str);
 	NLS_ASSERT_EQUALS(str, ref1);
 	NLS_ASSERT_EQUALS(1, mem->nm_ref);
 
-	ref2 = nls_string_grab(str);
+	ref2 = nls_grab(str);
 	NLS_ASSERT_EQUALS(str, ref2);
 	NLS_ASSERT_EQUALS(2, mem->nm_ref);
 

@@ -57,7 +57,7 @@ code	: op_spaces
 	| op_spaces exprs op_spaces
 	{
 		$$ = $2;
-		nls_sys_parse_result = nls_node_grab($$);
+		nls_sys_parse_result = nls_grab($$);
 	}
 
 exprs	: expr

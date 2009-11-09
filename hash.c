@@ -23,7 +23,6 @@
 #define NLS_MSG_HASH_ENOENT "No such hash entry"
 
 static nls_hash_entry* nls_hash_entry_new(nls_string *key, nls_node *node);
-static nls_hash_entry* nls_hash_entry_grab(nls_hash_entry *ent);
 static void nls_hash_entry_free(void *ptr);
 
 void
@@ -92,10 +91,10 @@ nls_hash_add(nls_hash *hash, nls_string *key, nls_node *item)
 		return ENOMEM;
 	}
 	if (head->nhe_next) {
-		ent->nhe_next = nls_hash_entry_grab(head->nhe_next);
+		ent->nhe_next = nls_grab(head->nhe_next);
 		nls_release(head->nhe_next);
 	}
-	head->nhe_next = nls_hash_entry_grab(ent);
+	head->nhe_next = nls_grab(ent);
 	hash->nh_num++;
 	return 0;
 }
@@ -105,10 +104,10 @@ static void
 test_nls_hash_add(void)
 {
 	nls_hash hash;
-	nls_string *key1 = nls_string_grab(nls_string_new("key1"));
-	nls_string *key2 = nls_string_grab(nls_string_new("KEY2"));
-	nls_node *item1 = nls_node_grab(nls_int_new(1));
-	nls_node *item2 = nls_node_grab(nls_int_new(2));
+	nls_string *key1 = nls_grab(nls_string_new("key1"));
+	nls_string *key2 = nls_grab(nls_string_new("KEY2"));
+	nls_node *item1 = nls_grab(nls_int_new(1));
+	nls_node *item2 = nls_grab(nls_int_new(2));
 
 	nls_hash_init(&hash);
 	NLS_ASSERT_EQUALS(0, hash.nh_num);
@@ -136,7 +135,7 @@ nls_hash_remove(nls_hash *hash, nls_string *key)
 		return EINVAL;
 	}
 	if (ent->nhe_next) {
-		prev->nhe_next = nls_hash_entry_grab(ent->nhe_next);
+		prev->nhe_next = nls_grab(ent->nhe_next);
 	}
 	nls_release(ent);
 	hash->nh_num--;
@@ -148,10 +147,10 @@ static void
 test_nls_hash_remove(void)
 {
 	nls_hash hash;
-	nls_string *key1 = nls_string_grab(nls_string_new("WWW"));
-	nls_string *key2 = nls_string_grab(nls_string_new("912"));
-	nls_node *item1 = nls_node_grab(nls_int_new(1));
-	nls_node *item2 = nls_node_grab(nls_int_new(2));
+	nls_string *key1 = nls_grab(nls_string_new("WWW"));
+	nls_string *key2 = nls_grab(nls_string_new("912"));
+	nls_node *item1 = nls_grab(nls_int_new(1));
+	nls_node *item2 = nls_grab(nls_int_new(2));
 
 	nls_hash_init(&hash);
 	nls_hash_add(&hash, key1, item1);
@@ -180,15 +179,9 @@ nls_hash_entry_new(nls_string *key, nls_node *node)
 		return NULL;
 	}
 	new->nhe_next = NULL;
-	new->nhe_key  = nls_string_grab(key);
-	new->nhe_node = nls_node_grab(node);
+	new->nhe_key  = nls_grab(key);
+	new->nhe_node = nls_grab(node);
 	return new;
-}
-
-static nls_hash_entry*
-nls_hash_entry_grab(nls_hash_entry *ent)
-{
-	return nls_grab(ent);
 }
 
 static void

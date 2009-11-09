@@ -114,7 +114,6 @@ typedef struct _nls_node {
 				(*(tmp2))->nn_list.nl_rest : NULL)) \
 	) \
 
-nls_node* nls_node_grab(nls_node *node);
 void nls_node_free(void *ptr);
 nls_node* nls_int_new(int val);
 nls_node* nls_var_new(nls_string *name);

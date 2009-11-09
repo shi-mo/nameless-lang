@@ -189,7 +189,7 @@ nls_apply(nls_node **node)
 		if ((ret = nls_apply_function(*func, *args, &out))) {
 			return ret;
 		}
-		out = nls_node_grab(out);
+		out = nls_grab(out);
 		nls_release(*node);
 		*node = out;
 		break;
@@ -197,7 +197,7 @@ nls_apply(nls_node **node)
 		if ((ret = nls_apply_abstraction(func, *args))) {
 			return ret;
 		}
-		out = nls_node_grab(*func);
+		out = nls_grab(*func);
 		nls_release(*node);
 		*node = out;
 		break;
@@ -253,25 +253,25 @@ nls_part_apply_function(nls_node *func, nls_node *args, nls_node **out)
 	}
 	add_vars = nls_vars_new(num_lack);
 	if (!add_vars) {
-		nls_release(nls_node_grab(vars));
+		nls_release(nls_grab(vars));
 		return ENOMEM;
 	}
 	func = nls_function_new(fp, num_args, name->ns_bufp);
 	if (!func) {
-		nls_release(nls_node_grab(vars));
-		nls_release(nls_node_grab(add_vars));
+		nls_release(nls_grab(vars));
+		nls_release(nls_grab(add_vars));
 		return ENOMEM;
 	}
 	nls_list_concat(args, add_vars);
 	def = nls_application_new(func, args);
 	if (!def) {
-		nls_release(nls_node_grab(func));
+		nls_release(nls_grab(func));
 		nls_release(vars);
 		return ENOMEM;
 	}
 	curry = nls_abstraction_new(vars, def);
 	if (!curry) {
-		nls_release(nls_node_grab(def));
+		nls_release(nls_grab(def));
 		nls_release(vars);
 		return ENOMEM;
 	}
@@ -302,7 +302,7 @@ nls_apply_abstraction(nls_node **func, nls_node *args)
 		nls_remove_head_vars(*func, num_args);
 		return 0;
 	}
-	out = nls_node_grab(abst->nab_def);
+	out = nls_grab(abst->nab_def);
 	nls_release(*func);
 	*func = out;
 	if ((ret = nls_reduce(func))) {
@@ -322,7 +322,7 @@ nls_replace_vars(nls_node *vars, nls_node *args)
 
 		while (replace) {
 			nls_release(*replace);
-			*replace = nls_node_grab(*arg);
+			*replace = nls_grab(*arg);
 			replace = next;
 			next = next ? (*next)->nn_var.nv_next_ref : NULL;
 		}
@@ -368,7 +368,7 @@ nls_vars_new(int n)
 		if (!vars) {
 			vars = nls_list_new(var);
 			if (!vars) {
-				nls_release(nls_node_grab(var));
+				nls_release(nls_grab(var));
 				return NULL;
 			}
 			continue;
@@ -378,7 +378,7 @@ nls_vars_new(int n)
 	return vars;
 free_exit:
 	if (vars) {
-		nls_release(nls_node_grab(vars));
+		nls_release(nls_grab(vars));
 	}
 	return NULL;
 }

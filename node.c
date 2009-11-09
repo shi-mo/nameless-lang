@@ -28,12 +28,6 @@ static void nls_list_item_free(nls_node *node);
 static nls_node* nls_list_tail_entry(nls_node *node);
 static int nls_register_vars(nls_node **tree, nls_node *var);
 
-nls_node*
-nls_node_grab(nls_node *node)
-{
-	return nls_grab(node);
-}
-
 void
 nls_node_free(void *ptr)
 {
@@ -96,7 +90,7 @@ nls_var_new(nls_string *name)
 		return NULL;
 	}
 	node->nn_var.nv_next_ref = NULL;
-	node->nn_var.nv_name = nls_string_grab(name);
+	node->nn_var.nv_name = nls_grab(name);
 	return node;
 }
 
@@ -115,7 +109,7 @@ nls_function_new(nls_fp fp, int num_args, char *name)
 		return NULL;
 	}
 	node->nn_func.nf_num_args = num_args;
-	node->nn_func.nf_name = nls_string_grab(str);
+	node->nn_func.nf_name = nls_grab(str);
 	node->nn_func.nf_fp = fp;
 	return node;
 }
@@ -141,8 +135,8 @@ nls_abstraction_new(nls_node *vars, nls_node *def)
 	}
 	abst = &(node->nn_abst);
 	abst->nab_num_args = n;
-	abst->nab_vars = nls_node_grab(vars);
-	abst->nab_def  = nls_node_grab(def);
+	abst->nab_vars = nls_grab(vars);
+	abst->nab_def  = nls_grab(def);
 	return node;
 free_exit:
 	nls_release(node);
@@ -159,8 +153,8 @@ nls_application_new(nls_node *func, nls_node *arg)
 		return NULL;
 	}
 	app = &(node->nn_app);
-	app->nap_func = nls_node_grab(func);
-	app->nap_args = nls_node_grab(arg);
+	app->nap_func = nls_grab(func);
+	app->nap_args = nls_grab(arg);
 	return node;
 }
 
@@ -174,7 +168,7 @@ nls_list_new(nls_node *item)
 		return NULL;
 	}
 	list = &(node->nn_list);
-	list->nl_head = nls_node_grab(item);
+	list->nl_head = nls_grab(item);
 	list->nl_rest = NULL;
 	return node;
 }
@@ -191,7 +185,7 @@ nls_list_add(nls_node *ent, nls_node *item)
 	if (!new) {
 		return 1;
 	}
-	list->nl_rest = nls_node_grab(new);
+	list->nl_rest = nls_grab(new);
 	return 0;
 }
 
@@ -220,7 +214,7 @@ test_nls_list_remove(void)
 	nls_node *node2 = nls_int_new(2);
 	nls_node *node3 = nls_int_new(3);
 
-	list = nls_node_grab(nls_list_new(node1));
+	list = nls_grab(nls_list_new(node1));
 	nls_list_add(list, node2);
 	nls_list_add(list, node3);
 
@@ -238,7 +232,7 @@ nls_list_concat(nls_node *ent1, nls_node *ent2)
 
 	tail = nls_list_tail_entry(ent1);
 	list = &(tail->nn_list);
-	list->nl_rest = nls_node_grab(ent2);
+	list->nl_rest = nls_grab(ent2);
 	return 0;
 }
 
@@ -262,7 +256,7 @@ test_nls_list_count_when_size1(void)
 	nls_node *list = nls_list_new(node);
 	NLS_ASSERT_EQUALS(1, nls_list_count(list));
 
-	nls_release(nls_node_grab(list));
+	nls_release(nls_grab(list));
 }
 
 static void
@@ -279,7 +273,7 @@ test_nls_list_count_when_size3(void)
 	nls_list_add(list, node3);
 	NLS_ASSERT_EQUALS(3, nls_list_count(list));
 
-	nls_release(nls_node_grab(list));
+	nls_release(nls_grab(list));
 }
 #endif /* NLS_UNIT_TEST */
 
