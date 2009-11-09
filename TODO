@@ -32,8 +32,8 @@ TODO LIST
   comment(structure chart)
   commit message rule
   CODINGSTD
-  COPYING
   README
+  *done* COPYING
 
 [Build Environment]
   source emmbed sha1-sum
