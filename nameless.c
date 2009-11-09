@@ -36,7 +36,6 @@ NLS_GLOBAL nls_hash nls_sys_sym_table;
 
 static void nls_sym_table_init(void);
 static void nls_sym_table_term(void);
-static int nls_apply(nls_node **node);
 static int nls_apply_function(nls_node *func, nls_node *args, nls_node **out);
 static int nls_part_apply_function(nls_node *func, nls_node *args, nls_node **out);
 static int nls_apply_abstraction(nls_node **func, nls_node *args);
@@ -64,7 +63,7 @@ nls_main(FILE *in, FILE *out, FILE *err)
 		goto free_exit;
 	}
 	nls_list_foreach(tree, &item, &tmp) {
-		if ((ret = nls_reduce(item))) {
+		if ((ret = nls_apply(item))) {
 			NLS_ERROR(NLS_MSG_REDUCTION_FAIL ": errno=%d: %s",
 				ret, strerror(ret));
 			goto free_exit;
@@ -100,34 +99,51 @@ nls_term(void)
 }
 
 /**
- * [DESTRUCTIVE] Recursively do application.
+ * [DESTRUCTIVE] Do lambda application.
  * @param  tree Target syntax tree.
  * @retval 0    Application succeed.
  * @retval else Error code.
  */
 int
-nls_reduce(nls_node **tree)
+nls_apply(nls_node **tree)
 {
 	int ret;
+	nls_node *out;
 
-	switch ((*tree)->nn_type) {
-	case NLS_TYPE_INT:
-	case NLS_TYPE_VAR:
-	case NLS_TYPE_FUNCTION:
-	case NLS_TYPE_ABSTRACTION:
+	nls_application *app = &((*tree)->nn_app);
+	nls_node **func = &(app->nap_func);
+	nls_node **args = &(app->nap_args);
+
+	if (NLS_TYPE_APPLICATION != (*tree)->nn_type) {
 		return 0;
-	case NLS_TYPE_APPLICATION:
-		if ((ret = nls_apply(tree))) {
+	}
+	switch ((*func)->nn_type) {
+	case NLS_TYPE_FUNCTION:
+		if ((ret = nls_apply_function(*func, *args, &out))) {
 			return ret;
 		}
-		return nls_reduce(tree);
-	case NLS_TYPE_LIST:
-		return 0;
+		out = nls_grab(out);
+		nls_release(*tree);
+		*tree = out;
+		break;
+	case NLS_TYPE_ABSTRACTION:
+		if ((ret = nls_apply_abstraction(func, *args))) {
+			return ret;
+		}
+		out = nls_grab(*func);
+		nls_release(*tree);
+		*tree = out;
+		break;
+	case NLS_TYPE_APPLICATION:
+		if ((ret = nls_apply(func))) {
+			return ret;
+		}
+		return nls_apply(tree);
 	default:
-		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE ": type=%d",
-			(*tree)->nn_type);
-		return EINVAL; /* must not happen */
+		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE
+			": type=%d", (*func)->nn_type);
 	}
+	return 0;
 }
 
 nls_node*
@@ -168,49 +184,6 @@ static void
 nls_sym_table_term(void)
 {
 	nls_hash_term(&nls_sys_sym_table);
-}
-
-/*
- * @return 0  evaluation result
- * 	   !0 error code
- */
-static int
-nls_apply(nls_node **node)
-{
-	int ret;
-	nls_node *out;
-
-	nls_application *app = &((*node)->nn_app);
-	nls_node **func = &(app->nap_func);
-	nls_node **args = &(app->nap_args);
-
-	switch ((*func)->nn_type) {
-	case NLS_TYPE_FUNCTION:
-		if ((ret = nls_apply_function(*func, *args, &out))) {
-			return ret;
-		}
-		out = nls_grab(out);
-		nls_release(*node);
-		*node = out;
-		break;
-	case NLS_TYPE_ABSTRACTION:
-		if ((ret = nls_apply_abstraction(func, *args))) {
-			return ret;
-		}
-		out = nls_grab(*func);
-		nls_release(*node);
-		*node = out;
-		break;
-	case NLS_TYPE_APPLICATION:
-		if ((ret = nls_reduce(func))) {
-			return ret;
-		}
-		return nls_apply(node);
-	default:
-		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE
-			": type=%d", (*func)->nn_type);
-	}
-	return 0;
 }
 
 static int
@@ -305,7 +278,7 @@ nls_apply_abstraction(nls_node **func, nls_node *args)
 	out = nls_grab(abst->nab_def);
 	nls_release(*func);
 	*func = out;
-	if ((ret = nls_reduce(func))) {
+	if ((ret = nls_apply(func))) {
 		return ret;
 	}
 	return 0;

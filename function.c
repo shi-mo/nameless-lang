@@ -93,10 +93,10 @@ _nls_int2_func(nls_fp fp, char *name, nls_int2_op op, nls_node *args, nls_node *
 	if ((ret = nls_argn_get(args, 2, &arg1, &arg2))) {
 		return ret;
 	}
-	if ((ret = nls_reduce(arg1))) {
+	if ((ret = nls_apply(arg1))) {
 		return ret;
 	}
-	if ((ret = nls_reduce(arg2))) {
+	if ((ret = nls_apply(arg2))) {
 		return ret;
 	}
 	if ((ret = __nls_int2_func(*arg1, *arg2, op, out))) {
