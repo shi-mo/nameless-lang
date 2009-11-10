@@ -1,0 +1,2 @@
+set(add2 add)
+add2(22 135)

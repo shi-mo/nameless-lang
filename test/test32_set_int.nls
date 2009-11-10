@@ -1,0 +1,3 @@
+set(a 3)
+mul(a a)
+(lambda(x).div(x a))(16)

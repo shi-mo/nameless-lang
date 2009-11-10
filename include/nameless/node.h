@@ -23,6 +23,7 @@
 
 #define NLS_ISINT(node)  (NLS_TYPE_INT  == (node)->nn_type)
 #define NLS_ISVAR(node)  (NLS_TYPE_VAR  == (node)->nn_type)
+#define NLS_ISAPP(node)  (NLS_TYPE_APPLICATION == (node)->nn_type)
 #define NLS_ISLIST(node) (NLS_TYPE_LIST == (node)->nn_type)
 #define NLS_INT_VAL(node) ((node)->nn_int)
 
@@ -119,7 +120,7 @@ nls_node* nls_int_new(int val);
 nls_node* nls_var_new(nls_string *name);
 nls_node* nls_function_new(nls_fp fp, int num_args, char *name);
 nls_node* nls_abstraction_new(nls_node *vars, nls_node *def);
-nls_node* nls_application_new(nls_node *func, nls_node *arg);
+nls_node* nls_application_new(nls_node *func, nls_node *args);
 nls_node* nls_list_new(nls_node *node);
 int nls_list_add(nls_node *ent, nls_node *item);
 void nls_list_remove(nls_node **ent);

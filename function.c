@@ -84,6 +84,27 @@ nls_func_abst(nls_node *arg, nls_node **out)
 	return 0;
 }
 
+int
+nls_func_set(nls_node *arg, nls_node**out)
+{
+	int ret;
+	nls_node **var, **def;
+
+	if ((ret = nls_argn_get(arg, 2, &var, &def))) {
+		return ret;
+	}
+	if (!NLS_ISVAR(*var)) {
+		return EINVAL;
+	}
+	ret = nls_hash_add(&nls_sys_sym_table, (*var)->nn_var.nv_name, *def);
+	if (ret) {
+		return ret;
+	}
+	nls_release(var);
+	*out = *def;
+	return 0;
+}
+
 static int
 _nls_int2_func(nls_fp fp, char *name, nls_int2_op op, nls_node *args, nls_node **out)
 {

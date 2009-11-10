@@ -26,6 +26,7 @@
 #include "nameless/function.h"
 
 #define NLS_MSG_REDUCTION_FAIL "Reduction failure"
+#define NLS_MSG_NO_SUCH_SYMBOL "No such symbol"
 
 #define NLS_ANON_VAR_NAME_BUF_SIZE 32
 #define NLS_ANON_VAR_PREFIX 'x'
@@ -43,6 +44,7 @@ static void nls_replace_vars(nls_node *vars, nls_node *args);
 static void nls_remove_head_vars(nls_node *func, int n);
 static nls_node* nls_vars_new(int n);
 static int nls_tree_print(FILE *out, nls_node *tree);
+static nls_node* nls_tree_clone(nls_node *tree);
 
 int
 nls_main(FILE *in, FILE *out, FILE *err)
@@ -108,16 +110,33 @@ int
 nls_apply(nls_node **tree)
 {
 	int ret;
-	nls_node *out;
+	nls_node *out, *tmp;
 
 	nls_application *app = &((*tree)->nn_app);
 	nls_node **func = &(app->nap_func);
 	nls_node **args = &(app->nap_args);
 
-	if (NLS_TYPE_APPLICATION != (*tree)->nn_type) {
+	if (NLS_ISVAR(*tree)) {
+		if (!(out = nls_symbol_get((*tree)->nn_var.nv_name))) {
+			return 0;
+		}
+		nls_release(*tree);
+		*tree = nls_grab(out);
+		return 0;
+	}
+	if (!NLS_ISAPP(*tree)) {
 		return 0;
 	}
 	switch ((*func)->nn_type) {
+	case NLS_TYPE_VAR:
+		if (!(tmp = nls_symbol_get((*func)->nn_var.nv_name))) {
+			NLS_ERROR(NLS_MSG_NO_SUCH_SYMBOL ": %s",
+				(*func)->nn_var.nv_name->ns_bufp);
+			return EINVAL;
+		}
+		nls_release(*func);
+		*func = nls_grab(nls_tree_clone(tmp));
+		return nls_apply(tree);
 	case NLS_TYPE_FUNCTION:
 		if ((ret = nls_apply_function(*func, *args, &out))) {
 			return ret;
@@ -171,12 +190,13 @@ nls_sym_table_init(void)
 		} \
 		nls_hash_add(&nls_sys_sym_table, func->nn_func.nf_name, func); \
 	} while(0)
-	NLS_SYM_TABLE_ADD_FUNC(nls_func_abst, 2, "abst");
 	NLS_SYM_TABLE_ADD_FUNC(nls_func_add,  2, "add");
 	NLS_SYM_TABLE_ADD_FUNC(nls_func_sub,  2, "sub");
 	NLS_SYM_TABLE_ADD_FUNC(nls_func_mul,  2, "mul");
 	NLS_SYM_TABLE_ADD_FUNC(nls_func_div,  2, "div");
 	NLS_SYM_TABLE_ADD_FUNC(nls_func_mod,  2, "mod");
+	NLS_SYM_TABLE_ADD_FUNC(nls_func_abst, 2, "abst");
+	NLS_SYM_TABLE_ADD_FUNC(nls_func_set,  2, "set");
 #undef  NLS_SYM_TABLE_ADD_FUNC
 }
 
@@ -412,5 +432,92 @@ nls_tree_print(FILE *out, nls_node *tree)
 	default:
 		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE ": type=%d", tree->nn_type);
 		return EINVAL;
+	}
+}
+
+static nls_node*
+nls_tree_clone(nls_node *tree)
+{
+	switch (tree->nn_type) {
+	case NLS_TYPE_INT:
+		return nls_int_new(tree->nn_int);
+	case NLS_TYPE_VAR:
+		{
+			nls_string *str;
+
+			str = nls_string_new(tree->nn_var.nv_name->ns_bufp);
+			if (!str) {
+				NLS_ERROR(NLS_MSG_FAILED_TO_ALLOCATE_MEMORY);
+				return NULL;
+			}
+			return nls_var_new(str);
+		}
+	case NLS_TYPE_FUNCTION:
+		{
+			nls_function *func = &(tree->nn_func);
+
+			return nls_function_new(func->nf_fp,
+				func->nf_num_args, func->nf_name->ns_bufp);
+		}
+	case NLS_TYPE_ABSTRACTION:
+		{
+			nls_node *vars, *def;
+			nls_abstraction *abst = &(tree->nn_abst);
+
+			if (!(vars = nls_tree_clone(abst->nab_vars))) {
+				NLS_ERROR(NLS_MSG_FAILED_TO_ALLOCATE_MEMORY);
+				return NULL;
+			}
+			if (!(def = nls_tree_clone(abst->nab_def))) {
+				NLS_ERROR(NLS_MSG_FAILED_TO_ALLOCATE_MEMORY);
+				return NULL;
+			}
+			return nls_abstraction_new(vars, def);
+		}
+	case NLS_TYPE_APPLICATION:
+		{
+			nls_node *func, *args;
+			nls_application *app = &(tree->nn_app);
+
+			if (!(func = nls_tree_clone(app->nap_func))) {
+				NLS_ERROR(NLS_MSG_FAILED_TO_ALLOCATE_MEMORY);
+				return NULL;
+			}
+			if (!(args = nls_tree_clone(app->nap_args))) {
+				NLS_ERROR(NLS_MSG_FAILED_TO_ALLOCATE_MEMORY);
+				return NULL;
+			}
+			return nls_application_new(func, args);
+		}
+	case NLS_TYPE_LIST:
+		{
+			int first = 1;
+			nls_node *new;
+			nls_node **item, *tmp;
+
+			nls_list_foreach(tree, &item, &tmp) {
+				nls_node *clone = nls_tree_clone(*item);
+
+				if (!clone) {
+					NLS_ERROR(NLS_MSG_FAILED_TO_ALLOCATE_MEMORY);
+					return NULL;
+				}
+				if (!first) {
+					nls_list_add(new, clone);
+					continue;
+				}
+				if (first) {
+					first = 0;
+				}
+				if (!(new = nls_list_new(clone))) {
+					NLS_ERROR(NLS_MSG_FAILED_TO_ALLOCATE_MEMORY);
+					return NULL;
+				}
+			}
+			return new;
+		}
+	default:
+		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE ": type=%d", tree->nn_type);
+		return NULL;
 	}
 }

@@ -144,7 +144,7 @@ free_exit:
 }
 
 nls_node*
-nls_application_new(nls_node *func, nls_node *arg)
+nls_application_new(nls_node *func, nls_node *args)
 {
 	nls_application *app;
 	nls_node *node = nls_node_new(NLS_TYPE_APPLICATION);
@@ -154,7 +154,7 @@ nls_application_new(nls_node *func, nls_node *arg)
 	}
 	app = &(node->nn_app);
 	app->nap_func = nls_grab(func);
-	app->nap_args = nls_grab(arg);
+	app->nap_args = nls_grab(args);
 	return node;
 }
 

@@ -1,0 +1,4 @@
+set(cube lambda(x).mul(x mul(x x)))
+cube(1)
+cube(2)
+cube(3)

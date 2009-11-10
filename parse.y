@@ -24,11 +24,10 @@
 #include "nameless/mm.h"
 #include "nameless/function.h"
 
-#define NLS_MSG_NO_SUCH_SYMBOL "No such symbol"
-
 NLS_GLOBAL nls_node *nls_sys_parse_result;
 
 static int yyerror(char *msg);
+static nls_node* nls_ident2node(nls_string *ident);
 %}
 
 %union {
@@ -76,14 +75,7 @@ expr	: tNUMBER
 	}
 	| tIDENT
 	{
-		nls_node *sym = nls_symbol_get($1);
-
-		if (sym) {
-			nls_string_free($1);
-			$$ = sym;
-		} else {
-			$$ = nls_var_new($1);
-		}
+		$$ = nls_ident2node($1);
 	}
 	| tLAMBDA tLPAREN exprs tRPAREN tDOT expr
 	{
@@ -105,14 +97,7 @@ expr	: tNUMBER
 
 abstraction: tIDENT
 	{
-		nls_node *sym = nls_symbol_get($1);
-
-		if (!sym) {
-			NLS_ERROR(NLS_MSG_NO_SUCH_SYMBOL);
-			YYERROR;
-		}
-		nls_string_free($1);
-		$$ = sym;
+		$$ = nls_ident2node($1);
 	}
 	| tLPAREN expr tRPAREN
 	{
@@ -136,4 +121,16 @@ yyerror(char *msg)
 	NLS_ERROR("%s", msg);
 
 	return 0;
+}
+
+static nls_node*
+nls_ident2node(nls_string *ident)
+{
+	nls_node *sym = nls_symbol_get(ident);
+
+	if (!sym) {
+		return nls_var_new(ident);
+	}
+	nls_string_free(ident);
+	return sym;
 }
