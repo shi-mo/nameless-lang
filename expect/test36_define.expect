@@ -1,0 +1,3 @@
+lambda(name args expr).set(name abst(args expr))
+abst((x) mul(x x))
+25
