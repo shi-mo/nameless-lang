@@ -39,4 +39,6 @@ TODO LIST
   *done* COPYING
 
 [Build Environment]
+  configure
+  make install
   source emmbed sha1-sum
