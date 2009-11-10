@@ -18,6 +18,7 @@ TODO LIST
   set
   cond
   procedure/parallel
+  hash literal
   nil terminated list
   *done* lambda abstraction
   *done* symbol table
