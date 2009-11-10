@@ -13,6 +13,8 @@ TODO LIST
 
 [Language Specification]
   Suppress SEGV on syntax error
+  Allow ambiguity for 'lambda' (do not use 'abst')
+    ex) lambda(x).mul(x x) <=> lambda((x) mul(x x))
   set
   cond
   procedure/parallel
