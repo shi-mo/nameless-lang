@@ -2,6 +2,7 @@ TODO LIST
 ---------
 
 [Functionality]
+  Interactive interface as irb
   GC
   *done* nls_grab(reference count)
   *done* leak check
