@@ -185,7 +185,7 @@ nls_sym_table_init(void)
 	do { \
 		nls_node *func = nls_function_new((fp), (n), (name)); \
 		if (!func) { \
-			NLS_ERROR(NLS_MSG_FAILED_TO_ALLOCATE_MEMORY); \
+			NLS_ERROR(NLS_MSG_ENOMEM); \
 			return; \
 		} \
 		nls_hash_add(&nls_sys_sym_table, func->nn_func.nf_name, func); \
@@ -447,7 +447,7 @@ nls_tree_clone(nls_node *tree)
 
 			str = nls_string_new(tree->nn_var.nv_name->ns_bufp);
 			if (!str) {
-				NLS_ERROR(NLS_MSG_FAILED_TO_ALLOCATE_MEMORY);
+				NLS_ERROR(NLS_MSG_ENOMEM);
 				return NULL;
 			}
 			return nls_var_new(str);
@@ -465,11 +465,11 @@ nls_tree_clone(nls_node *tree)
 			nls_abstraction *abst = &(tree->nn_abst);
 
 			if (!(vars = nls_tree_clone(abst->nab_vars))) {
-				NLS_ERROR(NLS_MSG_FAILED_TO_ALLOCATE_MEMORY);
+				NLS_ERROR(NLS_MSG_ENOMEM);
 				return NULL;
 			}
 			if (!(def = nls_tree_clone(abst->nab_def))) {
-				NLS_ERROR(NLS_MSG_FAILED_TO_ALLOCATE_MEMORY);
+				NLS_ERROR(NLS_MSG_ENOMEM);
 				return NULL;
 			}
 			return nls_abstraction_new(vars, def);
@@ -480,11 +480,11 @@ nls_tree_clone(nls_node *tree)
 			nls_application *app = &(tree->nn_app);
 
 			if (!(func = nls_tree_clone(app->nap_func))) {
-				NLS_ERROR(NLS_MSG_FAILED_TO_ALLOCATE_MEMORY);
+				NLS_ERROR(NLS_MSG_ENOMEM);
 				return NULL;
 			}
 			if (!(args = nls_tree_clone(app->nap_args))) {
-				NLS_ERROR(NLS_MSG_FAILED_TO_ALLOCATE_MEMORY);
+				NLS_ERROR(NLS_MSG_ENOMEM);
 				return NULL;
 			}
 			return nls_application_new(func, args);
@@ -499,7 +499,7 @@ nls_tree_clone(nls_node *tree)
 				nls_node *clone = nls_tree_clone(*item);
 
 				if (!clone) {
-					NLS_ERROR(NLS_MSG_FAILED_TO_ALLOCATE_MEMORY);
+					NLS_ERROR(NLS_MSG_ENOMEM);
 					return NULL;
 				}
 				if (!first) {
@@ -510,7 +510,7 @@ nls_tree_clone(nls_node *tree)
 					first = 0;
 				}
 				if (!(new = nls_list_new(clone))) {
-					NLS_ERROR(NLS_MSG_FAILED_TO_ALLOCATE_MEMORY);
+					NLS_ERROR(NLS_MSG_ENOMEM);
 					return NULL;
 				}
 			}

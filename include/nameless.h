@@ -29,7 +29,7 @@
 #define NLS_MSG_INVALID_REFCOUNT  "Invalid reference count"
 #define NLS_MSG_NOT_IMPLEMENTED   "Not implemented yet"
 #define NLS_MSG_TOO_MANY_ARGS     "Too many arguments"
-#define NLS_MSG_FAILED_TO_ALLOCATE_MEMORY "Failed to allocate memory"
+#define NLS_MSG_ENOMEM "Failed to allocate memory"
 
 #define NLS_WARN(fmt, ...) \
 	fprintf(nls_sys_err, "Warning:%s:%d:%s: " fmt "\n", \

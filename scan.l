@@ -47,7 +47,7 @@ static int yywrap(void);
 
 	str = nls_string_new(yytext);
 	if (!str) {
-		NLS_ERROR(NLS_MSG_FAILED_TO_ALLOCATE_MEMORY);
+		NLS_ERROR(NLS_MSG_ENOMEM);
 		exit(1);
 	}
 	yylval.yst_str = str;
