@@ -85,7 +85,7 @@ nls_func_abst(nls_node *arg, nls_node **out)
 }
 
 int
-nls_func_set(nls_node *arg, nls_node**out)
+nls_func_set(nls_node *arg, nls_node **out)
 {
 	int ret;
 	nls_node **var, **def;
@@ -96,10 +96,7 @@ nls_func_set(nls_node *arg, nls_node**out)
 	if (!NLS_ISVAR(*var)) {
 		return EINVAL;
 	}
-	ret = nls_hash_add(&nls_sys_sym_table, (*var)->nn_var.nv_name, *def);
-	if (ret) {
-		return ret;
-	}
+	nls_symbol_set((*var)->nn_var.nv_name, *def);
 	nls_release(var);
 	*out = *def;
 	return 0;

@@ -33,7 +33,7 @@
 
 NLS_GLOBAL FILE *nls_sys_out;
 NLS_GLOBAL FILE *nls_sys_err;
-NLS_GLOBAL nls_hash nls_sys_sym_table;
+static nls_hash nls_sym_table;
 
 static void nls_sym_table_init(void);
 static void nls_sym_table_term(void);
@@ -170,17 +170,23 @@ nls_symbol_get(nls_string *name)
 {
 	nls_hash_entry *ent, *prev;
 
-	ent = nls_hash_search(&nls_sys_sym_table, name, &prev);
+	ent = nls_hash_search(&nls_sym_table, name, &prev);
 	if (!ent) {
 		return NULL;
 	}
 	return ent->nhe_node;
 }
 
+void
+nls_symbol_set(nls_string *name, nls_node *node)
+{
+	nls_hash_add(&nls_sym_table, name, node);
+}
+
 static void
 nls_sym_table_init(void)
 {
-	nls_hash_init(&nls_sys_sym_table);
+	nls_hash_init(&nls_sym_table);
 #define NLS_SYM_TABLE_ADD_FUNC(fp, n, name) \
 	do { \
 		nls_node *func = nls_function_new((fp), (n), (name)); \
@@ -188,7 +194,7 @@ nls_sym_table_init(void)
 			NLS_ERROR(NLS_MSG_ENOMEM); \
 			return; \
 		} \
-		nls_hash_add(&nls_sys_sym_table, func->nn_func.nf_name, func); \
+		nls_symbol_set(func->nn_func.nf_name, func); \
 	} while(0)
 	NLS_SYM_TABLE_ADD_FUNC(nls_func_add,  2, "add");
 	NLS_SYM_TABLE_ADD_FUNC(nls_func_sub,  2, "sub");
@@ -203,7 +209,7 @@ nls_sym_table_init(void)
 static void
 nls_sym_table_term(void)
 {
-	nls_hash_term(&nls_sys_sym_table);
+	nls_hash_term(&nls_sym_table);
 }
 
 static int
