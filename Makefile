@@ -127,6 +127,9 @@ y.tab.h: y.tab.c
 lex.yy.c: scan.l y.tab.h $(HEADERS)
 	$(LEX) $<
 
+tags: clean
+	ctags -R
+
 $(ACTUALDIR):
 	mkdir -p $(ACTUALDIR)
 
