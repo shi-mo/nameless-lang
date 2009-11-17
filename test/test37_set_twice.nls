@@ -1,0 +1,4 @@
+set(a lambda(x).mul(x x))
+a(2)
+set(a lambda(x).mul(mul(x x) x))
+a(3)

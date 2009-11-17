@@ -1,0 +1,4 @@
+lambda(x).mul(x x)
+4
+lambda(x).mul(mul(x x) x)
+27
