@@ -1,0 +1,3 @@
+set(multiplier lambda(x).lambda(y).mul(x y))
+multiplier(3)
+(multiplier(2))(4)

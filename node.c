@@ -333,8 +333,9 @@ nls_register_vars(nls_node **tree, nls_node *var)
 	case NLS_TYPE_FUNCTION:
 		return 0;
 	case NLS_TYPE_ABSTRACTION:
-		NLS_WARN(NLS_MSG_NOT_IMPLEMENTED);
-		return EPERM;
+		nls_register_vars(&((*tree)->nn_abst.nab_vars), var);
+		nls_register_vars(&((*tree)->nn_abst.nab_def),  var);
+		return 0;
 	case NLS_TYPE_APPLICATION:
 		nls_register_vars(&((*tree)->nn_app.nap_args), var);
 		return 0;
