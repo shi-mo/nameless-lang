@@ -23,56 +23,107 @@
 
 #define NLS_MSG_BROKEN_LIST "Broken list"
 
-static nls_node* nls_node_new(nls_node_type_t type);
+#define nls_INT_operations		nls_int_operations
+#define nls_VAR_operations		nls_var_operations
+#define nls_FUNCTION_operations		nls_function_operations
+#define nls_ABSTRACTION_operations	nls_abstraction_operations
+#define nls_APPLICATION_operations	nls_application_operations
+#define nls_LIST_operations		nls_list_operations
+
+#define nls_node_new(type) \
+	_nls_node_new(NLS_TYPE_##type, &nls_##type##_operations)
+
+static void nls_int_release(nls_node *tree);
+static void nls_var_release(nls_node *tree);
+static void nls_function_release(nls_node *tree);
+static void nls_abstraction_release(nls_node *tree);
+static void nls_application_release(nls_node *tree);
+static void nls_list_release(nls_node *tree);
+
+static nls_node* _nls_node_new(nls_node_type_t type, nls_node_operations *op);
 static void nls_list_item_free(nls_node *node);
 static nls_node* nls_list_tail_entry(nls_node *node);
 static int nls_register_vars(nls_node **tree, nls_node *var);
 
+static nls_node_operations nls_int_operations = {
+	.nop_release = nls_int_release,
+};
+
+static nls_node_operations nls_var_operations = {
+	.nop_release = nls_var_release,
+};
+
+static nls_node_operations nls_function_operations = {
+	.nop_release = nls_function_release,
+};
+
+static nls_node_operations nls_abstraction_operations = {
+	.nop_release = nls_abstraction_release,
+};
+
+static nls_node_operations nls_application_operations = {
+	.nop_release = nls_application_release,
+};
+
+static nls_node_operations nls_list_operations = {
+	.nop_release = nls_list_release,
+};
+
 void
 nls_node_free(void *ptr)
 {
-	nls_node *tree = (nls_node*)ptr;
+	nls_node *node = (nls_node*)ptr;
 
-	switch (tree->nn_type) {
-	case NLS_TYPE_INT:
-		break;
-	case NLS_TYPE_VAR:
-		nls_release(tree->nn_var.nv_name);
-		break;
-	case NLS_TYPE_FUNCTION:
-		nls_release(tree->nn_func.nf_name);
-		break;
-	case NLS_TYPE_ABSTRACTION:
-		{
-			nls_abstraction *abst = &(tree->nn_abst);
+	node->nn_op->nop_release(node);
+	nls_free(node);
+}
 
-			nls_release(abst->nab_vars);
-			nls_release(abst->nab_def);
-		}
-		break;
-	case NLS_TYPE_LIST:
-		nls_list_item_free(tree);
-		break;
-	case NLS_TYPE_APPLICATION:
-		{
-			nls_application *app = &tree->nn_app;
+static void
+nls_int_release(nls_node *tree)
+{
+	/* Nothing to do. */
+}
 
-			nls_release(app->nap_args);
-			nls_release(app->nap_func);
-		}
-		break;
-	default:
-		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE ": type=%d",
-			tree->nn_type);
-		return;
-	}
-	nls_free(tree);
+static void
+nls_var_release(nls_node *tree)
+{
+	nls_release(tree->nn_var.nv_name);
+}
+
+static void
+nls_function_release(nls_node *tree)
+{
+	nls_release(tree->nn_func.nf_name);
+}
+
+static void
+nls_abstraction_release(nls_node *tree)
+{
+	nls_abstraction *abst = &(tree->nn_abst);
+
+	nls_release(abst->nab_vars);
+	nls_release(abst->nab_def);
+}
+
+static void
+nls_application_release(nls_node *tree)
+{
+	nls_application *app = &tree->nn_app;
+
+	nls_release(app->nap_args);
+	nls_release(app->nap_func);
+}
+
+static void
+nls_list_release(nls_node *tree)
+{
+	nls_list_item_free(tree);
 }
 
 nls_node*
 nls_int_new(int val)
 {
-	nls_node *node = nls_node_new(NLS_TYPE_INT);
+	nls_node *node = nls_node_new(INT);
 
 	if (!node) {
 		return NULL;
@@ -84,7 +135,7 @@ nls_int_new(int val)
 nls_node*
 nls_var_new(nls_string *name)
 {
-	nls_node *node = nls_node_new(NLS_TYPE_VAR);
+	nls_node *node = nls_node_new(VAR);
 
 	if (!node) {
 		return NULL;
@@ -103,7 +154,7 @@ nls_function_new(nls_fp fp, int num_args, char *name)
 	if (!name) {
 		return NULL;
 	}
-	node = nls_node_new(NLS_TYPE_FUNCTION);
+	node = nls_node_new(FUNCTION);
 	if (!node) {
 		nls_string_free(str);
 		return NULL;
@@ -123,7 +174,7 @@ nls_abstraction_new(nls_node *vars, nls_node *def)
 	nls_node *node;
 	nls_node **var, *tmp;
 
-	if (!(node = nls_node_new(NLS_TYPE_ABSTRACTION))) {
+	if (!(node = nls_node_new(ABSTRACTION))) {
 		return NULL;
 	}
 
@@ -147,7 +198,7 @@ nls_node*
 nls_application_new(nls_node *func, nls_node *args)
 {
 	nls_application *app;
-	nls_node *node = nls_node_new(NLS_TYPE_APPLICATION);
+	nls_node *node = nls_node_new(APPLICATION);
 
 	if (!node) {
 		return NULL;
@@ -162,7 +213,7 @@ nls_node*
 nls_list_new(nls_node *item)
 {
 	nls_list *list;
-	nls_node *node = nls_node_new(NLS_TYPE_LIST);
+	nls_node *node = nls_node_new(LIST);
 
 	if (!node) {
 		return NULL;
@@ -278,7 +329,7 @@ test_nls_list_count_when_size3(void)
 #endif /* NLS_UNIT_TEST */
 
 static nls_node*
-nls_node_new(nls_node_type_t type)
+_nls_node_new(nls_node_type_t type, nls_node_operations *op)
 {
 	nls_node *node = nls_new(nls_node);
 
@@ -286,6 +337,7 @@ nls_node_new(nls_node_type_t type)
 		return NULL;
 	}
 	node->nn_type = type;
+	node->nn_op = op;
 	return node;
 }
 

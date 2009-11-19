@@ -21,8 +21,8 @@
 
 #include "nameless/string.h"
 
-#define NLS_ISINT(node)  (NLS_TYPE_INT  == (node)->nn_type)
-#define NLS_ISVAR(node)  (NLS_TYPE_VAR  == (node)->nn_type)
+#define NLS_ISINT(node)  (NLS_TYPE_INT == (node)->nn_type)
+#define NLS_ISVAR(node)  (NLS_TYPE_VAR == (node)->nn_type)
 #define NLS_ISAPP(node)  (NLS_TYPE_APPLICATION == (node)->nn_type)
 #define NLS_ISLIST(node) (NLS_TYPE_LIST == (node)->nn_type)
 #define NLS_INT_VAL(node) ((node)->nn_int)
@@ -66,8 +66,15 @@ typedef struct _nls_function {
 	nls_fp nf_fp;
 } nls_function;
 
+typedef void (*nls_nop_release)(struct _nls_node*);
+
+typedef struct _nls_node_operations {
+	nls_nop_release nop_release;
+} nls_node_operations;
+
 typedef struct _nls_node {
 	nls_node_type_t nn_type;
+	nls_node_operations *nn_op;
 	union {
 		int nnu_int;
 		nls_var nnu_var;
