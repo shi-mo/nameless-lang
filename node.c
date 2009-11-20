@@ -33,17 +33,17 @@
 #define nls_node_new(type) \
 	_nls_node_new(NLS_TYPE_##type, &nls_##type##_operations)
 
+static nls_node* _nls_node_new(nls_node_type_t type, nls_node_operations *op);
+static void nls_list_item_free(nls_node *node);
+static nls_node* nls_list_tail_entry(nls_node *node);
+static void nls_register_vars(nls_node **tree, nls_node *var);
+
 static void nls_int_release(nls_node *tree);
 static void nls_var_release(nls_node *tree);
 static void nls_function_release(nls_node *tree);
 static void nls_abstraction_release(nls_node *tree);
 static void nls_application_release(nls_node *tree);
 static void nls_list_release(nls_node *tree);
-
-static nls_node* _nls_node_new(nls_node_type_t type, nls_node_operations *op);
-static void nls_list_item_free(nls_node *node);
-static nls_node* nls_list_tail_entry(nls_node *node);
-static void nls_register_vars(nls_node **tree, nls_node *var);
 
 static nls_node* nls_int_clone(nls_node *tree);
 static nls_node* nls_var_clone(nls_node *tree);
@@ -89,48 +89,6 @@ nls_node_free(void *ptr)
 
 	node->nn_op->nop_release(node);
 	nls_free(node);
-}
-
-static void
-nls_int_release(nls_node *tree)
-{
-	/* Nothing to do. */
-}
-
-static void
-nls_var_release(nls_node *tree)
-{
-	nls_release(tree->nn_var.nv_name);
-}
-
-static void
-nls_function_release(nls_node *tree)
-{
-	nls_release(tree->nn_func.nf_name);
-}
-
-static void
-nls_abstraction_release(nls_node *tree)
-{
-	nls_abstraction *abst = &(tree->nn_abst);
-
-	nls_release(abst->nab_vars);
-	nls_release(abst->nab_def);
-}
-
-static void
-nls_application_release(nls_node *tree)
-{
-	nls_application *app = &tree->nn_app;
-
-	nls_release(app->nap_args);
-	nls_release(app->nap_func);
-}
-
-static void
-nls_list_release(nls_node *tree)
-{
-	nls_list_item_free(tree);
 }
 
 nls_node*
@@ -417,6 +375,48 @@ nls_register_vars(nls_node **tree, nls_node *var)
 		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE);
 		return;
 	}
+}
+
+static void
+nls_int_release(nls_node *tree)
+{
+	/* Nothing to do. */
+}
+
+static void
+nls_var_release(nls_node *tree)
+{
+	nls_release(tree->nn_var.nv_name);
+}
+
+static void
+nls_function_release(nls_node *tree)
+{
+	nls_release(tree->nn_func.nf_name);
+}
+
+static void
+nls_abstraction_release(nls_node *tree)
+{
+	nls_abstraction *abst = &(tree->nn_abst);
+
+	nls_release(abst->nab_vars);
+	nls_release(abst->nab_def);
+}
+
+static void
+nls_application_release(nls_node *tree)
+{
+	nls_application *app = &tree->nn_app;
+
+	nls_release(app->nap_args);
+	nls_release(app->nap_func);
+}
+
+static void
+nls_list_release(nls_node *tree)
+{
+	nls_list_item_free(tree);
 }
 
 static nls_node*
