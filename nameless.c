@@ -43,7 +43,7 @@ static int nls_apply_abstraction(nls_node **func, nls_node *args);
 static void nls_replace_vars(nls_node *vars, nls_node *args);
 static void nls_remove_head_vars(nls_node *func, int n);
 static nls_node* nls_vars_new(int n);
-static int nls_tree_print(nls_node *tree, FILE *out);
+static int nls_node_print(nls_node *tree, FILE *out);
 
 int
 nls_main(FILE *in, FILE *out, FILE *err)
@@ -69,7 +69,7 @@ nls_main(FILE *in, FILE *out, FILE *err)
 				ret, strerror(ret));
 			goto free_exit;
 		}
-		nls_tree_print(*item, nls_sys_out);
+		nls_node_print(*item, nls_sys_out);
 		fprintf(out, "\n");
 	}
 free_exit:
@@ -382,7 +382,7 @@ free_exit:
 }
 
 static int
-nls_tree_print(nls_node *tree, FILE *out)
+nls_node_print(nls_node *tree, FILE *out)
 {
 	int ret;
 
@@ -398,19 +398,19 @@ nls_tree_print(nls_node *tree, FILE *out)
 		return 0;
 	case NLS_TYPE_ABSTRACTION:
 		fprintf(out, "lambda");
-		if ((ret = nls_tree_print(tree->nn_abst.nab_vars, out))) {
+		if ((ret = nls_node_print(tree->nn_abst.nab_vars, out))) {
 			return ret;
 		}
 		fprintf(out, ".");
-		if ((ret = nls_tree_print(tree->nn_abst.nab_def, out))) {
+		if ((ret = nls_node_print(tree->nn_abst.nab_def, out))) {
 			return ret;
 		}
 		return 0;
 	case NLS_TYPE_APPLICATION:
-		if ((ret = nls_tree_print(tree->nn_app.nap_func, out))) {
+		if ((ret = nls_node_print(tree->nn_app.nap_func, out))) {
 			return ret;
 		}
-		if ((ret = nls_tree_print(tree->nn_app.nap_args, out))) {
+		if ((ret = nls_node_print(tree->nn_app.nap_args, out))) {
 			return ret;
 		}
 		return 0;
@@ -427,7 +427,7 @@ nls_tree_print(nls_node *tree, FILE *out)
 				if (first) {
 					first = 0;
 				}
-				if ((ret = nls_tree_print(*item, out))) {
+				if ((ret = nls_node_print(*item, out))) {
 					return ret;
 				}
 			}
