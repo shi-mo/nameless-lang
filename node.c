@@ -43,7 +43,7 @@ static void nls_list_release(nls_node *tree);
 static nls_node* _nls_node_new(nls_node_type_t type, nls_node_operations *op);
 static void nls_list_item_free(nls_node *node);
 static nls_node* nls_list_tail_entry(nls_node *node);
-static int nls_register_vars(nls_node **tree, nls_node *var);
+static void nls_register_vars(nls_node **tree, nls_node *var);
 
 static nls_node_operations nls_int_operations = {
 	.nop_release = nls_int_release,
@@ -168,7 +168,6 @@ nls_function_new(nls_fp fp, int num_args, char *name)
 nls_node*
 nls_abstraction_new(nls_node *vars, nls_node *def)
 {
-	int ret;
 	int i, n = nls_list_count(vars);
 	nls_abstraction *abst;
 	nls_node *node;
@@ -180,18 +179,13 @@ nls_abstraction_new(nls_node *vars, nls_node *def)
 
 	i = 0;
 	nls_list_foreach(vars, &var, &tmp) {
-		if ((ret = nls_register_vars(&def, *var))) {
-			goto free_exit;
-		}
+		nls_register_vars(&def, *var);
 	}
 	abst = &(node->nn_abst);
 	abst->nab_num_args = n;
 	abst->nab_vars = nls_grab(vars);
 	abst->nab_def  = nls_grab(def);
 	return node;
-free_exit:
-	nls_release(node);
-	return NULL;
 }
 
 nls_node*
@@ -368,12 +362,12 @@ nls_list_tail_entry(nls_node *node)
 	return node;
 }
 
-static int
+static void
 nls_register_vars(nls_node **tree, nls_node *var)
 {
 	switch ((*tree)->nn_type) {
 	case NLS_TYPE_INT:
-		return 0;
+		return;
 	case NLS_TYPE_VAR:
 		if (!nls_strcmp((*tree)->nn_var.nv_name, var->nn_var.nv_name)) {
 			nls_node **next_ref = var->nn_var.nv_next_ref;
@@ -381,16 +375,16 @@ nls_register_vars(nls_node **tree, nls_node *var)
 			(*tree)->nn_var.nv_next_ref = next_ref;
 			var->nn_var.nv_next_ref = tree;
 		}
-		return 0;
+		return;
 	case NLS_TYPE_FUNCTION:
-		return 0;
+		return;
 	case NLS_TYPE_ABSTRACTION:
 		nls_register_vars(&((*tree)->nn_abst.nab_vars), var);
 		nls_register_vars(&((*tree)->nn_abst.nab_def),  var);
-		return 0;
+		return;
 	case NLS_TYPE_APPLICATION:
 		nls_register_vars(&((*tree)->nn_app.nap_args), var);
-		return 0;
+		return;
 	case NLS_TYPE_LIST:
 		{
 			nls_node **item, *tmp;
@@ -399,9 +393,9 @@ nls_register_vars(nls_node **tree, nls_node *var)
 				nls_register_vars(item, var);
 			}
 		}
-		return 0;
+		return;
 	default:
 		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE);
-		return EINVAL;
+		return;
 	}
 }
