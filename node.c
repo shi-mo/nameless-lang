@@ -45,28 +45,41 @@ static void nls_list_item_free(nls_node *node);
 static nls_node* nls_list_tail_entry(nls_node *node);
 static void nls_register_vars(nls_node **tree, nls_node *var);
 
+static nls_node* nls_int_clone(nls_node *tree);
+static nls_node* nls_var_clone(nls_node *tree);
+static nls_node* nls_function_clone(nls_node *tree);
+static nls_node* nls_abstraction_clone(nls_node *tree);
+static nls_node* nls_application_clone(nls_node *tree);
+static nls_node* nls_list_clone(nls_node *tree);
+
 static nls_node_operations nls_int_operations = {
 	.nop_release = nls_int_release,
+	.nop_clone   = nls_int_clone,
 };
 
 static nls_node_operations nls_var_operations = {
 	.nop_release = nls_var_release,
+	.nop_clone   = nls_var_clone,
 };
 
 static nls_node_operations nls_function_operations = {
 	.nop_release = nls_function_release,
+	.nop_clone   = nls_function_clone,
 };
 
 static nls_node_operations nls_abstraction_operations = {
 	.nop_release = nls_abstraction_release,
+	.nop_clone   = nls_abstraction_clone,
 };
 
 static nls_node_operations nls_application_operations = {
 	.nop_release = nls_application_release,
+	.nop_clone   = nls_application_clone,
 };
 
 static nls_node_operations nls_list_operations = {
 	.nop_release = nls_list_release,
+	.nop_clone   = nls_list_clone,
 };
 
 void
@@ -216,6 +229,12 @@ nls_list_new(nls_node *item)
 	list->nl_head = nls_grab(item);
 	list->nl_rest = NULL;
 	return node;
+}
+
+nls_node*
+nls_node_clone(nls_node *tree)
+{
+	return tree->nn_op->nop_clone(tree);
 }
 
 int
@@ -398,4 +417,94 @@ nls_register_vars(nls_node **tree, nls_node *var)
 		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE);
 		return;
 	}
+}
+
+static nls_node*
+nls_int_clone(nls_node *tree)
+{
+	return nls_int_new(tree->nn_int);
+}
+
+static nls_node*
+nls_var_clone(nls_node *tree)
+{
+	nls_string *str = nls_string_new(tree->nn_var.nv_name->ns_bufp);
+
+	if (!str) {
+		NLS_ERROR(NLS_MSG_ENOMEM);
+		return NULL;
+	}
+	return nls_var_new(str);
+}
+
+static nls_node*
+nls_function_clone(nls_node *tree)
+{
+	nls_function *func = &(tree->nn_func);
+
+	return nls_function_new(func->nf_fp,
+		func->nf_num_args, func->nf_name->ns_bufp);
+}
+
+static nls_node*
+nls_abstraction_clone(nls_node *tree)
+{
+	nls_node *vars, *def;
+	nls_abstraction *abst = &(tree->nn_abst);
+
+	if (!(vars = nls_node_clone(abst->nab_vars))) {
+		NLS_ERROR(NLS_MSG_ENOMEM);
+		return NULL;
+	}
+	if (!(def = nls_node_clone(abst->nab_def))) {
+		NLS_ERROR(NLS_MSG_ENOMEM);
+		return NULL;
+	}
+	return nls_abstraction_new(vars, def);
+}
+
+static nls_node*
+nls_application_clone(nls_node *tree)
+{
+	nls_node *func, *args;
+	nls_application *app = &(tree->nn_app);
+
+	if (!(func = nls_node_clone(app->nap_func))) {
+		NLS_ERROR(NLS_MSG_ENOMEM);
+		return NULL;
+	}
+	if (!(args = nls_node_clone(app->nap_args))) {
+		NLS_ERROR(NLS_MSG_ENOMEM);
+		return NULL;
+	}
+	return nls_application_new(func, args);
+}
+
+static nls_node*
+nls_list_clone(nls_node *tree)
+{
+	int first = 1;
+	nls_node *new;
+	nls_node **item, *tmp;
+
+	nls_list_foreach(tree, &item, &tmp) {
+		nls_node *clone = nls_node_clone(*item);
+
+		if (!clone) {
+			NLS_ERROR(NLS_MSG_ENOMEM);
+			return NULL;
+		}
+		if (!first) {
+			nls_list_add(new, clone);
+			continue;
+		}
+		if (first) {
+			first = 0;
+		}
+		if (!(new = nls_list_new(clone))) {
+			NLS_ERROR(NLS_MSG_ENOMEM);
+			return NULL;
+		}
+	}
+	return new;
 }

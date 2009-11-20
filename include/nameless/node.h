@@ -67,9 +67,11 @@ typedef struct _nls_function {
 } nls_function;
 
 typedef void (*nls_node_op_release)(struct _nls_node*);
+typedef struct _nls_node* (*nls_node_op_clone)(struct _nls_node*);
 
 typedef struct _nls_node_operations {
 	nls_node_op_release nop_release;
+	nls_node_op_clone nop_clone;
 } nls_node_operations;
 
 typedef struct _nls_node {
@@ -129,6 +131,7 @@ nls_node* nls_function_new(nls_fp fp, int num_args, char *name);
 nls_node* nls_abstraction_new(nls_node *vars, nls_node *def);
 nls_node* nls_application_new(nls_node *func, nls_node *args);
 nls_node* nls_list_new(nls_node *node);
+nls_node* nls_node_clone(nls_node *tree);
 int nls_list_add(nls_node *ent, nls_node *item);
 void nls_list_remove(nls_node **ent);
 int nls_list_concat(nls_node *ent1, nls_node *ent2);
