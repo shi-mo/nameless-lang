@@ -66,10 +66,10 @@ typedef struct _nls_function {
 	nls_fp nf_fp;
 } nls_function;
 
-typedef void (*nls_nop_release)(struct _nls_node*);
+typedef void (*nls_node_op_release)(struct _nls_node*);
 
 typedef struct _nls_node_operations {
-	nls_nop_release nop_release;
+	nls_node_op_release nop_release;
 } nls_node_operations;
 
 typedef struct _nls_node {
