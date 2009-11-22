@@ -76,7 +76,7 @@ extern FILE *nls_sys_err;
 int nls_main(FILE *in, FILE *out, FILE *err);
 void nls_init(FILE *out, FILE *err);
 void nls_term(void);
-int nls_apply(nls_node **tree);
+int nls_eval(nls_node **tree);
 nls_node* nls_symbol_get(nls_string *name);
 void nls_symbol_set(nls_string *name, nls_node *node);
 
