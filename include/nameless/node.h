@@ -70,11 +70,13 @@ typedef struct _nls_function {
 typedef void (*nls_node_op_release)(struct _nls_node*);
 typedef struct _nls_node* (*nls_node_op_clone)(struct _nls_node*);
 typedef void (*nls_node_op_print)(struct _nls_node*, FILE*);
+typedef int (*nls_node_op_apply)(struct _nls_node**);
 
 typedef struct _nls_node_operations {
 	nls_node_op_release nop_release;
 	nls_node_op_clone nop_clone;
 	nls_node_op_print nop_print;
+	nls_node_op_apply nop_apply;
 } nls_node_operations;
 
 typedef struct _nls_node {

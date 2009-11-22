@@ -22,7 +22,11 @@
 #include "nameless/node.h"
 #include "nameless/mm.h"
 
+#define NLS_ANON_VAR_NAME_BUF_SIZE 32
+#define NLS_ANON_VAR_PREFIX 'x'
+
 #define NLS_MSG_BROKEN_LIST "Broken list"
+#define NLS_MSG_NO_SUCH_SYMBOL "No such symbol"
 
 #define nls_INT_operations		nls_int_operations
 #define nls_VAR_operations		nls_var_operations
@@ -60,40 +64,60 @@ static void nls_abstraction_print(nls_node *node, FILE* out);
 static void nls_application_print(nls_node *node, FILE* out);
 static void nls_list_print(nls_node *node, FILE* out);
 
+static int nls_int_apply(nls_node **tree);
+static int nls_var_apply(nls_node **tree);
+static int nls_function_apply(nls_node **tree);
+static int nls_abstraction_apply(nls_node **tree);
+static int nls_application_apply(nls_node **tree);
+static int nls_list_apply(nls_node **tree);
+
+static int nls_apply_function(nls_node *func, nls_node *args, nls_node **out);
+static int nls_part_apply_function(nls_node *func, nls_node *args, nls_node **out);
+static int nls_apply_abstraction(nls_node **func, nls_node *args);
+static void nls_replace_vars(nls_node *vars, nls_node *args);
+static void nls_remove_head_vars(nls_node *func, int n);
+static nls_node* nls_vars_new(int n);
+
 static nls_node_operations nls_int_operations = {
 	.nop_release = nls_int_release,
 	.nop_clone   = nls_int_clone,
 	.nop_print   = nls_int_print,
+	.nop_apply   = nls_int_apply,
 };
 
 static nls_node_operations nls_var_operations = {
 	.nop_release = nls_var_release,
 	.nop_clone   = nls_var_clone,
 	.nop_print   = nls_var_print,
+	.nop_apply   = nls_var_apply,
 };
 
 static nls_node_operations nls_function_operations = {
 	.nop_release = nls_function_release,
 	.nop_clone   = nls_function_clone,
 	.nop_print   = nls_function_print,
+	.nop_apply   = nls_function_apply,
 };
 
 static nls_node_operations nls_abstraction_operations = {
 	.nop_release = nls_abstraction_release,
 	.nop_clone   = nls_abstraction_clone,
 	.nop_print   = nls_abstraction_print,
+	.nop_apply   = nls_abstraction_apply,
 };
 
 static nls_node_operations nls_application_operations = {
 	.nop_release = nls_application_release,
 	.nop_clone   = nls_application_clone,
 	.nop_print   = nls_application_print,
+	.nop_apply   = nls_application_apply,
 };
 
 static nls_node_operations nls_list_operations = {
 	.nop_release = nls_list_release,
 	.nop_clone   = nls_list_clone,
 	.nop_print   = nls_list_print,
+	.nop_apply   = nls_list_apply,
 };
 
 void
@@ -580,4 +604,255 @@ nls_list_print(nls_node *node, FILE* out)
 		nls_node_print(*item, out);
 	}
 	fprintf(out, ")");
+}
+
+static int
+nls_int_apply(nls_node **tree)
+{
+	/* Nothing to do. */
+	return 0;
+}
+
+static int
+nls_var_apply(nls_node **tree)
+{
+	nls_node *tmp;
+	nls_application *app = &((*tree)->nn_app);
+	nls_node **func = &(app->nap_func);
+
+	if (!(tmp = nls_symbol_get((*func)->nn_var.nv_name))) {
+		NLS_ERROR(NLS_MSG_NO_SUCH_SYMBOL ": %s",
+			(*func)->nn_var.nv_name->ns_bufp);
+		return EINVAL;
+	}
+	nls_release(*func);
+	*func = nls_grab(nls_node_clone(tmp));
+	return nls_eval(tree);
+}
+
+static int
+nls_function_apply(nls_node **tree)
+{
+	int ret;
+	nls_node *out;
+	nls_application *app = &((*tree)->nn_app);
+	nls_node **func = &(app->nap_func);
+	nls_node **args = &(app->nap_args);
+
+	if ((ret = nls_apply_function(*func, *args, &out))) {
+		return ret;
+	}
+	out = nls_grab(out);
+	nls_release(*tree);
+	*tree = out;
+	return 0;
+}
+
+static int
+nls_abstraction_apply(nls_node **tree)
+{
+	int ret;
+	nls_node *out;
+
+	nls_application *app = &((*tree)->nn_app);
+	nls_node **func = &(app->nap_func);
+	nls_node **args = &(app->nap_args);
+
+	if ((ret = nls_apply_abstraction(func, *args))) {
+		return ret;
+	}
+	out = nls_grab(*func);
+	nls_release(*tree);
+	*tree = out;
+	return 0;
+}
+
+static int
+nls_application_apply(nls_node **tree)
+{
+	int ret;
+	nls_application *app = &((*tree)->nn_app);
+	nls_node **func = &(app->nap_func);
+
+	if ((ret = nls_eval(func))) {
+		return ret;
+	}
+	return nls_eval(tree);
+}
+
+static int
+nls_list_apply(nls_node **tree)
+{
+	/* Nothing to do. */
+	return 0;
+}
+
+static int
+nls_apply_function(nls_node *func, nls_node *args, nls_node **out)
+{
+	int ret;
+	int num_args = nls_list_count(args);
+
+	nls_fp fp = func->nn_func.nf_fp;
+	int func_nargs = func->nn_func.nf_num_args;
+
+	if (num_args > func_nargs) {
+		NLS_ERROR(NLS_MSG_TOO_MANY_ARGS " expected=%d actual=%d",
+			func_nargs, num_args);
+		return EINVAL;
+	}
+	if (num_args < func_nargs) {
+		return nls_part_apply_function(func, args, out);
+	}
+	if ((ret = (fp)(args, out))) {
+		return ret;
+	}
+	return 0;
+}
+
+static int
+nls_part_apply_function(nls_node *func, nls_node *args, nls_node **out)
+{
+	int num_args     = func->nn_func.nf_num_args;
+	nls_string *name = func->nn_func.nf_name;
+	nls_fp fp        = func->nn_func.nf_fp;
+
+	nls_node *vars, *add_vars;
+	nls_node *def, *curry;
+	int num_lack = num_args - nls_list_count(args);
+
+	vars = nls_vars_new(num_lack);
+	if (!vars) {
+		return ENOMEM;
+	}
+	add_vars = nls_vars_new(num_lack);
+	if (!add_vars) {
+		nls_node_free(vars);
+		return ENOMEM;
+	}
+	func = nls_function_new(fp, num_args, name->ns_bufp);
+	if (!func) {
+		nls_node_free(vars);
+		nls_node_free(add_vars);
+		return ENOMEM;
+	}
+	nls_list_concat(args, add_vars);
+	def = nls_application_new(func, args);
+	if (!def) {
+		nls_node_free(func);
+		nls_node_free(vars);
+		return ENOMEM;
+	}
+	curry = nls_abstraction_new(vars, def);
+	if (!curry) {
+		nls_node_free(def);
+		nls_node_free(vars);
+		return ENOMEM;
+	}
+	*out = curry;
+	return 0;
+}
+
+static int
+nls_apply_abstraction(nls_node **func, nls_node *args)
+{
+	int ret;
+	int num_args = nls_list_count(args);
+
+	nls_node *out;
+	nls_abstraction *abst = &((*func)->nn_abst);
+	nls_node **vars = &(abst->nab_vars);
+	int func_nargs  = abst->nab_num_args;
+
+	if (num_args > func_nargs) {
+		NLS_ERROR(NLS_MSG_TOO_MANY_ARGS " expected=%d actual=%d",
+			func_nargs, num_args);
+		return EINVAL;
+	}
+
+	nls_replace_vars(*vars, args);
+	if (num_args < func_nargs) {
+		/* Partial apply */
+		nls_remove_head_vars(*func, num_args);
+		return 0;
+	}
+	out = nls_grab(abst->nab_def);
+	nls_release(*func);
+	*func = out;
+	if ((ret = nls_eval(func))) {
+		return ret;
+	}
+	return 0;
+}
+
+static void
+nls_replace_vars(nls_node *vars, nls_node *args)
+{
+	nls_node **var, **arg, *tmp1, *tmp2;
+
+	nls_double_list_foreach(vars, args, &var, &arg, &tmp1, &tmp2) {
+		nls_node **replace = (*var)->nn_var.nv_next_ref;
+		nls_node **next = replace ?(*replace)->nn_var.nv_next_ref : NULL;
+
+		while (replace) {
+			nls_release(*replace);
+			*replace = nls_grab(*arg);
+			replace = next;
+			next = next ? (*next)->nn_var.nv_next_ref : NULL;
+		}
+	}
+}
+
+static void
+nls_remove_head_vars(nls_node *func, int n)
+{
+	int i;
+	nls_abstraction *abst = &(func->nn_abst);
+	nls_node **vars = &(abst->nab_vars);
+
+	for (i = 0; i < n; i++) {
+		nls_list_remove(vars);
+	}
+	abst->nab_num_args -= n;
+}
+
+static nls_node*
+nls_vars_new(int n)
+{
+	int i;
+	char *bufp, buf[NLS_ANON_VAR_NAME_BUF_SIZE];
+	nls_node *var;
+	nls_node *vars = NULL;
+
+	buf[0] = NLS_ANON_VAR_PREFIX;
+	bufp = buf + 1;
+	for (i = 1; i <= n; i++) {
+		nls_string *name;
+
+		snprintf(bufp, NLS_ANON_VAR_NAME_BUF_SIZE-1, "%d", i);
+		name = nls_string_new(buf);
+		if (!name) {
+			goto free_exit;
+		}
+		var = nls_var_new(name);
+		if (!var) {
+			nls_string_free(name);
+			goto free_exit;
+		}
+		if (!vars) {
+			vars = nls_list_new(var);
+			if (!vars) {
+				nls_node_free(var);
+				return NULL;
+			}
+			continue;
+		}
+		nls_list_add(vars, var);
+	}
+	return vars;
+free_exit:
+	if (vars) {
+		nls_node_free(vars);
+	}
+	return NULL;
 }
