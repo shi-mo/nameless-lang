@@ -17,6 +17,7 @@
  */
 #include <errno.h>
 #include <string.h>
+#include <stdio.h>
 #include "nameless.h"
 #include "nameless/node.h"
 #include "nameless/mm.h"
@@ -52,34 +53,47 @@ static nls_node* nls_abstraction_clone(nls_node *tree);
 static nls_node* nls_application_clone(nls_node *tree);
 static nls_node* nls_list_clone(nls_node *tree);
 
+static void nls_int_print(nls_node *node, FILE* out);
+static void nls_var_print(nls_node *node, FILE* out);
+static void nls_function_print(nls_node *node, FILE* out);
+static void nls_abstraction_print(nls_node *node, FILE* out);
+static void nls_application_print(nls_node *node, FILE* out);
+static void nls_list_print(nls_node *node, FILE* out);
+
 static nls_node_operations nls_int_operations = {
 	.nop_release = nls_int_release,
 	.nop_clone   = nls_int_clone,
+	.nop_print   = nls_int_print,
 };
 
 static nls_node_operations nls_var_operations = {
 	.nop_release = nls_var_release,
 	.nop_clone   = nls_var_clone,
+	.nop_print   = nls_var_print,
 };
 
 static nls_node_operations nls_function_operations = {
 	.nop_release = nls_function_release,
 	.nop_clone   = nls_function_clone,
+	.nop_print   = nls_function_print,
 };
 
 static nls_node_operations nls_abstraction_operations = {
 	.nop_release = nls_abstraction_release,
 	.nop_clone   = nls_abstraction_clone,
+	.nop_print   = nls_abstraction_print,
 };
 
 static nls_node_operations nls_application_operations = {
 	.nop_release = nls_application_release,
 	.nop_clone   = nls_application_clone,
+	.nop_print   = nls_application_print,
 };
 
 static nls_node_operations nls_list_operations = {
 	.nop_release = nls_list_release,
 	.nop_clone   = nls_list_clone,
+	.nop_print   = nls_list_print,
 };
 
 void
@@ -507,4 +521,63 @@ nls_list_clone(nls_node *tree)
 		}
 	}
 	return new;
+}
+
+void
+nls_node_print(nls_node *node, FILE* out)
+{
+	(node->nn_op->nop_print)(node, out);
+}
+
+static void
+nls_int_print(nls_node *node, FILE* out)
+{
+	fprintf(out, "%d", node->nn_int);
+}
+
+static void
+nls_var_print(nls_node *node, FILE* out)
+{
+	fprintf(out, "%s", node->nn_var.nv_name->ns_bufp);
+}
+
+static void
+nls_function_print(nls_node *node, FILE* out)
+{
+	fprintf(out, "%s", node->nn_func.nf_name->ns_bufp);
+}
+
+static void
+nls_abstraction_print(nls_node *node, FILE* out)
+{
+	fprintf(out, "lambda");
+	nls_node_print(node->nn_abst.nab_vars, out);
+	fprintf(out, ".");
+	nls_node_print(node->nn_abst.nab_def, out);
+}
+
+static void
+nls_application_print(nls_node *node, FILE* out)
+{
+	nls_node_print(node->nn_app.nap_func, out);
+	nls_node_print(node->nn_app.nap_args, out);
+}
+
+static void
+nls_list_print(nls_node *node, FILE* out)
+{
+	int first = 1;
+	nls_node **item, *tmp;
+
+	fprintf(out, "(");
+	nls_list_foreach(node, &item, &tmp) {
+		if (!first) {
+			fprintf(out, " ");
+		}
+		if (first) {
+			first = 0;
+		}
+		nls_node_print(*item, out);
+	}
+	fprintf(out, ")");
 }

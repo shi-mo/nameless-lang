@@ -19,6 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
 #include "nameless/string.h"
 
 #define NLS_ISINT(node)  (NLS_TYPE_INT == (node)->nn_type)
@@ -68,10 +69,12 @@ typedef struct _nls_function {
 
 typedef void (*nls_node_op_release)(struct _nls_node*);
 typedef struct _nls_node* (*nls_node_op_clone)(struct _nls_node*);
+typedef void (*nls_node_op_print)(struct _nls_node*, FILE*);
 
 typedef struct _nls_node_operations {
 	nls_node_op_release nop_release;
 	nls_node_op_clone nop_clone;
+	nls_node_op_print nop_print;
 } nls_node_operations;
 
 typedef struct _nls_node {
@@ -132,6 +135,7 @@ nls_node* nls_abstraction_new(nls_node *vars, nls_node *def);
 nls_node* nls_application_new(nls_node *func, nls_node *args);
 nls_node* nls_list_new(nls_node *node);
 nls_node* nls_node_clone(nls_node *tree);
+void nls_node_print(nls_node *node, FILE* out);
 int nls_list_add(nls_node *ent, nls_node *item);
 void nls_list_remove(nls_node **ent);
 int nls_list_concat(nls_node *ent1, nls_node *ent2);

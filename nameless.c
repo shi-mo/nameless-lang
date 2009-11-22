@@ -43,7 +43,6 @@ static int nls_apply_abstraction(nls_node **func, nls_node *args);
 static void nls_replace_vars(nls_node *vars, nls_node *args);
 static void nls_remove_head_vars(nls_node *func, int n);
 static nls_node* nls_vars_new(int n);
-static int nls_node_print(nls_node *tree, FILE *out);
 
 int
 nls_main(FILE *in, FILE *out, FILE *err)
@@ -379,63 +378,4 @@ free_exit:
 		nls_node_free(vars);
 	}
 	return NULL;
-}
-
-static int
-nls_node_print(nls_node *tree, FILE *out)
-{
-	int ret;
-
-	switch (tree->nn_type) {
-	case NLS_TYPE_INT:
-		fprintf(out, "%d", tree->nn_int);
-		return 0;
-	case NLS_TYPE_VAR:
-		fprintf(out, "%s", tree->nn_var.nv_name->ns_bufp);
-		return 0;
-	case NLS_TYPE_FUNCTION:
-		fprintf(out, "%s", tree->nn_func.nf_name->ns_bufp);
-		return 0;
-	case NLS_TYPE_ABSTRACTION:
-		fprintf(out, "lambda");
-		if ((ret = nls_node_print(tree->nn_abst.nab_vars, out))) {
-			return ret;
-		}
-		fprintf(out, ".");
-		if ((ret = nls_node_print(tree->nn_abst.nab_def, out))) {
-			return ret;
-		}
-		return 0;
-	case NLS_TYPE_APPLICATION:
-		if ((ret = nls_node_print(tree->nn_app.nap_func, out))) {
-			return ret;
-		}
-		if ((ret = nls_node_print(tree->nn_app.nap_args, out))) {
-			return ret;
-		}
-		return 0;
-	case NLS_TYPE_LIST:
-		{
-			int first = 1;
-			nls_node **item, *tmp;
-
-			fprintf(out, "(");
-			nls_list_foreach(tree, &item, &tmp) {
-				if (!first) {
-					fprintf(out, " ");
-				}
-				if (first) {
-					first = 0;
-				}
-				if ((ret = nls_node_print(*item, out))) {
-					return ret;
-				}
-			}
-			fprintf(out, ")");
-		}
-		return 0;
-	default:
-		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE ": type=%d", tree->nn_type);
-		return EINVAL;
-	}
 }
