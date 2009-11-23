@@ -730,7 +730,7 @@ nls_apply_abstraction(nls_node *func, nls_node *args, nls_node **out)
 	int func_nargs = abst->nab_num_args;
 
 	if (num_args > func_nargs) {
-		NLS_ERROR(NLS_MSG_TOO_MANY_ARGS " expected=%d actual=%d",
+		NLS_ERROR(NLS_MSG_TOO_MANY_ARGS ": expected=%d actual=%d",
 			func_nargs, num_args);
 		return EINVAL;
 	}
