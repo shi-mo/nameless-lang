@@ -28,14 +28,14 @@
 #define NLS_MSG_BROKEN_LIST "Broken list"
 #define NLS_MSG_NO_SUCH_SYMBOL "No such symbol"
 
-#define nls_INT_operations		nls_int_operations
-#define nls_VAR_operations		nls_var_operations
-#define nls_FUNCTION_operations		nls_function_operations
-#define nls_ABSTRACTION_operations	nls_abstraction_operations
-#define nls_APPLICATION_operations	nls_application_operations
-#define nls_LIST_operations		nls_list_operations
+#define NLS_TYPE_int		NLS_TYPE_INT
+#define NLS_TYPE_var		NLS_TYPE_VAR
+#define NLS_TYPE_function	NLS_TYPE_FUNCTION
+#define NLS_TYPE_abstraction	NLS_TYPE_ABSTRACTION
+#define NLS_TYPE_application	NLS_TYPE_APPLICATION
+#define NLS_TYPE_list		NLS_TYPE_LIST
 
-#define nls_node_new(type) \
+#define NLS_NODE_NEW(type) \
 	_nls_node_new(NLS_TYPE_##type, &nls_##type##_operations)
 
 #define NLS_DEF_NODE_OPERATIONS(type) \
@@ -105,7 +105,7 @@ nls_node_free(void *ptr)
 nls_node*
 nls_int_new(int val)
 {
-	nls_node *node = nls_node_new(INT);
+	nls_node *node = NLS_NODE_NEW(int);
 
 	if (!node) {
 		return NULL;
@@ -117,7 +117,7 @@ nls_int_new(int val)
 nls_node*
 nls_var_new(nls_string *name)
 {
-	nls_node *node = nls_node_new(VAR);
+	nls_node *node = NLS_NODE_NEW(var);
 
 	if (!node) {
 		return NULL;
@@ -136,7 +136,7 @@ nls_function_new(nls_fp fp, int num_args, char *name)
 	if (!name) {
 		return NULL;
 	}
-	node = nls_node_new(FUNCTION);
+	node = NLS_NODE_NEW(function);
 	if (!node) {
 		nls_string_free(str);
 		return NULL;
@@ -155,7 +155,7 @@ nls_abstraction_new(nls_node *vars, nls_node *def)
 	nls_node *node;
 	nls_node **var, *tmp;
 
-	if (!(node = nls_node_new(ABSTRACTION))) {
+	if (!(node = NLS_NODE_NEW(abstraction))) {
 		return NULL;
 	}
 
@@ -174,7 +174,7 @@ nls_node*
 nls_application_new(nls_node *func, nls_node *args)
 {
 	nls_application *app;
-	nls_node *node = nls_node_new(APPLICATION);
+	nls_node *node = NLS_NODE_NEW(application);
 
 	if (!node) {
 		return NULL;
@@ -189,7 +189,7 @@ nls_node*
 nls_list_new(nls_node *item)
 {
 	nls_list *list;
-	nls_node *node = nls_node_new(LIST);
+	nls_node *node = NLS_NODE_NEW(list);
 
 	if (!node) {
 		return NULL;
