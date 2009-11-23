@@ -80,7 +80,6 @@ static int nls_application_apply(nls_node **tree);
 static int nls_list_apply(nls_node **tree);
 
 static int nls_function_part_apply(nls_node *func, nls_node *args, nls_node **out);
-static int nls_apply_abstraction(nls_node *func, nls_node *args, nls_node **out);
 static void nls_replace_vars(nls_node *vars, nls_node *args);
 static void nls_remove_head_vars(nls_node *func, int n);
 static nls_node* nls_vars_new(int n);
@@ -647,9 +646,29 @@ nls_abstraction_apply(nls_node **tree)
 	nls_node *func = app->nap_func;
 	nls_node *args = app->nap_args;
 
-	if ((ret = nls_apply_abstraction(func, args, &out))) {
+	nls_abstraction *abst = &(func->nn_abst);
+	nls_node *vars = abst->nab_vars;
+	int nargs_expected = abst->nab_num_args;
+	int nargs_actual = nls_list_count(args);
+
+	if (nargs_actual > nargs_expected) {
+		NLS_ERROR(NLS_MSG_TOO_MANY_ARGS ": expected=%d actual=%d",
+			nargs_expected, nargs_actual);
+		return EINVAL;
+	}
+
+	nls_replace_vars(vars, args);
+	if (nargs_actual < nargs_expected) {
+		/* Partial apply */
+		nls_remove_head_vars(func, nargs_actual);
+		out = func;
+		goto set_result_exit;
+	}
+	if ((ret = nls_eval(&abst->nab_def))) {
 		return ret;
 	}
+	out = abst->nab_def;
+set_result_exit:
 	out = nls_grab(out);
 	nls_release(*tree);
 	*tree = out;
@@ -716,36 +735,6 @@ nls_function_part_apply(nls_node *func, nls_node *args, nls_node **out)
 		return ENOMEM;
 	}
 	*out = curry;
-	return 0;
-}
-
-static int
-nls_apply_abstraction(nls_node *func, nls_node *args, nls_node **out)
-{
-	int ret;
-	int nargs_actual = nls_list_count(args);
-
-	nls_abstraction *abst = &(func->nn_abst);
-	nls_node *vars = abst->nab_vars;
-	int nargs_expected = abst->nab_num_args;
-
-	if (nargs_actual > nargs_expected) {
-		NLS_ERROR(NLS_MSG_TOO_MANY_ARGS ": expected=%d actual=%d",
-			nargs_expected, nargs_actual);
-		return EINVAL;
-	}
-
-	nls_replace_vars(vars, args);
-	if (nargs_actual < nargs_expected) {
-		/* Partial apply */
-		nls_remove_head_vars(func, nargs_actual);
-		*out = func;
-		return 0;
-	}
-	if ((ret = nls_eval(&abst->nab_def))) {
-		return ret;
-	}
-	*out = abst->nab_def;
 	return 0;
 }
 
