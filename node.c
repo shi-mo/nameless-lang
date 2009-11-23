@@ -38,6 +38,14 @@
 #define nls_node_new(type) \
 	_nls_node_new(NLS_TYPE_##type, &nls_##type##_operations)
 
+#define NLS_DEF_NODE_OPERATIONS(type) \
+	static nls_node_operations nls_##type##_operations = { \
+		.nop_release = nls_##type##_release, \
+		.nop_clone   = nls_##type##_clone, \
+		.nop_print   = nls_##type##_print, \
+		.nop_apply   = nls_##type##_apply, \
+	}
+
 static nls_node* _nls_node_new(nls_node_type_t type, nls_node_operations *op);
 static void nls_list_item_free(nls_node *node);
 static nls_node* nls_list_tail_entry(nls_node *node);
@@ -78,47 +86,12 @@ static void nls_replace_vars(nls_node *vars, nls_node *args);
 static void nls_remove_head_vars(nls_node *func, int n);
 static nls_node* nls_vars_new(int n);
 
-static nls_node_operations nls_int_operations = {
-	.nop_release = nls_int_release,
-	.nop_clone   = nls_int_clone,
-	.nop_print   = nls_int_print,
-	.nop_apply   = nls_int_apply,
-};
-
-static nls_node_operations nls_var_operations = {
-	.nop_release = nls_var_release,
-	.nop_clone   = nls_var_clone,
-	.nop_print   = nls_var_print,
-	.nop_apply   = nls_var_apply,
-};
-
-static nls_node_operations nls_function_operations = {
-	.nop_release = nls_function_release,
-	.nop_clone   = nls_function_clone,
-	.nop_print   = nls_function_print,
-	.nop_apply   = nls_function_apply,
-};
-
-static nls_node_operations nls_abstraction_operations = {
-	.nop_release = nls_abstraction_release,
-	.nop_clone   = nls_abstraction_clone,
-	.nop_print   = nls_abstraction_print,
-	.nop_apply   = nls_abstraction_apply,
-};
-
-static nls_node_operations nls_application_operations = {
-	.nop_release = nls_application_release,
-	.nop_clone   = nls_application_clone,
-	.nop_print   = nls_application_print,
-	.nop_apply   = nls_application_apply,
-};
-
-static nls_node_operations nls_list_operations = {
-	.nop_release = nls_list_release,
-	.nop_clone   = nls_list_clone,
-	.nop_print   = nls_list_print,
-	.nop_apply   = nls_list_apply,
-};
+NLS_DEF_NODE_OPERATIONS(int);
+NLS_DEF_NODE_OPERATIONS(var);
+NLS_DEF_NODE_OPERATIONS(function);
+NLS_DEF_NODE_OPERATIONS(abstraction);
+NLS_DEF_NODE_OPERATIONS(application);
+NLS_DEF_NODE_OPERATIONS(list);
 
 void
 nls_node_free(void *ptr)
