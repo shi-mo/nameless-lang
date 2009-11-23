@@ -79,7 +79,6 @@ static int nls_abstraction_apply(nls_node **tree);
 static int nls_application_apply(nls_node **tree);
 static int nls_list_apply(nls_node **tree);
 
-static int nls_apply_function(nls_node *func, nls_node *args, nls_node **out);
 static int nls_part_apply_function(nls_node *func, nls_node *args, nls_node **out);
 static int nls_apply_abstraction(nls_node **func, nls_node *args);
 static void nls_replace_vars(nls_node *vars, nls_node *args);
@@ -608,13 +607,30 @@ nls_function_apply(nls_node **tree)
 {
 	int ret;
 	nls_node *out;
-	nls_application *app = &((*tree)->nn_app);
-	nls_node **func = &(app->nap_func);
-	nls_node **args = &(app->nap_args);
 
-	if ((ret = nls_apply_function(*func, *args, &out))) {
+	nls_application *app = &((*tree)->nn_app);
+	nls_node *func = app->nap_func;
+	nls_node *args = app->nap_args;
+
+	nls_fp fp = func->nn_func.nf_fp;
+	int func_nargs = func->nn_func.nf_num_args;
+	int num_args = nls_list_count(args);
+
+	if (num_args > func_nargs) {
+		NLS_ERROR(NLS_MSG_TOO_MANY_ARGS " expected=%d actual=%d",
+			func_nargs, num_args);
+		return EINVAL;
+	}
+	if (num_args < func_nargs) {
+		if ((ret = nls_part_apply_function(func, args, &out))) {
+			return ret;
+		}
+		goto set_result_exit;
+	}
+	if ((ret = (fp)(args, &out))) {
 		return ret;
 	}
+set_result_exit:
 	out = nls_grab(out);
 	nls_release(*tree);
 	*tree = out;
@@ -657,29 +673,6 @@ static int
 nls_list_apply(nls_node **tree)
 {
 	/* Nothing to do. */
-	return 0;
-}
-
-static int
-nls_apply_function(nls_node *func, nls_node *args, nls_node **out)
-{
-	int ret;
-	int num_args = nls_list_count(args);
-
-	nls_fp fp = func->nn_func.nf_fp;
-	int func_nargs = func->nn_func.nf_num_args;
-
-	if (num_args > func_nargs) {
-		NLS_ERROR(NLS_MSG_TOO_MANY_ARGS " expected=%d actual=%d",
-			func_nargs, num_args);
-		return EINVAL;
-	}
-	if (num_args < func_nargs) {
-		return nls_part_apply_function(func, args, out);
-	}
-	if ((ret = (fp)(args, out))) {
-		return ret;
-	}
 	return 0;
 }
 
