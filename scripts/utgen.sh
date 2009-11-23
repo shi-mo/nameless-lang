@@ -18,6 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+set -u
+
 if [ 1 -ne $# ]; then
 	echo "usage: `basename $0` src.c" 1>&2
 	exit 1
