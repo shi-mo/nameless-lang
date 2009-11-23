@@ -79,7 +79,7 @@ static int nls_abstraction_apply(nls_node **tree);
 static int nls_application_apply(nls_node **tree);
 static int nls_list_apply(nls_node **tree);
 
-static int nls_part_apply_function(nls_node *func, nls_node *args, nls_node **out);
+static int nls_function_part_apply(nls_node *func, nls_node *args, nls_node **out);
 static int nls_apply_abstraction(nls_node *func, nls_node *args, nls_node **out);
 static void nls_replace_vars(nls_node *vars, nls_node *args);
 static void nls_remove_head_vars(nls_node *func, int n);
@@ -622,7 +622,7 @@ nls_function_apply(nls_node **tree)
 		return EINVAL;
 	}
 	if (nargs_actual < nargs_expected) {
-		if ((ret = nls_part_apply_function(func, args, &out))) {
+		if ((ret = nls_function_part_apply(func, args, &out))) {
 			return ret;
 		}
 		goto set_result_exit;
@@ -677,7 +677,7 @@ nls_list_apply(nls_node **tree)
 }
 
 static int
-nls_part_apply_function(nls_node *func, nls_node *args, nls_node **out)
+nls_function_part_apply(nls_node *func, nls_node *args, nls_node **out)
 {
 	int num_args     = func->nn_func.nf_num_args;
 	nls_string *name = func->nn_func.nf_name;
