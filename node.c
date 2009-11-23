@@ -616,7 +616,7 @@ nls_function_apply(nls_node **tree)
 	int nargs_actual = nls_list_count(args);
 
 	if (nargs_actual > nargs_expected) {
-		NLS_ERROR(NLS_MSG_TOO_MANY_ARGS " expected=%d actual=%d",
+		NLS_ERROR(NLS_MSG_TOO_MANY_ARGS ": expected=%d actual=%d",
 			nargs_expected, nargs_actual);
 		return EINVAL;
 	}
