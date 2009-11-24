@@ -148,7 +148,7 @@ nls_function_new(nls_fp fp, int num_args, char *name)
 nls_node*
 nls_abstraction_new(nls_node *vars, nls_node *def)
 {
-	int i, n = nls_list_count(vars);
+	int n = nls_list_count(vars);
 	nls_abstraction *abst;
 	nls_node *node;
 	nls_node **var, *tmp;
@@ -157,7 +157,6 @@ nls_abstraction_new(nls_node *vars, nls_node *def)
 		return NULL;
 	}
 
-	i = 0;
 	nls_list_foreach(vars, &var, &tmp) {
 		nls_register_vars(&def, *var);
 	}
