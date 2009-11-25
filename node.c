@@ -49,7 +49,7 @@
 static nls_node* _nls_node_new(nls_node_type_t type, nls_node_operations *op);
 static void nls_list_item_free(nls_node *node);
 static nls_node* nls_list_tail_entry(nls_node *node);
-static void nls_register_vars(nls_node **tree, nls_node *var);
+static void nls_bound_vars(nls_node **tree, nls_node *var);
 
 static void nls_int_release(nls_node *tree);
 static void nls_var_release(nls_node *tree);
@@ -158,7 +158,7 @@ nls_abstraction_new(nls_node *vars, nls_node *def)
 	}
 
 	nls_list_foreach(vars, &var, &tmp) {
-		nls_register_vars(&def, *var);
+		nls_bound_vars(&def, *var);
 	}
 	abst = &(node->nn_abst);
 	abst->nab_num_args = n;
@@ -348,7 +348,7 @@ nls_list_tail_entry(nls_node *node)
 }
 
 static void
-nls_register_vars(nls_node **tree, nls_node *var)
+nls_bound_vars(nls_node **tree, nls_node *var)
 {
 	switch ((*tree)->nn_type) {
 	case NLS_TYPE_INT:
@@ -364,18 +364,18 @@ nls_register_vars(nls_node **tree, nls_node *var)
 	case NLS_TYPE_FUNCTION:
 		return;
 	case NLS_TYPE_ABSTRACTION:
-		nls_register_vars(&((*tree)->nn_abst.nab_vars), var);
-		nls_register_vars(&((*tree)->nn_abst.nab_def),  var);
+		nls_bound_vars(&((*tree)->nn_abst.nab_vars), var);
+		nls_bound_vars(&((*tree)->nn_abst.nab_def), var);
 		return;
 	case NLS_TYPE_APPLICATION:
-		nls_register_vars(&((*tree)->nn_app.nap_args), var);
+		nls_bound_vars(&((*tree)->nn_app.nap_args), var);
 		return;
 	case NLS_TYPE_LIST:
 		{
 			nls_node **item, *tmp;
 
 			nls_list_foreach((*tree), &item, &tmp) {
-				nls_register_vars(item, var);
+				nls_bound_vars(item, var);
 			}
 		}
 		return;
