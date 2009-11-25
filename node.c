@@ -44,6 +44,7 @@
 		.nop_clone   = nls_##type##_clone, \
 		.nop_print   = nls_##type##_print, \
 		.nop_apply   = nls_##type##_apply, \
+		.nop_bound_vars = nls_##type##_bound_vars, \
 	}
 
 static nls_node* _nls_node_new(nls_node_type_t type, nls_node_operations *op);
@@ -78,6 +79,13 @@ static int nls_function_apply(nls_node **tree);
 static int nls_abstraction_apply(nls_node **tree);
 static int nls_application_apply(nls_node **tree);
 static int nls_list_apply(nls_node **tree);
+
+static void nls_int_bound_vars(nls_node **tree, nls_node *var);
+static void nls_var_bound_vars(nls_node **tree, nls_node *var);
+static void nls_function_bound_vars(nls_node **tree, nls_node *var);
+static void nls_abstraction_bound_vars(nls_node **tree, nls_node *var);
+static void nls_application_bound_vars(nls_node **tree, nls_node *var);
+static void nls_list_bound_vars(nls_node **tree, nls_node *var);
 
 static int nls_function_part_apply(nls_node *func, nls_node *args, nls_node **out);
 static void nls_replace_vars(nls_node *vars, nls_node *args);
@@ -350,39 +358,7 @@ nls_list_tail_entry(nls_node *node)
 static void
 nls_bound_vars(nls_node **tree, nls_node *var)
 {
-	switch ((*tree)->nn_type) {
-	case NLS_TYPE_INT:
-		return;
-	case NLS_TYPE_VAR:
-		if (!nls_strcmp((*tree)->nn_var.nv_name, var->nn_var.nv_name)) {
-			nls_node **next_ref = var->nn_var.nv_next_ref;
-
-			(*tree)->nn_var.nv_next_ref = next_ref;
-			var->nn_var.nv_next_ref = tree;
-		}
-		return;
-	case NLS_TYPE_FUNCTION:
-		return;
-	case NLS_TYPE_ABSTRACTION:
-		nls_bound_vars(&((*tree)->nn_abst.nab_vars), var);
-		nls_bound_vars(&((*tree)->nn_abst.nab_def), var);
-		return;
-	case NLS_TYPE_APPLICATION:
-		nls_bound_vars(&((*tree)->nn_app.nap_args), var);
-		return;
-	case NLS_TYPE_LIST:
-		{
-			nls_node **item, *tmp;
-
-			nls_list_foreach((*tree), &item, &tmp) {
-				nls_bound_vars(item, var);
-			}
-		}
-		return;
-	default:
-		NLS_BUG(NLS_MSG_INVALID_NODE_TYPE);
-		return;
-	}
+	((*tree)->nn_op->nop_bound_vars)(tree, var);
 }
 
 static void
@@ -692,6 +668,52 @@ nls_list_apply(nls_node **tree)
 {
 	/* Nothing to do. */
 	return 0;
+}
+
+static void
+nls_int_bound_vars(nls_node **tree, nls_node *var)
+{
+	/* Nothing to do. */
+}
+
+static void
+nls_var_bound_vars(nls_node **tree, nls_node *var)
+{
+	if (!nls_strcmp((*tree)->nn_var.nv_name, var->nn_var.nv_name)) {
+		nls_node **next_ref = var->nn_var.nv_next_ref;
+
+		(*tree)->nn_var.nv_next_ref = next_ref;
+		var->nn_var.nv_next_ref = tree;
+	}
+}
+
+static void
+nls_function_bound_vars(nls_node **tree, nls_node *var)
+{
+	/* Nothing to do. */
+}
+
+static void
+nls_abstraction_bound_vars(nls_node **tree, nls_node *var)
+{
+	nls_bound_vars(&((*tree)->nn_abst.nab_vars), var);
+	nls_bound_vars(&((*tree)->nn_abst.nab_def), var);
+}
+
+static void
+nls_application_bound_vars(nls_node **tree, nls_node *var)
+{
+	nls_bound_vars(&((*tree)->nn_app.nap_args), var);
+}
+
+static void
+nls_list_bound_vars(nls_node **tree, nls_node *var)
+{
+	nls_node **item, *tmp;
+
+	nls_list_foreach((*tree), &item, &tmp) {
+		nls_bound_vars(item, var);
+	}
 }
 
 static int
